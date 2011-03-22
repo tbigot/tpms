@@ -1,0 +1,120 @@
+INTRODUCTION
+============
+
+This help file explains how to launch tpms_query, and give details about the
+querying language.
+
+
+REQUIREMENTS
+============
+
+To perform a query, you need a database in the RAP format. You can create such a
+database using the tpms_mkdb command (see the file 2_Make_a_Database.txt for
+instructions). And you need to have the binary tpms_query (If it's not the case,
+see file 1_Compilation_and_Installation.txt).
+
+
+RUNNING THE PROGRAM
+===================
+
+If you have just built the program from the sources and did not installed it
+yet, remember it's still in the "build/" directory of the tpms main directory.
+
+Just type this command:
+
+    tpms_query -database=<RAP Database> -output=<ouput Directory>
+
+Arguments
+---------
+
+
+    -database=<RAP Database>
+	the file you generated at the previous step
+
+    -output=<output Directory>
+	a directory in which result files will be saved. If you run tpms for the
+first time, just create the directory.
+
+
+Display
+-------
+
+If everything is OK, you should have this kind of lined displayed:
+
+    Loading preamble...    [DONE]
+    Loading species tree...    [DONE]
+    Loading family trees:
+    |0%                                           100%|
+    [#################################################]      
+    
+    Load sucessful!
+    
+    Species tree loaded: 5 species.
+    Loaded 19910 families / 19910 expected.
+    Trees are not reconciled.
+    
+    Generating trees with species names as labels:
+    |0%                                           100%|
+    [#################################################]   
+
+
+
+
+QUERYING
+========
+
+Query Name
+----------
+
+You are now prompted to give a query name. This is the name of the file to be
+created in <output Directory>. You have to give one query name per query, so, in
+each file, you get the result of one query.
+
+
+Simple Query
+------------
+
+The query language uses the Newick form. If you want to search the database for
+the following tree pattern:
+
+    +------------Specie A
+    |
+    |   +--------Specie B   
+    +---|
+        +--------Specie C
+
+
+your query will be:
+   
+    (Specie A,(Specie B,Specie C));
+
+This will select all the families in the database which the genes tree contains
+this pattern.
+
+
+Constraints on branches
+-----------------------
+
+You can set constraints on branches leading to a leaf.
+
+Say we want to require the left branch of this subtree only contains genes from species that are member to a certain taxonomic group Taxon 1.
+
+     +(C1)--------Specie A
+     |
+     |   +--------Specie B
+     +---|
+	 +--------Specie C
+
+
+
+We've noted (C1)= The subtree containing a gene from species A only contains genes of
+species belonging to Taxon 1. The considered subtree begins just after the parent node (here,
+the root node).
+
+Your query will be:
+
+(Specie A{+Taxon 1},(Specie B,Specie C));
+
+Note: to be able to use Taxon names, you must refer to node names of your
+species tree (see "file (1)" in "2_Make_a_Database.txt" helpfile).
+

@@ -1,0 +1,65 @@
+#ifndef DATABASE_HPP_TPMS
+#define DATABASE_HPP_TPMS
+
+
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <set>
+#include <map>
+
+#include "Family.hpp"
+
+//inclusions bio++
+#include <Phyl/Newick.h>
+#include <Phyl/Tree.h>
+
+class DataBase {
+	
+	private:
+		unsigned int nbFamilies;
+		bool reconciled;
+		bpp::TreeTemplate<bpp::Node> * speciesTree;
+		std::vector<Family *> families;
+		std::map<std::string,int> nbFC; // cache de recherche de la fonction nbFamiliesContaining
+		std::set<std::string> species;
+		
+		void loadFamily(std::stringstream * intro, std::string newick);
+		void loadSpeciesTree(std::string newickLine);
+		void loadFromFile(std::ifstream& RAPfile);
+		void renameNodes(bpp::TreeTemplate<bpp::Node> *);
+		
+		bool speciesTreesBuilded;
+		bool refTreesBuilded;
+
+				
+		
+				
+	public:
+		//constructeur à partir d'un fichier
+		DataBase(std::string path);
+		bpp::TreeTemplate<bpp::Node> * getSpeciesTree();
+		std::vector<Family *> & getFamilies();
+		unsigned int getNbFamilies();
+		std::string getParentTaxon(std::string pTaxon, unsigned int level);
+		bool taxonExists(std::string ptax);
+		
+		//nombre de familles contenant un taxon donné
+		int nbFamiliesContaining(std::string pTax);
+		
+		std::set<std::string> getAllLeaves(bpp::Node * localRoot);
+		std::set<std::string> getDescendants(std::string taxon);
+		std::set<std::string> getDescendants(std::vector<std::string> taxaList);
+		
+		void iNeedSpeciesTrees(bool verbose, std::string path,bool generate=false);
+		void iNeedMapping(bool verbose, std::string path, bool generate=false);
+		
+		std::set<std::string> * getSpecies();
+
+};
+#else
+
+class DataBase;
+
+#endif
