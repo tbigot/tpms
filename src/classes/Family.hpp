@@ -25,11 +25,14 @@ class Family {
 	std::map<std::string,std::string> mne2spec;
 	std::set<std::string> species;
 	bpp::TreeTemplate<bpp::Node> * refTree;
+	std::vector<unsigned int> unicityScores;
 	
 	void renameNodes(bpp::TreeTemplate<bpp::Node> *);
 	
 	
 	void deleteFromLeavesToBif(bpp::Node * pnode);
+	
+	std::map<std::string,int> computeUnicity(bpp::Node * node);
 	
 	//! Suppression des fils uniques
 	/*!
@@ -69,6 +72,7 @@ class Family {
 	
 	void genRefTree(bool save=true, std::string path="");
 	void genSpTree(bool save=true, std::string path="");
+	void genUnicityTree();
 	
 	int numberOfNodesBetween(bpp::Node * ancestor, bpp::Node * pnode);
 	

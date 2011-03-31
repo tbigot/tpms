@@ -233,14 +233,14 @@ int DataBase::nbFamiliesContaining(string pTax){
 	return(result);
 }
 
-std::set<std::string> DataBase::getDescendants(string taxon){
-	return(getAllLeaves(speciesTree->getNode(taxon)));
+std::set<std::string> DataBase::getDescendants(string taxon, bool nodesWanted){
+	return(getAllNodes(speciesTree->getNode(taxon),nodesWanted));
 }
 
-std::set<std::string> DataBase::getDescendants(vector<string> taxaList){
+std::set<std::string> DataBase::getDescendants(vector<string> taxaList, bool nodesWanted){
 	set<string> speciesList;
 	for(vector<string>::iterator taxon = taxaList.begin(); taxon != taxaList.end(); taxon++){
-	  set<string> currSpecies = getDescendants(*taxon);
+	  set<string> currSpecies = getDescendants(*taxon,nodesWanted);
 	  speciesList.insert(currSpecies.begin(), currSpecies.end());
 	}
 	return(speciesList);
@@ -248,16 +248,19 @@ std::set<std::string> DataBase::getDescendants(vector<string> taxaList){
 
 // fonction récursive qui retourne le noms de tous les noeuds sous un noeud
 
-std::set<std::string> DataBase::getAllLeaves(Node * localRoot){
+std::set<std::string> DataBase::getAllNodes(Node * localRoot, bool nodesWanted){
 	std::set<std::string> sons;
 	if(localRoot->getNumberOfSons() == 0) { // cas de base : la feuille
 		sons.insert(localRoot->getName());
 	} else { // cas récursif : on explore les fils
 		// mais on entre quand même le nom du nœud
-		if(localRoot->hasName()) sons.insert(localRoot->getName());
+		if(nodesWanted)
+		    if(localRoot->hasName())
+			sons.insert(localRoot->getName());
+		    
 		std::set<std::string> desc;
 		for(unsigned int i=0; i < localRoot->getNumberOfSons(); i++) {
-			desc = getAllLeaves(localRoot->getSon(i));
+			desc = getAllNodes(localRoot->getSon(i),nodesWanted);
 			sons.insert(desc.begin(),desc.end());
 		}
 	}
@@ -267,3 +270,6 @@ std::set<std::string> DataBase::getAllLeaves(Node * localRoot){
 set<string> * DataBase::getSpecies(){
     return(&species);
 }
+
+
+

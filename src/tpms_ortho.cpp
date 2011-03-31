@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
   
   DataBase currDB(args.getArg("database"));
   
-  cout << "Construction/Chargement des arbres d'espèces" << endl;
+  cout << "Building loading species trees." << endl;
   currDB.iNeedSpeciesTrees(true,string("cache"),true);
   
   //on suit les queries avec leurs noms : itérateur
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
     
     // pour chaque requete, on doit développer la liste proposée càd passer d'une liste mixe taxons/espèces à une liste espèces
     cout << "Taille de la requete = " << oneQuery->size();
-    set<string> species = currDB.getDescendants(*oneQuery);
+    set<string> species = currDB.getDescendants(*oneQuery,false);
    
     
     //DEBUG: on affiche les espèces de query

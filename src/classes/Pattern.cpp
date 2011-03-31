@@ -247,6 +247,7 @@ bool Pattern::isInTaxa(Node * pNode,string pSpecie){
     return(it2 != it->second.end());
 }
 
+
 bool Pattern::nodeOnlyContainsTheseTaxa(Node * localRoot, set<string> & taxonMembers, bool invert){
     // monophyletique 
     //FONCTION RÉCURSIVE
