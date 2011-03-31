@@ -104,7 +104,7 @@ map<string,int> Family::computeUnicity(Node * node){
     
     vector<Node *> sons = node->getSons();
     for(vector<Node *>::iterator currSon = sons.begin(); currSon < sons.end(); currSon ++) {
-	map<string,int> currSonCount = computeUnicity(currSon);
+	map<string,int> currSonCount = computeUnicity(*currSon);
 	thisNodeCount.insert(currSonCount.begin(),currSonCount.end());
     }
     
@@ -115,8 +115,8 @@ map<string,int> Family::computeUnicity(Node * node){
     // step 2 : this node score computation
     unsigned int score = 1;
     
-    for(map<string,int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); thisNodeCount++){
-	 score *= thisNodeCount->second;
+    for(map<string,int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
+	 score *= currCount->second;
     }
     
     unicityScores[id] = score;

@@ -52,6 +52,7 @@ class Family {
 	
 	bpp::TreeTemplate<bpp::Node> * getTree();
 	bpp::TreeTemplate<bpp::Node> * getSpTree();
+	void genUnicityScores();
 	
 	bool containsSpecie(std::string specie);
 	bool containsSpecies(std::set<std::string> speciesList);

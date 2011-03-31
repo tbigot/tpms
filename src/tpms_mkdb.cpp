@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 	fs::directory_iterator end;
 	for (fs::directory_iterator it(path); it != end; ++it)
 	{
-	    cout << "  - from file " << it->filename();
+	    cout << "  - from file " << it->path().filename();
 	    if (fs::is_regular_file(it->status())){
 		ifstream curFamFile(it->path().string().c_str(),ifstream::in);
 		string newickLine = tpms::TreeTools::extractNewickLineFromFile(curFamFile);
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
     {
 	vector<string> seqList;
 	
-	cout << "  - including family tree from " << it->filename() << endl;
+	cout << "  - including family tree from " << it->path().filename() << endl;
 	if (fs::is_regular_file(it->status())){
 	    ifstream curFamFile(it->path().string().c_str(),ifstream::in);
 	    string newickLine = tpms::TreeTools::extractNewickLineFromFile(curFamFile);
@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
 		numberOfTrees++;
 		// LEAVES NAMES ARE EXTRACTED, WRITING “COMMENT” PART OF THE NEWICK CODE
 		// printing file name
-		output << it->filename() << endl;
+		output << it->path().filename() << endl;
 		output << '[' << endl;
 		for(vector<string>::iterator currSeqName = seqList.begin(); currSeqName != seqList.end(); currSeqName++)
 		{
