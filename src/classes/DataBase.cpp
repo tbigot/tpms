@@ -87,6 +87,18 @@ void DataBase::iNeedMapping(bool verbose, string path, bool generate) {
 	
 }
 
+void DataBase::genUnicityScores() {
+    if(!unicityScoresComputed) {
+	Waiter patienteur(&cout, nbFamilies, 'o');
+	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
+	    (*currFamily)->genUnicityScores();
+	    patienteur.step();
+	}
+	unicityScoresComputed = true;
+	patienteur.drawFinal();
+    }
+}
+
 
 
 void DataBase::loadFromFile(ifstream & RAPfile) {

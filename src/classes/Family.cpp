@@ -92,36 +92,41 @@ void Family::genSpTree(bool save, string path) {
 
 void Family::genUnicityScores() {
     unicityScores.resize(tree->getNextId()-1);
-    computeUnicity(tree->getRootNode());    
+    map<string,unsigned int> counts;
+    computeUnicity(counts, tree->getRootNode());    
 }
 
-map<string,int> Family::computeUnicity(Node * node){
+void Family::computeUnicity(map<string, unsigned int> &thisNodeCount, Node * node){
     unsigned int id = node->getId();
     
     // step 1 : this node count
-    
-    map<string,int> thisNodeCount;
-    
+        
     vector<Node *> sons = node->getSons();
     for(vector<Node *>::iterator currSon = sons.begin(); currSon < sons.end(); currSon ++) {
-	map<string,int> currSonCount = computeUnicity(*currSon);
-	thisNodeCount.insert(currSonCount.begin(),currSonCount.end());
+	map<string,unsigned int> currSonCount;
+	computeUnicity(currSonCount, *currSon);
+	// adding this new map to the current
+	for(map<string,unsigned int>::iterator currCount = currSonCount.begin(); currCount != currSonCount.end(); currCount++){
+	    thisNodeCount[currCount->first] += currCount->second;
+	}
     }
     
     if(sons.size() == 0){ // leave case
-	thisNodeCount.insert(pair<string,int>(spTree->getNodeName(id),1));
+	thisNodeCount.insert(pair<string,unsigned int>(spTree->getNodeName(id),1));
     }
     
     // step 2 : this node score computation
     unsigned int score = 1;
     
-    for(map<string,int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
+    for(map<string,unsigned int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
 	 score *= currCount->second;
     }
     
+    cout << "score " << score << endl;
+    
     unicityScores[id] = score;
     
-    return(thisNodeCount);
+    cout << "tncs" << thisNodeCount.size() << endl;
 }
 
 void Family::writeTreeToStream(Node* root, ostream & sortie, unsigned int deep){
@@ -319,3 +324,9 @@ void Family::labelWithSequencesNames(Node * currNode)
     for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++)
 	labelWithSequencesNames(*currSon);
 }
+
+std::vector< unsigned int >& Family::getUnicityScores()
+{
+    return(unicityScores);
+}
+

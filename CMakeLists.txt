@@ -60,5 +60,9 @@ target_link_libraries(tpms_query_static bpp-phyl bpp-utils bpp-numcalc bpp-seq -
 add_executable(tpms_mkdb src/tpms_mkdb.cpp ${classes})
 target_link_libraries(tpms_mkdb bpp-phyl bpp-utils bpp-numcalc bpp-seq bpp-raa ${Boost_LIBRARIES})
 
+add_executable(tpms_unicity src/tpms_unicity.cpp ${classes})
+target_link_libraries(tpms_unicity bpp-phyl bpp-utils bpp-numcalc bpp-seq bpp-raa ${Boost_LIBRARIES})
+
+
 #add_executable(tpms_mkdb_static src/tpms_mkdb.cpp ${classes})
 #target_link_libraries(STATIC tpms_mkdb_static bpp-phyl bpp-utils bpp-numcalc bpp-seq bpp-raa ${Boost_LIBRARIES} z)

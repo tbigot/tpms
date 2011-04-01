@@ -32,6 +32,7 @@ class DataBase {
 		
 		bool speciesTreesBuilded;
 		bool refTreesBuilded;
+		bool unicityScoresComputed;
 
 				
 		
@@ -55,6 +56,7 @@ class DataBase {
 		
 		void iNeedSpeciesTrees(bool verbose, std::string path,bool generate=false);
 		void iNeedMapping(bool verbose, std::string path, bool generate=false);
+		void genUnicityScores();
 		
 		std::set<std::string> * getSpecies();
 
