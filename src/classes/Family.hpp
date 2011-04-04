@@ -32,7 +32,7 @@ class Family {
 	
 	void deleteFromLeavesToBif(bpp::Node * pnode);
 	
-	void computeUnicity(std::map<std::string, unsigned int> &thisNodeCount, bpp::Node * node);
+	std::map<std::string, unsigned int> computeUnicity(bpp::Node * node);
 	
 	//! Suppression des fils uniques
 	/*!

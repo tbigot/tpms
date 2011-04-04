@@ -5,12 +5,12 @@
 #include <Phyl/Tree.h>
 
 #include "classes/DataBase.hpp"
-#include "classes/Family.hpp"
 #include "classes/Pattern.hpp"
 #include "classes/Query.hpp"
 #include "classes/Waiter.hpp"
 #include "classes/CmdLineArgs.hpp"
 #include "classes/TreeTools.hpp"
+#include "classes/Family.hpp"
 
 
 using namespace std;
@@ -39,6 +39,17 @@ int main(int argc, char *argv[]) {
 	Waiter patienteur(&std::cout, dbFamilies.size(), '#');
 	for(vector<Family*>::iterator currFamily = dbFamilies.begin(); currFamily != dbFamilies.end(); currFamily++){
 	    patienteur.step();
+	    
+	    vector<unsigned int> scores = (*currFamily)->getUnicityScores();
+	    
+	    // labelling the node names
+	    
+	    vector<Node *> nodesList = (*currFamily)->getTree()->getNodes();
+	    for(vector<Node *>::iterator nit = nodesList.begin(); nit != nodesList.end(); nit++){
+		ostringstream iscore;
+		iscore << scores.at((*nit)->getId());
+		(*nit)->setName("[" + iscore.str() + "]" + (*nit)->getName());
+	    }
 	    
 	    out << tpms::TreeTools::nodeToNewick((*currFamily)->getTree()->getRootNode())<<endl;
 	}

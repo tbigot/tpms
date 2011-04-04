@@ -91,28 +91,28 @@ void Family::genSpTree(bool save, string path) {
 }
 
 void Family::genUnicityScores() {
-    unicityScores.resize(tree->getNextId()-1);
-    map<string,unsigned int> counts;
-    computeUnicity(counts, tree->getRootNode());    
+    unicityScores.resize(tree->getNumberOfNodes());
+    computeUnicity(tree->getRootNode());    
 }
 
-void Family::computeUnicity(map<string, unsigned int> &thisNodeCount, Node * node){
+map<string, unsigned int> Family::computeUnicity(Node * node){
     unsigned int id = node->getId();
+    map<string, unsigned int> thisNodeCount;
     
     // step 1 : this node count
         
     vector<Node *> sons = node->getSons();
     for(vector<Node *>::iterator currSon = sons.begin(); currSon < sons.end(); currSon ++) {
-	map<string,unsigned int> currSonCount;
-	computeUnicity(currSonCount, *currSon);
+	map<string,unsigned int> currSonCount = computeUnicity(*currSon);
 	// adding this new map to the current
-	for(map<string,unsigned int>::iterator currCount = currSonCount.begin(); currCount != currSonCount.end(); currCount++){
+	for(map<string,unsigned int>::iterator currCount = currSonCount.begin(); currCount != currSonCount.end(); currCount++){	    
 	    thisNodeCount[currCount->first] += currCount->second;
 	}
     }
     
     if(sons.size() == 0){ // leave case
-	thisNodeCount.insert(pair<string,unsigned int>(spTree->getNodeName(id),1));
+	    thisNodeCount.insert(pair<string,unsigned int>(spTree->getNodeName(id),1));
+	    
     }
     
     // step 2 : this node score computation
@@ -120,13 +120,11 @@ void Family::computeUnicity(map<string, unsigned int> &thisNodeCount, Node * nod
     
     for(map<string,unsigned int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
 	 score *= currCount->second;
-    }
-    
-    cout << "score " << score << endl;
+    }    
     
     unicityScores[id] = score;
-    
-    cout << "tncs" << thisNodeCount.size() << endl;
+        
+    return(thisNodeCount);
 }
 
 void Family::writeTreeToStream(Node* root, ostream & sortie, unsigned int deep){
