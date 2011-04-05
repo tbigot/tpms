@@ -5,9 +5,8 @@
 #include <vector>
 #include <string>
 
-#include <Phyl/Newick.h>
-#include <Phyl/Tree.h>
-#include <Phyl/Newick.h>
+#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/Io/Newick.h>
 
 #include "Family.hpp"
 #include "DataBase.hpp"

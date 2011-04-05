@@ -3,8 +3,9 @@
 
 #include <string>
 
-#include <Phyl/Tree.h>
-#include <Phyl/Newick.h>
+#include <Bpp/Phyl/TreeTemplate.h>
+
+
 namespace tpms{
 class TreeTools{
     public:

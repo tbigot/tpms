@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 
-#include <Phyl/Tree.h>
+#include <Bpp/Phyl/Tree.h>
 
 #include "classes/DataBase.hpp"
 #include "classes/Pattern.hpp"

@@ -8,7 +8,7 @@
 #include "classes/Waiter.hpp"
 #include "classes/CmdLineArgs.hpp"
 
-#include <Phyl/Tree.h>
+#include <Bpp/Phyl/TreeTemplate.h>
 
 using namespace std;
 using namespace bpp;

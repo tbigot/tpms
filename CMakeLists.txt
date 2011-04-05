@@ -4,7 +4,7 @@ PROJECT(tpms)
 set(EXECUTABLE_OUTPUT_PATH build/${CMAKE_BUILD_TYPE})
 
 IF(NOT BPP_LIBRARY)
-    FIND_PATH(BPP_INCLUDE_DIR "Phyl/TreeTemplate.h")
+    FIND_PATH(BPP_INCLUDE_DIR "Bpp/Phyl/TreeTemplate.h")
     SET(BPP_NAMES bpp-phyl bpp-phyllib bpp-phyldll)
     FIND_LIBRARY(BPP_LIBRARY NAMES ${BPP_NAMES})
 ENDIF(NOT BPP_LIBRARY)
@@ -46,22 +46,22 @@ file(
 
 
 add_executable(tpms_ortho src/tpms_ortho.cpp ${classes})
-target_link_libraries(tpms_ortho bpp-phyl bpp-utils bpp-numcalc bpp-seq)
+target_link_libraries(tpms_ortho bpp-phyl bpp-core bpp-seq)
 
 add_executable(tpms_query src/tpms_query.cpp ${classes})
-target_link_libraries(tpms_query bpp-phyl bpp-utils bpp-numcalc bpp-seq)
+target_link_libraries(tpms_query bpp-phyl bpp-core bpp-seq)
 
 add_executable(tpms_query_static src/tpms_query.cpp ${classes})
-target_link_libraries(tpms_query_static bpp-phyl bpp-utils bpp-numcalc bpp-seq -static)
+target_link_libraries(tpms_query_static bpp-phyl bpp-core bpp-seq -static)
 
 # add_executable(tpms_jump src/tpms_jump.cpp ${classes})
 # target_link_libraries(tpms_jump bpp-phyl bpp-utils bpp-numcalc bpp-seq)
 
 add_executable(tpms_mkdb src/tpms_mkdb.cpp ${classes})
-target_link_libraries(tpms_mkdb bpp-phyl bpp-utils bpp-numcalc bpp-seq bpp-raa ${Boost_LIBRARIES})
+target_link_libraries(tpms_mkdb bpp-phyl bpp-core bpp-seq bpp-raa ${Boost_LIBRARIES})
 
 add_executable(tpms_unicity src/tpms_unicity.cpp ${classes})
-target_link_libraries(tpms_unicity bpp-phyl bpp-utils bpp-numcalc bpp-seq bpp-raa ${Boost_LIBRARIES})
+target_link_libraries(tpms_unicity bpp-phyl bpp-core bpp-seq bpp-raa ${Boost_LIBRARIES})
 
 
 #add_executable(tpms_mkdb_static src/tpms_mkdb.cpp ${classes})

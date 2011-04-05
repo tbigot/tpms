@@ -10,8 +10,7 @@
 #include "classes/Waiter.hpp"
 
 
-#include <Phyl/Newick.h>
-#include <Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/TreeTemplate.h>
 
 using namespace std;
 using namespace tpms;

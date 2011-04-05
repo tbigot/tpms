@@ -1,6 +1,5 @@
 #include <string>
-#include <Phyl/Tree.h>
-#include <Phyl/Newick.h>
+#include <Bpp/Phyl/Tree.h>
 
 #include "TreeTools.hpp"
 

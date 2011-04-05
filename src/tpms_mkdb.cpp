@@ -9,8 +9,7 @@
 #include "classes/CandidateNode.hpp"
 #include "classes/TreeTools.hpp"
 
-#include <Phyl/Newick.h>
-#include <Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/TreeTemplate.h>
 #include <Bpp/Raa/RAA.h>
 
 

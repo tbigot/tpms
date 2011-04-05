@@ -9,8 +9,7 @@
 #include "Waiter.hpp"
 #include "Family.hpp"
 
-#include <Phyl/Newick.h>
-#include <Phyl/Tree.h>
+#include <Bpp/Phyl/Tree.h>
 
 using namespace std;
 using namespace bpp;

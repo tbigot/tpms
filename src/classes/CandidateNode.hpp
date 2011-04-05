@@ -4,8 +4,8 @@
 #include <set>
 #include <map>
 
-#include <Phyl/Tree.h>
-#include <Phyl/Newick.h>
+#include <Bpp/Phyl/TreeTemplate.h>
+
 namespace tpms{
     class CandidateNode{
 	private:

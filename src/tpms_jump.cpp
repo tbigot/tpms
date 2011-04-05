@@ -7,7 +7,7 @@
 #include "classes/Query.hpp"
 #include "classes/Waiter.hpp"
 
-#include <Phyl/Tree.h>
+#include <Bpp/Phyl/Tree.h>
 
 using namespace std;
 using namespace bpp;

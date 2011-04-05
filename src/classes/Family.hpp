@@ -7,8 +7,9 @@
 #include <set>
 
 //inclusions bio++
-#include <Phyl/Newick.h>
-#include <Phyl/Tree.h>
+#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/TreeTemplate.h>
+
 
 //inclusions personnelles
 #include "DataBase.hpp"
