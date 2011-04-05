@@ -4,13 +4,13 @@
 
 #include <Bpp/Phyl/Tree.h>
 
+#include "classes/Family.hpp"
 #include "classes/DataBase.hpp"
 #include "classes/Pattern.hpp"
 #include "classes/Query.hpp"
 #include "classes/Waiter.hpp"
 #include "classes/CmdLineArgs.hpp"
 #include "classes/TreeTools.hpp"
-#include "classes/Family.hpp"
 
 
 using namespace std;
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 		(*nit)->setName("[" + iscore.str() + "]" + ((*nit)->hasName() ? (*nit)->getName() : ""));
 	    }
 	    
-	    out << tpms::TreeTools::nodeToNewick((*currFamily)->getTree()->getRootNode())<<endl;
+	    out << (*currFamily)->getName()<< '\n' <<tpms::TreeTools::nodeToNewick((*currFamily)->getTree()->getRootNode())<< ';' <<endl;
 	}
 	patienteur.drawFinal();
 	
