@@ -10,6 +10,7 @@
 #include <map>
 
 #include "Family.hpp"
+#include "Taxon.hpp"
 
 //inclusions bio++
 #include <Bpp/Phyl/Tree.h>
@@ -17,6 +18,7 @@
 class DataBase {
 	
 	private:
+		std::map<string,tpms::Taxon> _taxa;
 		unsigned int nbFamilies;
 		bool reconciled;
 		bpp::TreeTemplate<bpp::Node> * speciesTree;
@@ -59,6 +61,7 @@ class DataBase {
 		void genBestUnicityScores();
 		
 		std::set<std::string> * getSpecies();
+		tpms::Taxon* nameToTaxon(std::string taxonName);
 
 };
 #else

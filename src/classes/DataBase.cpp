@@ -208,7 +208,8 @@ void DataBase::loadSpeciesTree(string newickLine)
 	vector<Node *> listeNoeuds = speciesTree->getNodes();
 	
 	for(vector<Node *>::iterator it = listeNoeuds.begin(); it != listeNoeuds.end(); it++) {
-		if((*it)->hasName()) species.insert((*it)->getName());
+		if((*it)->hasName())
+		    _taxa.insert(pair<string,Taxon>((*it)->getName(),new tpms::Taxon((*it)->getName(),speciesTree->getNode((*it)->getName()),*this)));
 	}
 	
 }
@@ -293,5 +294,11 @@ set<string> * DataBase::getSpecies(){
     return(&species);
 }
 
+tpms::Taxon* DataBase::nameToTaxon(string taxonName)
+{
+    map<string,Taxon>::iterator foundTaxon = _taxa.find(taxonName);
+    if(foundTaxon != _taxa.end()) return(foundTaxon->second);
+    return(tpms::Taxon::notFound);
+}
 
 
