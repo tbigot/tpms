@@ -13,18 +13,18 @@
 
 //inclusions personnelles
 #include "DataBase.hpp"
+#include "Taxon.hpp"
 
 class Family {
     
     private:
-	std::string _name;
-	//! Base de données d'appartenance
-	DataBase * db;
+	std::string name;
 	
+	DataBase * db;
+	std::vector<tpms::Taxon*> leave2spe;
 	bpp::TreeTemplate<bpp::Node> * tree;
-	bpp::TreeTemplate<bpp::Node> * spTree;
-	std::map<std::string,std::string> mne2spec;
-	std::set<std::string> species;
+	std::map<std::string,tpms::Taxon*> mne2tax;
+	std::set<tpms::Taxon*> species;
 	bpp::TreeTemplate<bpp::Node> * refTree;
 	std::vector<unsigned int> unicityScores;
 	
@@ -35,10 +35,6 @@ class Family {
 	
 	std::map<std::string, unsigned int> computeUnicity(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * originNode);
 	
-	//! Suppression des fils uniques
-	/*!
-	Raccourci les embranchements en supprimant les nœuds n'ayant qu'un fils, inutiles du point de vue topologique.
-	*/
 	bpp::Node * removeUniqueSons(bpp::Node* localRoot);
 	
 	std::string mapNodeOnTaxon(bpp::Node& nodep);
@@ -52,19 +48,20 @@ class Family {
 	Family(std::stringstream* sIntro, std::string sNewick, DataBase* dbp);
 	
 	bpp::TreeTemplate<bpp::Node> * getTree();
-	bpp::TreeTemplate<bpp::Node> * getSpTree();
 	void genUnicityScores();
 	void genBestUnicityScores();
+	void genLeaveToSpecies();
 	
-	bool containsSpecie(std::string specie);
-	bool containsSpecies(std::set<std::string> speciesList);
-	std::set<std::string> * getSpecies();
+	tpms::Taxon getSpeciesOfNode(Node * node);
+	
+	bool containsSpecie(Taxon* taxon);
+	// bool containsSpecies(std::set<std::string> speciesList);
+	// std::set<std::string> * getSpecies();
 	static void getLeavesFromNode(bpp::Node * pnode, std::vector< bpp::Node* >& leaves);
 	static void getLeavesFromNode(bpp::Node * pnode, std::set< bpp::Node* >& leaves, int &leavesNumber);
 	static void getLeavesFromNode(bpp::Node * pnode, std::set< bpp::Node* >& leaves);
 	
 	std::set<std::string> getLeavesNamesFromNode(bpp::Node * pnode);
-	static std::set<std::string> nodesToNames(std::set<bpp::Node *> &nodes);
 	std::string getName();
 	void writeTreeToStream(bpp::Node* root, std::ostream& sortie, unsigned int deep);
 	
@@ -72,9 +69,8 @@ class Family {
 	/*!
 	Ce générateur va partir d'un arbre vrai de référence et n'en garder que les espèces présentes dans la famille
 	*/
-	
 	void genRefTree(bool save=true, std::string path="");
-	void genSpTree(bool save=true, std::string path="");
+	
 	std::vector<unsigned int> &getUnicityScores();
 	
 	int numberOfNodesBetween(bpp::Node * ancestor, bpp::Node * pnode);

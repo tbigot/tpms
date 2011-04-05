@@ -8,11 +8,14 @@
 #include "DataBase.hpp"
 #include "Waiter.hpp"
 #include "Family.hpp"
+#include "Taxon.hpp"
 
 #include <Bpp/Phyl/Tree.h>
 
+
 using namespace std;
 using namespace bpp;
+using namespace tpms;
 
 DataBase::DataBase(string path): refTreesBuilded(false), speciesTreesBuilded(false) {
 	
@@ -209,7 +212,7 @@ void DataBase::loadSpeciesTree(string newickLine)
 	
 	for(vector<Node *>::iterator it = listeNoeuds.begin(); it != listeNoeuds.end(); it++) {
 		if((*it)->hasName())
-		    _taxa.insert(pair<string,Taxon>((*it)->getName(),new tpms::Taxon((*it)->getName(),speciesTree->getNode((*it)->getName()),*this)));
+		    taxa.insert(pair<string,Taxon*>((*it)->getName(),new tpms::Taxon((*it)->getName(),speciesTree->getNode((*it)->getName()),*this)));
 	}
 	
 }
@@ -296,9 +299,9 @@ set<string> * DataBase::getSpecies(){
 
 tpms::Taxon* DataBase::nameToTaxon(string taxonName)
 {
-    map<string,Taxon>::iterator foundTaxon = _taxa.find(taxonName);
-    if(foundTaxon != _taxa.end()) return(foundTaxon->second);
-    return(tpms::Taxon::notFound);
+    map<string,Taxon*>::iterator foundTaxon = taxa.find(taxonName);
+    if(foundTaxon != taxa.end()) return(foundTaxon->second);
+    return(00);
 }
 
 

@@ -18,7 +18,7 @@
 class DataBase {
 	
 	private:
-		std::map<string,tpms::Taxon> _taxa;
+		std::map<std::string,tpms::Taxon*> taxa;
 		unsigned int nbFamilies;
 		bool reconciled;
 		bpp::TreeTemplate<bpp::Node> * speciesTree;

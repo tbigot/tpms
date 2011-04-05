@@ -10,23 +10,25 @@
 #include <Bpp/Phyl/Io/Newick.h>
 
 #include "Family.hpp"
-#include "DataBase.hpp"
 #include "Waiter.hpp"
 #include "TreeTools.hpp"
+#include "Taxon.hpp"
+#include "DataBase.hpp"
 
 
 using namespace std;
 using namespace bpp;
+using namespace tpms;
 
 Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
     // extraction du nom de la famille
     string currLigne;
     getline(*sIntro,currLigne);
     istringstream sFamilleName(currLigne);
-    sFamilleName >> _name;
+    sFamilleName >> name;
     // extraction des synonymes
     getline(*sIntro, currLigne);
-    if(currLigne.at(0) != '[') std::cerr << "Bracket (newick comments beginning) expected at family " << _name << endl;
+    if(currLigne.at(0) != '[') std::cerr << "Bracket (newick comments beginning) expected at family " << name << endl;
     
     // cas du fichier avec deux arbres en plus (concerne les arbres réconciliés
     getline(*sIntro, currLigne);
@@ -54,13 +56,13 @@ Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
 		
 	    }
 	    
-	    mne2spec.insert(pair<string,string>(mnemonique.str(),espece.str()));
-	    species.insert(espece.str());
-	    
-	    //DEBUG: on vérifie que espece est bien dans la liste des espèces de la base !
-	    if(db->getSpecies()->find(espece.str()) == db->getSpecies()->end())
-		cout << "o Unable to find this specie in the species tree :" << espece.str() << endl;
-	    
+	    Taxon * currTaxon = db->nameToTaxon(espece.str());
+	    if(currTaxon != 00){
+	      mne2tax.insert(pair<string,Taxon *>(mnemonique.str(),currTaxon ));
+	      species.insert(currTaxon);
+	    } else {
+	      cout << "o Unable to find this specie in the species tree :" << espece.str() << endl;
+	    }
 	    
 	    getline(*sIntro, currLigne);
 	}
@@ -76,19 +78,14 @@ Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
 	*/
 }
 
-void Family::genSpTree(bool save, string path) {
-    spTree = tree->clone();
-    vector<Node *> noeuds = spTree->getLeaves();
-    for(vector<Node *>::iterator it = noeuds.begin(); it < noeuds.end(); it++) {
-	if((*it)->hasName())
-	    (*it)->setName(mne2spec[(*it)->getName()]);
+void Family::genLeaveToSpecies(){
+    vector<Node *> leaves = tree->getNodes();
+    leave2spe.resize(leaves.size());
+    for(vector<Node *>::iterator leave = leaves.begin(); leave != leaves.end(); leave++){
+	leave2spe.at(leave->getId())=mne2tax[leave->getName()];
     }
-    //DEBUG: on va sauvegarder temporairement ces fichiers
-    //ofstream sauveRefTree(string("cache/"+_name+".sptree").c_str());
-    //writeTreeToStream(spTree->getRootNode(),sauveRefTree,0);
-    
-    if (save) writeSpTreeToFile(path);
 }
+
 
 void Family::genUnicityScores() {
     unicityScores.resize(tree->getNumberOfNodes());
@@ -224,16 +221,16 @@ Node * Family::removeUniqueSons(Node * localRoot){
     }
 }
 
-TreeTemplate<Node> * Family::getSpTree() {
-    return(spTree);
-}
-
 TreeTemplate<Node> * Family::getTree() {
     return(tree);
 }
 
-bool Family::containsSpecie(string specie) {
-    return(!(species.find(specie)==species.end()));
+bool Family::containsSpecie(Taxon* taxon) {
+    return(species.find(taxon)!=species.end());
+}
+
+Taxon* Family::getSpeciesOfNode(Node* node){
+    return();
 }
 
 bool Family::containsSpecies(set<string> speciesList) {
@@ -283,15 +280,8 @@ set<string> Family::getLeavesNamesFromNode(Node * pnode){
 }
 
 
-std::set<std::string> Family::nodesToNames(std::set<bpp::Node *> &nodes){
-    set<string> answer;
-    for(set<Node *>::iterator node = nodes.begin(); node != nodes.end(); node++)
-	answer.insert((*node)->getName());
-    return(answer);
-}
-
 std::string Family::getName(){
-    return(_name);
+    return(name);
 }
 
 std::string Family::mapNodeOnTaxon(bpp::Node & pnode){
@@ -312,22 +302,26 @@ std::string Family::mapNodeOnTaxon(bpp::Node & pnode){
 
 void Family::loadRefTreeFromFile(string path){
     Newick reader;
-    refTree = reader.read(path+"/refTrees/"+_name+".refTree");
+    refTree = reader.read(path+"/refTrees/"+name
++".refTree");
 }
 
 void Family::loadSpTreeFromFile(string path){
     Newick reader;
-    spTree = reader.read(path+"/spTrees/"+_name+".spTree");
+    spTree = reader.read(path+"/spTrees/"+name
++".spTree");
 }
 
 void Family::writeRefTreeToFile(string path){
     Newick writer;
-    writer.write(*refTree,path+"/refTrees/"+_name+".refTree",true);
+    writer.write(*refTree,path+"/refTrees/"+name
++".refTree",true);
 }
 
 void Family::writeSpTreeToFile(string path){
     Newick writer;
-    writer.write(*spTree,path+"/spTrees/"+_name+".spTree",true);
+    writer.write(*spTree,path+"/spTrees/"+name
++".spTree",true);
 }
 
 

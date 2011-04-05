@@ -8,18 +8,20 @@
 namespace tpms{
     class Taxon{
 	private:
-	    std::string _name;
-	    std::set<tpms::Taxon> _ancestors;
-	    std::set<tpms::Taxon> _descendants;
+	    std::string name;
+	    std::set<tpms::Taxon*> ancestors;
+	    std::set<tpms::Taxon*> descendants;
 	    
-	    void genDescendantsList(bpp::TreeTemplate<bpp::Node*>* speciesTree);
-	    void genAncestorsList(bpp::TreeTemplate<bpp::Node*>* speciesTree);
+	    void genDescendantsList(bpp::Node* localNode, DataBase& database);
+	    void genAncestorsList(bpp::Node* localNode, DataBase& database);
 	    
 	    
 	public:
 	    Taxon(std::string name,bpp::Node *nodeInSpTree, DataBase &database);
 	    std::string getName();
-	    static const Taxon* notFound = 00;
+	    
+	    bool contains(Taxon *);
+	    bool belongsTo(Taxon *);
     };
 }
 

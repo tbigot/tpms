@@ -5,7 +5,7 @@ using namespace std;
 using namespace bpp;
 using namespace tpms;
 
-Taxon::Taxon(string name, Node* nodeInSpTree,DataBase &database): _name(name)
+Taxon::Taxon(string name, Node* nodeInSpTree,DataBase &database): name(name)
 {
     genDescendantsList(nodeInSpTree,database);
     genAncestorsList(nodeInSpTree,database);
@@ -13,13 +13,16 @@ Taxon::Taxon(string name, Node* nodeInSpTree,DataBase &database): _name(name)
 
 void Taxon::genAncestorsList(Node* localNode, DataBase &database)
 {
-    
+    if(localNode->hasName())
+	ancestors.insert(database.nameToTaxon(localNode->getName()));
+    if(localNode->hasFather())
+        genAncestorsList(localNode->getFather(),database);
 }
 
 void Taxon::genDescendantsList(Node* localNode, DataBase &database)
 {
     if(localNode->hasName())
-	_descendants.insert(database.nameToTaxon(localNode->getName()));
+	descendants.insert(database.nameToTaxon(localNode->getName()));
 
     vector<Node*> sons = localNode->getSons();
     for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++) {
@@ -29,5 +32,15 @@ void Taxon::genDescendantsList(Node* localNode, DataBase &database)
 
 string Taxon::getName()
 {
-    return(_name);
+    return(name);
+}
+
+bool Taxon::belongsTo(Taxon* ancestor)
+{
+    return(ancestors.find(ancestor)!=ancestors.end());
+}
+
+bool Taxon::contains(Taxon* descendant)
+{
+    return(descendants.find(descendant)!=descendants.end());
 }
