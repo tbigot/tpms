@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 	    for(vector<Node *>::iterator nit = nodesList.begin(); nit != nodesList.end(); nit++){
 		ostringstream iscore;
 		iscore << scores.at((*nit)->getId());
-		(*nit)->setName("[" + iscore.str() + "]" + (*nit)->getName());
+		(*nit)->setName("[" + iscore.str() + "]" + ((*nit)->hasName() ? (*nit)->getName() : ""));
 	    }
 	    
 	    out << tpms::TreeTools::nodeToNewick((*currFamily)->getTree()->getRootNode())<<endl;
