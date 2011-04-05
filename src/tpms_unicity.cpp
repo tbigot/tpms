@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 	currDB.iNeedSpeciesTrees(true,string("cache"),true);
 	
 	cout << "Generating UnicityScores (may take a while, please have a coffe - ask Jos)." << endl;
-	currDB.genUnicityScores();
+	currDB.genBestUnicityScores();
 	
 	// liste des familles
 	vector<Family*> & dbFamilies = currDB.getFamilies();

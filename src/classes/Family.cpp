@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <numeric>
 
 #include <Bpp/Phyl/Tree.h>
 #include <Bpp/Phyl/Io/Newick.h>
@@ -91,25 +92,54 @@ void Family::genSpTree(bool save, string path) {
 
 void Family::genUnicityScores() {
     unicityScores.resize(tree->getNumberOfNodes());
-    computeUnicity(tree->getRootNode());    
+    computeUnicity(unicityScores,tree->getRootNode(),00); // 00 because no origin, we are at the real root
 }
 
-map<string, unsigned int> Family::computeUnicity(Node * node){
+void Family::genBestUnicityScores() {
+    // in this function, we'll try all nodes as potential roots, and select the node with the minimum unicity score
+    // then, the trees will be rerooted
+    
+    vector<unsigned int> currScores;
+    vector<unsigned int> bestScores;
+    Node * bestRoot = 00;
+    unsigned int bestScoresSum;
+    unsigned int currScoresSum;
+    currScores.resize(tree->getNumberOfNodes());
+    vector<Node *> nodes = tree->getNodes();
+    for(vector<Node *>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++) {
+	if((*currNode)->isLeaf()) continue; // leaves cannot be roots, skipping
+	computeUnicity(currScores,*currNode,00);
+	currScoresSum = accumulate(currScores.begin(),currScores.end(),0);
+	if(bestRoot == 00 || currScoresSum <  bestScoresSum){
+	    // we've found a first or better root candidate
+	    bestRoot = *currNode;
+	    bestScores = currScores;
+	    bestScoresSum = currScoresSum;
+	}
+    }
+    // here, we've the best root in bestRoot: we have to reRoot
+    tree->setRootNode(bestRoot);
+    unicityScores = bestScores;
+    
+}
+
+map<string, unsigned int> Family::computeUnicity(vector<unsigned int> &scores, Node * node, Node * origin){
     unsigned int id = node->getId();
     map<string, unsigned int> thisNodeCount;
     
     // step 1 : this node count
         
-    vector<Node *> sons = node->getSons();
-    for(vector<Node *>::iterator currSon = sons.begin(); currSon < sons.end(); currSon ++) {
-	map<string,unsigned int> currSonCount = computeUnicity(*currSon);
+    vector<Node *> neighbors = node->getNeighbors();
+    for(vector<Node *>::iterator currSon = neighbors.begin(); currSon < neighbors.end(); currSon ++) {
+	if(*currSon == origin) continue;
+	map<string,unsigned int> currSonCount = computeUnicity(scores,*currSon,node);
 	// adding this new map to the current
 	for(map<string,unsigned int>::iterator currCount = currSonCount.begin(); currCount != currSonCount.end(); currCount++){	    
 	    thisNodeCount[currCount->first] += currCount->second;
 	}
     }
     
-    if(sons.size() == 0){ // leave case
+    if(neighbors.size() == 1){ // leave case
 	    thisNodeCount.insert(pair<string,unsigned int>(spTree->getNodeName(id),1));
 	    
     }
@@ -121,7 +151,7 @@ map<string, unsigned int> Family::computeUnicity(Node * node){
 	 score *= currCount->second;
     }    
     
-    unicityScores[id] = score;
+    scores[id] = score;
         
     return(thisNodeCount);
 }

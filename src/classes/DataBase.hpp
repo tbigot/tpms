@@ -56,6 +56,7 @@ class DataBase {
 		void iNeedSpeciesTrees(bool verbose, std::string path,bool generate=false);
 		void iNeedMapping(bool verbose, std::string path, bool generate=false);
 		void genUnicityScores();
+		void genBestUnicityScores();
 		
 		std::set<std::string> * getSpecies();
 

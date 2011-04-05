@@ -98,6 +98,17 @@ void DataBase::genUnicityScores() {
     }
 }
 
+void DataBase::genBestUnicityScores() {
+    if(!unicityScoresComputed) {
+	Waiter patienteur(&cout, nbFamilies, 'o');
+	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
+	    (*currFamily)->genBestUnicityScores();
+	    patienteur.step();
+	}
+	unicityScoresComputed = true;
+	patienteur.drawFinal();
+    }
+}
 
 
 void DataBase::loadFromFile(ifstream & RAPfile) {

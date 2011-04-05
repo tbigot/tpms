@@ -33,7 +33,7 @@ class Family {
 	
 	void deleteFromLeavesToBif(bpp::Node * pnode);
 	
-	std::map<std::string, unsigned int> computeUnicity(bpp::Node * node);
+	std::map<std::string, unsigned int> computeUnicity(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * originNode);
 	
 	//! Suppression des fils uniques
 	/*!
@@ -54,6 +54,7 @@ class Family {
 	bpp::TreeTemplate<bpp::Node> * getTree();
 	bpp::TreeTemplate<bpp::Node> * getSpTree();
 	void genUnicityScores();
+	void genBestUnicityScores();
 	
 	bool containsSpecie(std::string specie);
 	bool containsSpecies(std::set<std::string> speciesList);
