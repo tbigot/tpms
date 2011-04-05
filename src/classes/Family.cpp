@@ -119,7 +119,8 @@ void Family::genBestUnicityScores() {
     }
     // here, we've the best root in bestRoot: we have to reRoot
     tree->rootAt(bestRoot);
-    unicityScores = bestScores;
+    // after reroot, nodes id might have changed, we must recalculate scores
+    genUnicityScores();
     
 }
 
