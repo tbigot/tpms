@@ -96,8 +96,8 @@ void Family::genUnicityScores() {
 }
 
 void Family::genBestUnicityScores() {
-    // in this function, we'll try all nodes as potential roots, and select the node with the minimum unicity score
-    // then, the trees will be rerooted
+    // in this function, we'll try all nodes as potential roots, and keep the topology that gets the lower scores sum
+    // then, the tree is rerooted
     
     vector<unsigned int> currScores;
     vector<unsigned int> bestScores;
@@ -118,7 +118,7 @@ void Family::genBestUnicityScores() {
 	}
     }
     // here, we've the best root in bestRoot: we have to reRoot
-    tree->setRootNode(bestRoot);
+    tree->rootAt(bestRoot);
     unicityScores = bestScores;
     
 }
