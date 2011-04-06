@@ -35,6 +35,18 @@ string Taxon::getName()
     return(name);
 }
 
+std::set< Taxon* >& Taxon::getAncestors()
+{
+    return(ancestors);
+}
+
+std::set< Taxon* >& Taxon::getDescendants()
+{
+    return(descendants);
+}
+
+
+
 bool Taxon::belongsTo(Taxon* ancestor)
 {
     return(ancestors.find(ancestor)!=ancestors.end());

@@ -9,16 +9,18 @@
 #include "TreeTools.hpp"
 #include "Waiter.hpp"
 #include "CandidateNode.hpp"
+#include "Taxon.hpp"
+#include "Family.hpp"
 
 
 using namespace std;
 using namespace bpp;
 using namespace tpms;
 
-Pattern::Pattern(TreeTemplate<Node> &tree, DataBase &refDB): refDB(refDB), tree(tree){
+Pattern::Pattern(TreeTemplate<Node> &tree, DataBase &db): db(db), tree(tree){
     
     extractConstraints();
-    developSpecies();
+    fillSpeciesFromLeavesNames();
     cout << "\n -- Constraints visual representation:" << endl;
     print(tree.getRootNode(),0);
 }
@@ -37,7 +39,7 @@ void Pattern::extractConstraints(){
     // resize et remplissage : ici, on sait ce qu'on fait.
     constraints.resize(tree.getNumberOfNodes());
     for(unsigned int i = 0; i!= constraints.size();i++)
-	constraints.at(i) = new NodeConstraints(refDB);
+	constraints.at(i) = new NodeConstraints(db);
     
     vector<Node *> noeuds = tree.getNodes();
     for(vector<Node *>::iterator unNoeud = noeuds.begin(); unNoeud != noeuds.end(); unNoeud++){
@@ -50,7 +52,7 @@ void Pattern::extractConstraints(){
 	    if(!(*unNoeud)->hasFather())
 		cout << "\n!!!!!! Constraints on root are NOT YET supported !" << endl ;
 	    nodeName = initName.substr(0,found);
-	    (constraints.at((*unNoeud)->getId()))->setConstraints(refDB,initName.substr(found+1, (initName.size()-found-2)));
+	    (constraints.at((*unNoeud)->getId()))->setConstraints(db,initName.substr(found+1, (initName.size()-found-2)));
 	    if(!nodeName.empty()) (*unNoeud)->setName(nodeName); else (*unNoeud)->deleteName();
 	}
 	
@@ -58,32 +60,21 @@ void Pattern::extractConstraints(){
 }
 
 
-void Pattern::developSpecies() {
-    // cette fonction associe, pour chaque feuille du pattern, une liste d'espèces
+void Pattern::fillSpeciesFromLeavesNames() {
     
-    // quand on va entamer une recherche, et qu'il y a un taxon dans le pattern, il faut savoir exactement quelles espèces de l'arbre il recouvre. Si un nœud de l'abre est « BACTERIA », on doit avoir la liste de toutes les espèces correspondantes, c'est-à-dire toutes les feulles qui sont sous BACTERIA dans l'abre des espèces.
+    vector<Node *> leaves = tree.getLeaves();
     
-    // species est donc une map qui associe à chaque ID de nœud un set d'espèces (liste ordonnée) sous forme de chaînes.
-    // on récupère tous les nœuds, mais seules les feuilles nous intéressent.
-    vector<Node *> feuilles = tree.getNodes();
+    string leaveName;
     
-    string currNodeName;
+    // FIXME:à finir!!!
     
-    set<string> allSons;
-    for(vector<Node *>::iterator it = feuilles.begin(); it < feuilles.end(); it++) {
+    for(vector<Node *>::iterator it = leaves.begin(); it < leaves.end(); it++) {
 	if((*it)->hasName()) {
-	    currNodeName = (*it)->getName();
+	    leaveName = (*it)->getName();
 	    if(currNodeName.at(0) == '!') currNodeName = currNodeName.substr(1,currNodeName.size()-1);
-	    allSons = refDB.getDescendants(currNodeName);
-	    species.insert(pair<int,set<string> >((*it)->getId(),allSons));
+	    allSons = db.getDescendants(currNodeName);
+	    species.at((*it)->getId())=allSons;
 	    
-	    /*TO KNOW THE SPECIES LIST THAT IS ACCEPTED BY A NODE
-	     * 
-	     * 
-	     * for(set<string>::iterator lspc=allSons.begin(); lspc != allSons.end(); lspc++){
-		cout << *lspc << ", ";
-	    }
-	    cout << endl;*/
 	    
 	}
     }
@@ -144,14 +135,13 @@ unsigned int Pattern::search(std::vector< Family* >& families, vector< pair< Fam
     
 }
 
-bool Pattern::patternMatch(Node * target, Node * pattern, CandidateNode * fatherCandidate) {
-    // On reprend ici l'algoritme de JF Dufayard (Dufayard et al, 2005) duquel on a retiré la problématique de contraintes de branches
+bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, CandidateNode * fatherCandidate) {
+    // Dufayard et al, 2005
     
     
     if(isLeaf(target) && isLeaf(pattern)){
 	if(
-	    (pattern->getName().at(0)!='!' && isInTaxa(pattern,target->getName()))
-	    || (pattern->getName().at(0)=='!' && !isInTaxa(pattern,target->getName()))
+	    (pattern->getName().at(0)=='!' != pNodeAuthorisesThisSpecies(pattern,family.getSpeciesOfNode(target)))
 	)
 	{
 	    CandidateNode * currCandidate = new CandidateNode(fatherCandidate,target,pattern);
@@ -238,13 +228,12 @@ std::vector<int> Pattern::getIdWithTaxaList(bpp::TreeTemplate<bpp::Node> * sTree
 
 bool Pattern::isLeaf(Node * pNode) { return(pNode->getNumberOfSons() == 0); }
 
-// ce nœud autorise-t-il cette espèce ?
-bool Pattern::isInTaxa(Node * pNode,string pSpecie){
+bool Pattern::pNodeAuthorisesThisSpecies(Node* pNode,tpms::Taxon* species){
     // species associe à chaque ID de noeud un set d'espèces
-    map<int, set<string> >::iterator it = species.find(pNode->getId());
+    vector<set<tpms::Taxon*> >::iterator it = this->species.at(pNode->getId());
     // it pointe maintenant sur le vector qui nous intéresse. On cherche l'espèce dedans.
-    set<string>::iterator it2 = it->second.find(pSpecie);
-    return(it2 != it->second.end());
+    set<string>::iterator it2 = it->find(species);
+    return(it2 != it->end());
 }
 
 
@@ -303,11 +292,11 @@ int Pattern::enumerateTaxon(Node * localRoot, set<string> * tsMembers, bool tsCo
 vector<int> Pattern::xferDetected(map<int,Family *> * families, vector<int> selector, string sourceTaxon, string targetTaxon, string monophylyTaxon, unsigned int verifDeep, vector<unsigned int> bootstraps, vector<unsigned int> sourceRates) {
     // cette fonction doit trouver dans la liste famList toutes les familles qui groupent un membre de taxonTarget dans taxonSource
     bool tsComplementary = sourceTaxon.at(0) == '!'; if(tsComplementary) sourceTaxon = sourceTaxon.substr(1,sourceTaxon.size()-1);
-    set<string> tsMembers = refDB.getDescendants(sourceTaxon);
+    set<string> tsMembers = db.getDescendants(sourceTaxon);
     bool ttComplementary = targetTaxon.at(0) == '!'; if(ttComplementary) targetTaxon = targetTaxon.substr(1,targetTaxon.size()-1);
-    set<string> ttMembers = refDB.getDescendants(targetTaxon);
+    set<string> ttMembers = db.getDescendants(targetTaxon);
     bool mtComplementary = monophylyTaxon.at(0) == '!'; if(mtComplementary) monophylyTaxon = monophylyTaxon.substr(1,monophylyTaxon.size()-1);
-    set<string> mtMembers = refDB.getDescendants(monophylyTaxon);
+    set<string> mtMembers = db.getDescendants(monophylyTaxon);
     vector<int> listeTarget;
     Node * currNode,* currAncester;
     bool auMoinsUnTransfertDetecte = false;

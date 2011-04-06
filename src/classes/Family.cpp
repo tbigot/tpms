@@ -352,3 +352,10 @@ std::vector< unsigned int >& Family::getUnicityScores()
     return(unicityScores);
 }
 
+
+
+Taxon* Family::getSpeciesOfNode(Node* node)
+{
+    return(leave2spe.at(node->getId()));
+}
+

@@ -52,9 +52,9 @@ class Family {
 	void genBestUnicityScores();
 	void genLeaveToSpecies();
 	
-	tpms::Taxon getSpeciesOfNode(Node * node);
+	tpms::Taxon getSpeciesOfNode(bpp::Node * node);
 	
-	bool containsSpecie(Taxon* taxon);
+	bool containsSpecie(tpms::Taxon* taxon);
 	// bool containsSpecies(std::set<std::string> speciesList);
 	// std::set<std::string> * getSpecies();
 	static void getLeavesFromNode(bpp::Node * pnode, std::vector< bpp::Node* >& leaves);
@@ -86,7 +86,6 @@ class Family {
 	    * @param currNode node to start with
 	    */
 	void labelWithSequencesNames(bpp::Node* currNode);
-	
 	
 };
 

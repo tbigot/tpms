@@ -22,6 +22,9 @@ namespace tpms{
 	    
 	    bool contains(Taxon *);
 	    bool belongsTo(Taxon *);
+	    
+	    std::set<tpms::Taxon*>& getDescendants();
+	    std::set< pms::Taxon*>& getAncestors();
     };
 }
 

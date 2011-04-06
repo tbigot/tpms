@@ -16,13 +16,17 @@ class NodeConstraints{
     private:
 	DataBase &refDB;
 	NodeNature nature;
-	std::set<std::string> authorisedSpecies;
-	void buildAuthorisedSpecies(std::string speciesList);
-	void addTaxon(std::string);
-	void deleteTaxon(std::string);
+	std::set<tpms::Taxon*> fromFatherAllowedSpecies;
+	std::set<tpms::Taxon*> allowedSpeciesOnNode;
+	
+	void buildAllowedSpecies(std::set<tpms::Taxon*>& spset,std::string spstr);
+	
+	void addTaxon(set<Taxon*>& spset,tpms::Taxon* taxon);
+	void deleteTaxon(set<Taxon*>& spset,tpms::Taxon* taxon);
+	
 	std::string initString;
-	void cachParams();
-	bool speciesRestrictions;
+	void catchParams();
+	bool speciesRestrictionsFromFather;
 	
     public:
 	NodeConstraints(DataBase & pRefDB);
@@ -32,7 +36,7 @@ class NodeConstraints{
 	void setAuthorisedSpecies(std::set<std::string> &authorisedSpecies);
 	void setAuthorisedSpecies(std::string authSpString);
 	std::set<std::string> & getAuthorisedSpecies();
-	bool hasSpeciesRestrictions();
+	bool hasSpeciesRestrictionsFromFather();
 	std::string getString();
 	NodeNature getNature();
 	bool isAuthorizedNature(NodeNature nature);
