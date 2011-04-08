@@ -60,27 +60,6 @@ void Pattern::extractConstraints(){
 }
 
 
-void Pattern::fillSpeciesFromLeavesNames() {
-    
-    vector<Node *> leaves = tree.getLeaves();
-    
-    string leaveName;
-    
-    // FIXME:à finir!!!
-    
-    for(vector<Node *>::iterator it = leaves.begin(); it < leaves.end(); it++) {
-	if((*it)->hasName()) {
-	    leaveName = (*it)->getName();
-	    if(currNodeName.at(0) == '!') currNodeName = currNodeName.substr(1,currNodeName.size()-1);
-	    allSons = db.getDescendants(currNodeName);
-	    species.at((*it)->getId())=allSons;
-	    
-	    
-	}
-    }
-    
-}
-
 
 unsigned int Pattern::search(std::vector< Family* >& families, vector< pair< Family*, CandidateNode* > >& result){
     unsigned int found = 0;
@@ -118,7 +97,7 @@ unsigned int Pattern::search(std::vector< Family* >& families, vector< pair< Fam
 	
 	if(tousNoeudsOntEspece) {
 	    CandidateNode * candRoot = new CandidateNode();
-	    if(patternMatch((*theFamily)->getSpTree()->getRootNode(),tree.getRootNode(),candRoot)){
+	    if(patternMatch((*theFamily)->getTree()->getRootNode(),tree.getRootNode(),candRoot)){
 		result.push_back(pair<Family *, CandidateNode*>(*theFamily,candRoot));
 		found++;
 	    }
@@ -135,81 +114,6 @@ unsigned int Pattern::search(std::vector< Family* >& families, vector< pair< Fam
     
 }
 
-bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, CandidateNode * fatherCandidate) {
-    // Dufayard et al, 2005
-    
-    
-    if(isLeaf(target) && isLeaf(pattern)){
-	if(
-	    (pattern->getName().at(0)=='!' != pNodeAuthorisesThisSpecies(pattern,family.getSpeciesOfNode(target)))
-	)
-	{
-	    CandidateNode * currCandidate = new CandidateNode(fatherCandidate,target,pattern);
-	    currCandidate->confirm();
-	    return(true);
-	} else return(false);
-    } else if(isLeaf(target) && !isLeaf(pattern)) {
-	return(false);
-    } else if(!isLeaf(target) && isLeaf(pattern)) {
-	bool result = patternMatch(target->getSon(0),pattern,fatherCandidate);
-	result = patternMatch(target->getSon(1),pattern,fatherCandidate) || result;
-	return(result);
-    } else {
-	    Node * tson1 = target->getSon(0);
-	    Node * tson2 = target->getSon(1);
-	    Node * pson1 = pattern->getSon(0);
-	    Node * pson2 = pattern->getSon(1);
-	    
-	    NodeConstraints::NodeNature targetNature = NodeConstraints::SPECIATION;
-	    if(target->hasName() && target->getName().at(0) == '#') targetNature = NodeConstraints::DUPLICATION;
-	    
-	    CandidateNode * candidate = new CandidateNode(fatherCandidate, target, pattern);
-	    
-	 if(
-	    (constraints.at(pattern->getId())->isAuthorizedNature(targetNature) ) &&
-	    (!constraints.at(pson1->getId())->hasSpeciesRestrictions()
-	    || (nodeOnlyContainsTheseTaxa(tson1,constraints.at(pson1->getId())->getAuthorisedSpecies()) )
-	    )
-	    
-	    &&
-	    (!constraints.at(pson2->getId())->hasSpeciesRestrictions()
-	    || (nodeOnlyContainsTheseTaxa(tson2,constraints.at(pson2->getId())->getAuthorisedSpecies())   )
-	    )
-	    
-	    && ( patternMatch(tson1, pson1, candidate)
-	    && patternMatch(tson2, pson2, candidate))
-	    ) {
-	     candidate->confirm(); 
-	     return(true);}
-	 else delete(candidate);
-	    
-	 candidate = new CandidateNode(fatherCandidate, target, pattern);
-	 if	(
-	    (!constraints.at(pson1->getId())->hasSpeciesRestrictions()
-	    || (nodeOnlyContainsTheseTaxa(tson2,constraints.at(pson1->getId())->getAuthorisedSpecies()) )
-	    )
-	    
-	    &&
-	    (!constraints.at(pson2->getId())->hasSpeciesRestrictions()
-	    || (nodeOnlyContainsTheseTaxa(tson1,constraints.at(pson2->getId())->getAuthorisedSpecies()) )
-	    )
-	    
-	    && ( patternMatch(tson2, pson1, candidate)
-	    && patternMatch(tson1, pson2, candidate))
-	) {
-	     candidate->confirm();
-	     return(true);}
-	else delete(candidate);
-	
-	bool result = patternMatch(tson1, pattern, fatherCandidate);
-	result = patternMatch(tson2, pattern, fatherCandidate) || result;
-	return(result);
-	
-	
-	
-    }
-    
-}
 
 // extrait de tous les nœuds de l'arbre ceux qui appartiennent à un set de taxons
 std::vector<int> Pattern::getIdWithTaxaList(bpp::TreeTemplate<bpp::Node> * sTree, std::set<string> * taxa) {
@@ -227,14 +131,6 @@ std::vector<int> Pattern::getIdWithTaxaList(bpp::TreeTemplate<bpp::Node> * sTree
 }
 
 bool Pattern::isLeaf(Node * pNode) { return(pNode->getNumberOfSons() == 0); }
-
-bool Pattern::pNodeAuthorisesThisSpecies(Node* pNode,tpms::Taxon* species){
-    // species associe à chaque ID de noeud un set d'espèces
-    vector<set<tpms::Taxon*> >::iterator it = this->species.at(pNode->getId());
-    // it pointe maintenant sur le vector qui nous intéresse. On cherche l'espèce dedans.
-    set<string>::iterator it2 = it->find(species);
-    return(it2 != it->end());
-}
 
 
 bool Pattern::nodeOnlyContainsTheseTaxa(Node * localRoot, set<string> & taxonMembers, bool invert){
@@ -402,3 +298,57 @@ void Pattern::print(Node * noeud, int cpt){
 bool Pattern::isTreeBinary(){
     return(tpms::TreeTools::isBinaryTree(tree.getRootNode()));
 }
+
+
+NodeConstraints* Pattern::constraintsOf(Node* node){
+    return(constraints.at(node->getId()));
+}
+
+bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, CandidateNode * fatherCandidate) {
+    // Dufayard et al, 2005
+    
+    
+    if(isLeaf(target) && isLeaf(pattern)){
+	if(constraintsOf(pattern)->allows(target))
+	{
+	    CandidateNode * currCandidate = new CandidateNode(fatherCandidate,target,pattern);
+	    currCandidate->confirm();
+	    return(true);
+	} else return(false);
+    } else if(isLeaf(target) && !isLeaf(pattern)) {
+	return(false);
+    } else if(!isLeaf(target) && isLeaf(pattern)) {
+	return(patternMatch(target->getSon(0),pattern,fatherCandidate)
+	|| patternMatch(target->getSon(1),pattern,fatherCandidate));
+    } else {
+	Node * tson1 = target->getSon(0);
+	Node * tson2 = target->getSon(1);
+	Node * pson1 = pattern->getSon(0);
+	Node * pson2 = pattern->getSon(1);
+	
+	CandidateNode * candidate = new CandidateNode(fatherCandidate, target, pattern);
+	
+	if(constraintsOf(pson1)->allowsAsSon(tson1) && constraintsOf(pson2)->allowsAsSon(tson2)
+	    && patternMatch(tson1, pson1, candidate) && patternMatch(tson2, pson2, candidate) ) {
+	    candidate->confirm(); 
+	return(true);
+	    } else delete(candidate);
+	    
+	    candidate = new CandidateNode(fatherCandidate, target, pattern);
+	    
+	if(constraintsOf(pson1)->allowsAsSon(tson2) && constraintsOf(pson2)->allowsAsSon(tson1)
+	    && patternMatch(tson2, pson1, candidate) && patternMatch(tson1, pson2, candidate) ){
+	    candidate->confirm();
+	return(true);
+	    } else delete(candidate);
+		
+	// if we haven't returned yet, it means the current target node is not matching to a pattern node
+	// we have to try the pattern node in the sons
+	return(patternMatch(tson1, pattern, fatherCandidate) || patternMatch(tson2, pattern, fatherCandidate) );
+	
+		
+		
+    }
+    
+}
+

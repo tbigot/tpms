@@ -24,7 +24,7 @@ namespace tpms{
 	    bool belongsTo(Taxon *);
 	    
 	    std::set<tpms::Taxon*>& getDescendants();
-	    std::set< pms::Taxon*>& getAncestors();
+	    std::set<tpms::Taxon*>& getAncestors();
     };
 }
 

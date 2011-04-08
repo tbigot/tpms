@@ -1,6 +1,7 @@
-#include "NodeConstraints.hpp"
 #include "Taxon.hpp"
 #include "DataBase.hpp"
+
+#include "NodeConstraints.hpp"
 
 
 #include <sstream>
@@ -14,6 +15,7 @@ using namespace tpms;
 NodeConstraints::NodeConstraints(DataBase &pRefDB): refDB(pRefDB) {
     nature = ANY;
     speciesRestrictionsFromFather = false;
+    speciesRestructions = false;
 }
 
 NodeConstraints::NodeConstraints(DataBase &pRefDB, string constraintsString): refDB(pRefDB), initString(constraintsString){
@@ -113,4 +115,10 @@ bool NodeConstraints::isAuthorizedNature(NodeConstraints::NodeNature nature)
     if(this->nature == ANY || this->nature == nature) return(true);
     else return(false);
 }
+
+bool NodeConstraints::allows(Family& family, bpp::Node* node)
+{
+    Taxon* nodeSpecies = family.getSpeciesOfNode(node);
+}
+
 

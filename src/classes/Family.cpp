@@ -359,3 +359,10 @@ Taxon* Family::getSpeciesOfNode(Node* node)
     return(leave2spe.at(node->getId()));
 }
 
+Taxon* Family::getNatureOfNode(Node* node)
+{
+    return(node2nat.at(node->getId()));
+}
+
+
+

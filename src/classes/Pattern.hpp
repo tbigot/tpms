@@ -40,17 +40,6 @@ private:
     
 
     /**
-     * @name Construction functions
-     * @{
-     * @brief Associates a set of authorized species to each pattern node
-     * OLD DOC: cette fonction associe, pour chaque feuille du pattern, une liste d'espèces
-     * quand on va entamer une recherche, et qu'il y a un taxon dans le pattern, il faut savoir exactement quelles espèces de l'arbre il recouvre. Si un nœud de l'abre est « BACTERIA », on doit avoir la liste de toutes les espèces correspondantes, c'est-à-dire toutes les feulles qui sont sous BACTERIA dans l'abre des espèces.
-     * species est donc une map qui associe à chaque ID de nœud un set d'espèces (liste ordonnée) sous forme de chaînes.
-     *
-     **/
-    void fillSpeciesFromLeavesNames();
-    
-    /**
      * @brief Transform the first part of a node name into a constraint node
      *
      **/
@@ -58,27 +47,23 @@ private:
     
     /** @} */
     
+
     
-    /**
+ /**
      * @brief Pattern Maching recursive function
      *
      **/
     // fonction récursive de recherche de motifs (Pattern Matching)
-    bool patternMatch(Family& family ,bpp::Node* target, bpp::Node* pattern, tpms::CandidateNode* fatherCandidate);
+    bool patternMatch(bpp::Node* target, bpp::Node* pattern, tpms::CandidateNode* fatherCandidate);
     
     
+        
     /**
      * @name Small utilities
      * @{
      *
      **/
     static bool isLeaf(bpp::Node * pNode);
-    
-    /**
-     * @brief Does the node pNode accept the species parameter? Does species belong to the authorised species for this node?
-     *
-     **/
-    bool pNodeAuthorisesThisSpecies(bpp::Node * pNode, tpms::Taxon* species);
     
     
     /** @} */
@@ -89,6 +74,7 @@ private:
     std::vector<NodeConstraints *> constraints;
     void print(bpp::Node * noeud, int spc);
     
+    NodeConstraints* constraintsOf(bpp::Node* node);
     bool isTreeBinary();
     
 public:

@@ -21,25 +21,26 @@ class NodeConstraints{
 	
 	void buildAllowedSpecies(std::set<tpms::Taxon*>& spset,std::string spstr);
 	
-	void addTaxon(set<Taxon*>& spset,tpms::Taxon* taxon);
-	void deleteTaxon(set<Taxon*>& spset,tpms::Taxon* taxon);
+	void addTaxon(std::set<Taxon*>& spset,tpms::Taxon* taxon);
+	void deleteTaxon(std::set<Taxon*>& spset,tpms::Taxon* taxon);
 	
 	std::string initString;
 	void catchParams();
+	
 	bool speciesRestrictionsFromFather;
+	bool speciesRestructions;
 	
     public:
 	NodeConstraints(DataBase & pRefDB);
 	NodeConstraints(DataBase & pRefDB,std::string constraintString);
 	void setConstraints(DataBase &pRefDB, std::string constraintString);
-	void setNature(NodeNature);
-	void setAuthorisedSpecies(std::set<std::string> &authorisedSpecies);
-	void setAuthorisedSpecies(std::string authSpString);
 	std::set<std::string> & getAuthorisedSpecies();
 	bool hasSpeciesRestrictionsFromFather();
 	std::string getString();
 	NodeNature getNature();
 	bool isAuthorizedNature(NodeNature nature);
+	bool allowsAsSon(Family& family, bpp::Node* node);
+	bool allows(Family& family, bpp::Node * node);
 	
 	
     
