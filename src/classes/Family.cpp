@@ -125,8 +125,8 @@ void Family::genBestUnicityScores() {
     Node* bestOutgroup = 00;
     unsigned int minScore = 0;
     for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
-	if(bestOutgroup == 00 || unicityScores.at((*currSon)->getId())<minScore ){
-	    minScore = unicityScores.at((*currSon)->getId());
+	if(bestOutgroup == 00 || bestScores.at((*currSon)->getId())<minScore ){
+	    minScore = bestScores.at((*currSon)->getId());
 	    bestOutgroup = *currSon;
 	}
     }
