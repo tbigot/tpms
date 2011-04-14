@@ -118,7 +118,22 @@ void Family::genBestUnicityScores() {
 	}
     }
     // here, we've the best root in bestRoot: we have to reRoot
-    tree->rootAt(bestRoot);
+    // indicating a new outgroup (not to have a trifurcated root)
+    // FIXME:tree->rootAt(bestRoot);
+    
+    vector<Node *> sons = bestRoot->getNeighbors();
+    Node* bestOutgroup = 00;
+    unsigned int minScore = 0;
+    for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
+	if(bestOutgroup == 00 || unicityScores.at((*currSon)->getId())<minScore ){
+	    minScore = unicityScores.at((*currSon)->getId());
+	    bestOutgroup = *currSon;
+	}
+    }
+    
+    // "rerooting" the tree according to this new outgroup :
+    tree->newOutGroup(bestOutgroup);
+    
     // after reroot, nodes id might have changed, we must recalculate scores
     genUnicityScores();
     
