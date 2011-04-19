@@ -1,11 +1,12 @@
+#include "NodeConstraints.hpp"
+#include "Family.hpp"
 #include "Taxon.hpp"
 #include "DataBase.hpp"
-
-#include "NodeConstraints.hpp"
 
 
 #include <sstream>
 #include <iostream>
+
 
 
 using namespace std;
@@ -14,26 +15,22 @@ using namespace tpms;
 
 NodeConstraints::NodeConstraints(DataBase &pRefDB): refDB(pRefDB) {
     nature = ANY;
-    speciesRestrictionsFromFather = false;
-    speciesRestructions = false;
+    speciesRestrictionsAsSon = false;
+    speciesRestrictions = false;
+    type = NODE;
 }
 
-NodeConstraints::NodeConstraints(DataBase &pRefDB, string constraintsString): refDB(pRefDB), initString(constraintsString){
-    nature = ANY;
-    setConstraints(pRefDB,constraintsString);
-}
-
-void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString){
+void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString, Type type){
     initString = constraintsString;
-    catchParams();
+    readConstraintsString();
     if(!initString.empty()){
 	// if authorized species start with a minus (or a ! - compat reasons), implicit +ALL before
 	if(initString.at(0) == '!')
 	    initString.at(0) = '-';
 	if(initString.at(0) == '-')
 	    initString = "+" + pRefDB.getSpeciesTree()->getRootNode()->getName() + initString;
-	buildAllowedSpecies(fromFatherAllowedSpecies,initString);
-	speciesRestrictionsFromFather=true;
+	buildAllowedSpecies(allowedSpeciesOnSubtree,initString);
+	speciesRestrictionsAsSon=true;
     }
 }
 
@@ -52,19 +49,19 @@ void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr){
     else
 	deleteTaxon(spset,spstr.substr(1,cmpt-1));
     // si on n'est pas arrivé à la fin, on passe la fin de la chaîne à la fonction
-    if(cmpt < spstr.size()) buildAllowedSpecies(spstr.substr(cmpt));
+    if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt));
 }
 
 void NodeConstraints::addTaxon(set<Taxon*>& spset,string taxon)
 {
     // très simple, on transforme ce taxon en une liste d'espèces
-    set<string> spList = refDB.nameToTaxon(taxon)->getDescendants() ;
+    set<Taxon*> spList = refDB.nameToTaxon(taxon)->getDescendants() ;
     // et on l'ajoute intégralement à la liste des taxons autorisés, le set ne disposant pas de doublons
     spset.insert(spList.begin(), spList.end());
 }
 
 void NodeConstraints::deleteTaxon(set<Taxon*>& spset,string taxon){
-    set<string> spList = refDB.nameToTaxon(taxon)->getDescendants();
+    set<Taxon*> spList = refDB.nameToTaxon(taxon)->getDescendants();
     for(set<Taxon*>::iterator taxonToDelete = spList.begin(); taxonToDelete != spList.end(); taxonToDelete++){
 	set<Taxon*>::iterator found = spset.find(*taxonToDelete);
 	if(found != spset.end())
@@ -72,53 +69,81 @@ void NodeConstraints::deleteTaxon(set<Taxon*>& spset,string taxon){
     }
 }
 
-bool NodeConstraints::hasSpeciesRestrictionsFromFather(){
-    return(speciesRestrictionsFromFather);
-}
-
-set<string> & NodeConstraints::getAuthorisedSpecies(){
-    return(fromFatherAllowedSpecies);
-}
-
-std::string NodeConstraints::getString(){
-    return(initString);
-}
-
-void NodeConstraints::catchParams()
+void NodeConstraints::readConstraintsString()
 {
-    // we have to find where starts the species list
-    size_t speStart = initString.find('+');
-    size_t speStart2 = initString.find('-');
-    if(speStart2 != string::npos && speStart2 < speStart) speStart = speStart2;
-    string paramsString = initString.substr(0,speStart);
-    if(speStart != string::npos) initString = initString.substr(speStart);
-    else initString = "";
+    // the params are in the form :
+    // D!/+SUBTREE-SPECIES/+LEAVE+SPECIES
     
+    istringstream initSString(initString);
+    string paramsString;
+    getline(initSString,paramsString,'/');
     
+    getline(initSString,subtreeConstraintsString,'/');
+    buildAllowedSpecies(allowedSpeciesOnSubtree,subtreeConstraintsString);
+    
+    getline(initSString,constraintsOnNodeString,'/');
+    buildAllowedSpecies(allowedSpeciesOnNode,constraintsOnNodeString);
+
+
     // dealing with nodeNature
     if(paramsString.find('D') != string::npos) nature = DUPLICATION;
     else if (paramsString.find('S') != string::npos) nature = SPECIATION;
     else nature = ANY;
     
     // dealing with branch type
-    //TODO: handle branch type
+    if(paramsString.find('!') != string::npos) direct = true;
     
 }
 
-NodeConstraints::NodeNature NodeConstraints::getNature()
-{
-    return(nature);
-}
-
-bool NodeConstraints::isAuthorizedNature(NodeConstraints::NodeNature nature)
-{
-    if(this->nature == ANY || this->nature == nature) return(true);
-    else return(false);
-}
 
 bool NodeConstraints::allows(Family& family, bpp::Node* node)
 {
-    Taxon* nodeSpecies = family.getSpeciesOfNode(node);
+    if(type == LEAF){
+	Taxon* nodeSpecies = family.getSpeciesOfNode(node);
+	return(allowedSpeciesOnNode.find(nodeSpecies)!= allowedSpeciesOnNode.end());
+    } else {
+	// a node is accepted if the nature matches
+	return(nature==ANY || family.getNatureOf(node) == nature);
+    }
+}
+
+bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
+{
+    if(speciesRestrictionsAsSon) // we allow only if the subtree contains only allowed species from father
+    {
+	// 1st step: getting all the species on the gene tree subtree
+	vector<Taxon*> speciesList;
+	family.getTaxaOnThisSubtree(node,speciesList);
+	// seeing, for each species of the taxaList
+	bool allSpAreAllowed = true;
+	for(vector<Taxon*>::iterator currSp = speciesList.begin(); currSp != speciesList.end(); currSp++){
+	    allSpAreAllowed &= allowedSpeciesOnSubtree.find(*currSp) != allowedSpeciesOnSubtree.end();
+	}
+	return(allSpAreAllowed);
+    }
+    return(true);
+}
+
+std::set< Taxon* >& NodeConstraints::getAllowedSpecies()
+{
+    return(allowedSpeciesOnNode);
+}
+
+bool NodeConstraints::isLeaf()
+{
+    return(type == LEAF);
+}
+
+string NodeConstraints::getStr()
+{
+    string result;
+    switch(nature){
+	case DUPLICATION: result= "<DUP>"; break;
+	case SPECIATION: result = "<SPE>"; break;
+	case ANY: result = "<ANY>"; break;
+    }
+    result += "{"+ subtreeConstraintsString +"} " + constraintsOnNodeString ;
+    return(result);
 }
 
 

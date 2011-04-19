@@ -74,20 +74,20 @@ void DataBase::iNeedSpeciesTrees(bool verbose, string path, bool generate) {
     }
 }
 
-void DataBase::iNeedMapping(bool verbose, string path, bool generate) {
-    iNeedSpeciesTrees(verbose,path,generate);
-    if(!refTreesBuilded){
-	Waiter patienteur(&cout, nbFamilies, '#');
-	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    if(generate) (*currFamily)->genRefTree(false,path);
-	    else (*currFamily)->loadRefTreeFromFile(path);
-	    patienteur.step();
-	}
-    refTreesBuilded = true;
-    patienteur.drawFinal();
-    }
-	
-}
+// void DataBase::iNeedMapping(bool verbose, string path, bool generate) {
+//     iNeedSpeciesTrees(verbose,path,generate);
+//     if(!refTreesBuilded){
+// 	Waiter patienteur(&cout, nbFamilies, '#');
+// 	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
+// 	    if(generate) (*currFamily)->genRefTree(false,path);
+// 	    else (*currFamily)->loadRefTreeFromFile(path);
+// 	    patienteur.step();
+// 	}
+//     refTreesBuilded = true;
+//     patienteur.drawFinal();
+//     }
+// 	
+// }
 
 void DataBase::genUnicityScores() {
     if(!unicityScoresComputed) {

@@ -82,7 +82,7 @@ void Family::genLeaveToSpecies(){
     vector<Node *> leaves = tree->getNodes();
     leave2spe.resize(leaves.size());
     for(vector<Node *>::iterator leave = leaves.begin(); leave != leaves.end(); leave++){
-	leave2spe.at(leave->getId())=mne2tax[leave->getName()];
+	leave2spe.at((*leave)->getId())=mne2tax[(*leave)->getName()];
     }
 }
 
@@ -136,31 +136,31 @@ void Family::genBestUnicityScores() {
     
 }
 
-map<string, unsigned int> Family::computeUnicity(vector<unsigned int> &scores, Node * node, Node * origin){
+map<Taxon*, unsigned int> Family::computeUnicity(vector<unsigned int> &scores, Node * node, Node * origin){
     unsigned int id = node->getId();
-    map<string, unsigned int> thisNodeCount;
+    map<Taxon*, unsigned int> thisNodeCount;
     
     // step 1 : this node count
         
     vector<Node *> neighbors = node->getNeighbors();
     for(vector<Node *>::iterator currSon = neighbors.begin(); currSon < neighbors.end(); currSon ++) {
 	if(*currSon == origin) continue;
-	map<string,unsigned int> currSonCount = computeUnicity(scores,*currSon,node);
+	map<Taxon*,unsigned int> currSonCount = computeUnicity(scores,*currSon,node);
 	// adding this new map to the current
-	for(map<string,unsigned int>::iterator currCount = currSonCount.begin(); currCount != currSonCount.end(); currCount++){	    
+	for(map<Taxon*,unsigned int>::iterator currCount = currSonCount.begin(); currCount != currSonCount.end(); currCount++){	    
 	    thisNodeCount[currCount->first] += currCount->second;
 	}
     }
     
     if(neighbors.size() == 1){ // leave case
-	    thisNodeCount.insert(pair<string,unsigned int>(spTree->getNodeName(id),1));
+	    thisNodeCount.insert(pair<Taxon*,unsigned int>(leave2spe.at(id),1));
 	    
     }
     
     // step 2 : this node score computation
     unsigned int score = 1;
     
-    for(map<string,unsigned int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
+    for(map<Taxon*,unsigned int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
 	 score *= currCount->second;
     }    
     
@@ -178,28 +178,6 @@ void Family::writeTreeToStream(Node* root, ostream & sortie, unsigned int deep){
 	writeTreeToStream(root->getSon(i), sortie, deep+1);
 }
 
-void Family::genRefTree(bool save, string path) {
-    // l'arbre est initialement celui de référence de la base de données
-    refTree = db->getSpeciesTree()->clone();
-    
-    //ensuite, pour chaque feuille, on regarde si elle est dans la liste des espèces de la famille
-    vector<Node*> leaves = refTree->getLeaves();
-    
-    for(vector<Node*>::iterator currLeaf = leaves.begin(); currLeaf != leaves.end(); currLeaf++){
-	if(species.find((*currLeaf)->getName()) == species.end())
-	    //si elle ne l'est pas, on supprime le nœud feuille et on remonte jusqu'à la prochaine bifurcation
-	    deleteFromLeavesToBif(*currLeaf);
-	
-	    
-    }
-    
-   // on va ensuite parcourir récursivement l'arbre et éliminer les fils uniques. 
-   removeUniqueSons(refTree->getRootNode());
-   
-   //maintenant qu'on a généré l'arbre, on l'écrit dans le fichier cache
-   if (save) writeRefTreeToFile(path);
-   
-}
 
 int Family::numberOfNodesBetween(Node * ancestor, Node * pnode){
     if(ancestor == pnode) return 0;
@@ -245,18 +223,18 @@ bool Family::containsSpecie(Taxon* taxon) {
 }
 
 Taxon* Family::getSpeciesOfNode(Node* node){
-    return();
+    return(leave2spe.at(node->getId()));
 }
 
-bool Family::containsSpecies(set<string> speciesList) {
-    bool answer = true;
-    for(set<string>::iterator specie = speciesList.begin(); answer && specie != speciesList.end(); specie++)
-	answer = answer && containsSpecie(*specie);
-    
-    return(answer);
-}
+// bool Family::containsSpecies(set<string> speciesList) {
+//     bool answer = true;
+//     for(set<string>::iterator specie = speciesList.begin(); answer && specie != speciesList.end(); specie++)
+// 	answer = answer && containsSpecie(*specie);
+//     
+//     return(answer);
+// }
 
-set<string> * Family::getSpecies() {return(&species);}
+// set<string> * Family::getSpecies() {return(&species);}
 
 void Family::getLeavesFromNode(Node* pnode, std::vector< Node* >& leaves){
     if(pnode->isLeaf()) leaves.push_back(pnode);
@@ -315,30 +293,6 @@ std::string Family::mapNodeOnTaxon(bpp::Node & pnode){
     return(currNode->getName());
 }
 
-void Family::loadRefTreeFromFile(string path){
-    Newick reader;
-    refTree = reader.read(path+"/refTrees/"+name
-+".refTree");
-}
-
-void Family::loadSpTreeFromFile(string path){
-    Newick reader;
-    spTree = reader.read(path+"/spTrees/"+name
-+".spTree");
-}
-
-void Family::writeRefTreeToFile(string path){
-    Newick writer;
-    writer.write(*refTree,path+"/refTrees/"+name
-+".refTree",true);
-}
-
-void Family::writeSpTreeToFile(string path){
-    Newick writer;
-    writer.write(*spTree,path+"/spTrees/"+name
-+".spTree",true);
-}
-
 
 void Family::addSequencesNames(Node * currNode)
 {
@@ -368,16 +322,17 @@ std::vector< unsigned int >& Family::getUnicityScores()
 }
 
 
-
-Taxon* Family::getSpeciesOfNode(Node* node)
-{
-    return(leave2spe.at(node->getId()));
-}
-
-Taxon* Family::getNatureOfNode(Node* node)
+Family::NodeNature Family::getNatureOf(Node* node)
 {
     return(node2nat.at(node->getId()));
 }
 
-
-
+void Family::getTaxaOnThisSubtree(Node* node, std::vector< Taxon* >& speciesList)
+{
+    vector<Node *> sons = node->getSons();
+    for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
+	getTaxaOnThisSubtree(*currSon,speciesList);
+    }
+    if(sons.size() == 0) // leave case, return the species of this leave
+	speciesList.push_back(leave2spe.at(node->getId()));
+}

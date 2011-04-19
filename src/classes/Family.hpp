@@ -12,22 +12,25 @@
 
 
 //inclusions personnelles
+#include "NodeConstraints.hpp"
 #include "DataBase.hpp"
 #include "Taxon.hpp"
-#include "NodeConstraints.hpp"
 
 class Family {
     
 private:
+    
+    enum NodeNature {ANY, DUPLICATION, SPECIATION};
+    enum Type {NODE,LEAF};
+    
     std::string name;
-
     
     DataBase * db;
     std::vector<tpms::Taxon*> leave2spe;
     bpp::TreeTemplate<bpp::Node> * tree;
     std::map<std::string,tpms::Taxon*> mne2tax;
     std::set<tpms::Taxon*> species;
-    std::vector<NodeConstraints::NodeNature> node2nat;
+    std::vector<NodeNature> node2nat;
     bpp::TreeTemplate<bpp::Node> * refTree;
     std::vector<unsigned int> unicityScores;
     
@@ -36,7 +39,7 @@ private:
     
     void deleteFromLeavesToBif(bpp::Node * pnode);
     
-    std::map<std::string, unsigned int> computeUnicity(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * originNode);
+    std::map<tpms::Taxon*, unsigned int> computeUnicity(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * originNode);
     
     bpp::Node * removeUniqueSons(bpp::Node* localRoot);
     
@@ -59,7 +62,7 @@ public:
     void genLeaveToSpecies();
     
     tpms::Taxon* getSpeciesOfNode(bpp::Node * node);
-    NodeConstraints::NodeNature getNatureOfNode(bpp::Node * node);
+    NodeNature getNatureOfNode(bpp::Node * node);
     
     bool containsSpecie(tpms::Taxon* taxon);
     // bool containsSpecies(std::set<std::string> speciesList);
@@ -87,12 +90,16 @@ public:
     
     void addSequencesNames(bpp::Node* currNode);
     
+    void getTaxaOnThisSubtree(bpp::Node * node, std::vector<tpms::Taxon*>& speciesList);
+    
     /**
      * @brief Replace names of the pieces of pattern trees nodes by the name of the sequences
      * 
      * @param currNode node to start with
      */
     void labelWithSequencesNames(bpp::Node* currNode);
+    
+    NodeNature getNatureOf(bpp::Node* node);
     
     
 };

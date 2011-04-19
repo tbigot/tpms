@@ -32,12 +32,6 @@ private:
      **/
     std::set<tpms::Taxon*> allSpecies;
     
-    
-    /**
-     * @brief Associates a set of authorized species to each pattern node.
-     **/
-    std::vector<tpms::Taxon*> species;
-    
 
     /**
      * @brief Transform the first part of a node name into a constraint node
@@ -54,7 +48,7 @@ private:
      *
      **/
     // fonction récursive de recherche de motifs (Pattern Matching)
-    bool patternMatch(bpp::Node* target, bpp::Node* pattern, tpms::CandidateNode* fatherCandidate);
+    bool patternMatch(Family& family,bpp::Node* target, bpp::Node* pattern, tpms::CandidateNode* fatherCandidate);
     
     
         
