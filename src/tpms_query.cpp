@@ -81,9 +81,7 @@ int main(int argc, char *argv[]) {
 				
 				if(!args.getArg("onlyFamNames").empty()){
 				    ooo << curFam->first->getName() << '\n';
-				}
-				
-				if(args.getArg("pleaseReturnWholeMatchingSubtrees").empty()){
+				} else if(args.getArg("pleaseReturnWholeMatchingSubtrees").empty()){
 				    trouve += curFam->second->genTrees(resultTrees);
 				    for(vector<TreeTemplate<Node> *>::iterator currTree = resultTrees.begin(); currTree != resultTrees.end(); currTree++){
 					curFam->first->addSequencesNames((*currTree)->getRootNode());
