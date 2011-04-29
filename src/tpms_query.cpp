@@ -79,6 +79,10 @@ int main(int argc, char *argv[]) {
 				// retrieving all trees corresponding to CandidateNode :
 				vector<TreeTemplate<Node> *> resultTrees;
 				
+				if(!args.getArg("onlyFamNames").empty()){
+				    ooo << curFam->first->getName() << '\n';
+				}
+				
 				if(args.getArg("pleaseReturnWholeMatchingSubtrees").empty()){
 				    trouve += curFam->second->genTrees(resultTrees);
 				    for(vector<TreeTemplate<Node> *>::iterator currTree = resultTrees.begin(); currTree != resultTrees.end(); currTree++){
