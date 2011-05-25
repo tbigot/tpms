@@ -46,13 +46,14 @@ file(
 
 
 add_executable(tpms_ortho src/tpms_ortho.cpp ${classes})
-target_link_libraries(tpms_ortho bpp-phyl bpp-core bpp-seq)
+target_link_libraries(tpms_ortho bpp-phyl bpp-core bpp-seq ${Boost_LIBRARIES})
 
 add_executable(tpms_query src/tpms_query.cpp ${classes})
-target_link_libraries(tpms_query bpp-phyl bpp-core bpp-seq)
+target_link_libraries(tpms_query bpp-phyl bpp-core bpp-seq ${Boost_LIBRARIES})
 
-add_executable(tpms_query_static src/tpms_query.cpp ${classes})
-target_link_libraries(tpms_query_static bpp-phyl bpp-core bpp-seq -static)
+#STATIC
+#add_executable(tpms_query_static src/tpms_query.cpp ${classes})
+#target_link_libraries(tpms_query_static bpp-phyl bpp-core bpp-seq -static)
 
 # add_executable(tpms_jump src/tpms_jump.cpp ${classes})
 # target_link_libraries(tpms_jump bpp-phyl bpp-utils bpp-numcalc bpp-seq)

@@ -4,6 +4,11 @@
 #include <map>
 #include <vector>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
+
+
 #include "TreeTools.hpp"
 #include "DataBase.hpp"
 #include "Waiter.hpp"
@@ -14,9 +19,20 @@
 using namespace std;
 using namespace bpp;
 
+namespace fs = boost::filesystem;
+
+
 DataBase::DataBase(string path): refTreesBuilded(false), speciesTreesBuilded(false) {
 	
-	// ouverture du fichier
+	// checking this file exists
+	fs::path dbFile(path);
+	if(!fs::exists(dbFile)) {
+	    cout << "The file "<< path << " does not exists, exiting."<< endl;
+	    exit(1);
+	}
+    
+    
+    // ouverture du fichier
 	ifstream RAPfile(path.c_str(), ifstream::in);
 	
 	// chargement à partir du fichier
