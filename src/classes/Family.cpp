@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <numeric>
+#include <ios>
 
 #include <Bpp/Phyl/Tree.h>
 #include <Bpp/Phyl/Io/Newick.h>
@@ -36,13 +37,17 @@ Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
 	
 	bool mneFini;
 	bool specFini;
-	ostringstream mnemonique;
-	ostringstream espece;
+	
+	
 	char lecar;
 	
+	
 	while(currLigne.at(0) != ']') {
+	    stringstream espece;
+	    ostringstream mnemonique;
 	    mnemonique.str("");
 	    espece.str("");
+	    espece.seekg(0);
 	    mneFini = false;
 	    specFini = false;
 	    for(unsigned int i = 0; !specFini && i <currLigne.size(); i++) {
@@ -56,12 +61,20 @@ Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
 		
 	    }
 	    
-	    Taxon * currTaxon = db->nameToTaxon(espece.str());
+	    // removing commas (that are forbidden in species names)
+	    ostringstream cleanSpeciesName;
+	    string spcPart;
+	    while(getline(espece,spcPart,',')){
+		cleanSpeciesName << spcPart;
+	    }
+	    
+	    
+	    Taxon * currTaxon = db->nameToTaxon(cleanSpeciesName.str());
 	    if(currTaxon != 00){
 	      mne2tax.insert(pair<string,Taxon *>(mnemonique.str(),currTaxon ));
 	      species.insert(currTaxon);
 	    } else {
-	      cout << "o Unable to find this specie in the species tree :" << espece.str() << endl;
+	      cout << "o Unable to find this specie in the species tree :" << cleanSpeciesName.str() << endl;
 	    }
 	    
 	    getline(*sIntro, currLigne);

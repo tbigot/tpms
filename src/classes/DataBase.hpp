@@ -48,7 +48,7 @@ class DataBase {
 		bool taxonExists(std::string ptax);
 		
 		//nombre de familles contenant un taxon donné
-		int nbFamiliesContaining(std::string pTax);
+		// int nbFamiliesContaining(std::string pTax);
 		
 		std::set<std::string> getAllNodes(bpp::Node * localRoot,bool nodesWanted = true);
 		std::set<std::string> getDescendants(std::string taxon, bool nodesWanted = true);
