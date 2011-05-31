@@ -74,7 +74,7 @@ Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
 	      mne2tax.insert(pair<string,Taxon *>(mnemonique.str(),currTaxon ));
 	      species.insert(currTaxon);
 	    } else {
-	      cout << "o Unable to find this specie in the species tree :" << cleanSpeciesName.str() << endl;
+	      cout << "o Unable to find this specie in the species tree:" << cleanSpeciesName.str() << endl;
 	    }
 	    
 	    getline(*sIntro, currLigne);
@@ -89,6 +89,9 @@ Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
 	
 	/*if(tree->getNumberOfNodes() != tree2->getNumberOfNodes()) cout << "Incoherence famille " << _name << " bpp=" << tree->getNumberOfNodes() << " tpms=" <<tree2->getNumberOfNodes() << endl  ;
 	*/
+	
+	genLeaveToSpecies();
+	genNatures();
 }
 
 void Family::genLeaveToSpecies(){
@@ -96,6 +99,16 @@ void Family::genLeaveToSpecies(){
     leave2spe.resize(leaves.size());
     for(vector<Node *>::iterator leave = leaves.begin(); leave != leaves.end(); leave++){
 	leave2spe.at((*leave)->getId())=mne2tax[(*leave)->getName()];
+    }
+}
+
+void Family::genNatures(){
+    vector<Node *> nodes = tree->getNodes();
+    node2nat.resize(nodes.size());
+    for(vector<Node *>::iterator node = nodes.begin(); node != nodes.end(); node++){
+	if((*node)->hasName() && (*node)->getName().at(0) == '#')
+	    node2nat.at((*node)->getId())=DUPLICATION;
+	else node2nat.at((*node)->getId())=SPECIATION;
     }
 }
 

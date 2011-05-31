@@ -60,6 +60,7 @@ public:
     void genUnicityScores();
     void genBestUnicityScores();
     void genLeaveToSpecies();
+    void genNatures();
     
     tpms::Taxon* getSpeciesOfNode(bpp::Node * node);
     NodeNature getNatureOfNode(bpp::Node * node);

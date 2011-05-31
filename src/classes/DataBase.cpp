@@ -154,7 +154,7 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	bool crochetFermant;
 	Family * laFamille;
 	Waiter patienteur(&cout, nbFamilies, '#');
-	while(famillesChargees < nbFamilies) {
+	while(famillesChargees < nbFamilies && famillesChargees < 1000) {
 		// la première ligne est le nom de la famille, on l'ajoute
 		curPreambule.str("");
 		familleSuivante = false;
@@ -204,7 +204,6 @@ void DataBase::loadSpeciesTree(string newickLine)
 	}
 	
 	string snp = sNewickPropre.str();
-	cout << "\n SNP*** " << snp << endl;
 	speciesTree = tpms::TreeTools::newickToTree(snp,true);
 	
 	

@@ -29,6 +29,9 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
 	    initString.at(0) = '-';
 	if(initString.at(0) == '-')
 	    initString = "+" + pRefDB.getSpeciesTree()->getRootNode()->getName() + initString;
+	// case of single species
+	if(initString.find('+')== string::npos && initString.find('-')== string::npos)
+	    initString = '+' + initString;
 	buildAllowedSpecies(allowedSpeciesOnSubtree,initString);
 	speciesRestrictionsAsSon=true;
     }
@@ -38,30 +41,43 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
 void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr){
     // fonction récursive qui analyse la liste des espèces à autoriser.
     // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
-    
-    bool toAdd;
-    if(spstr.at(0) == '+') toAdd = true; else toAdd= false; //FIXME: il faudrait gérer les erreurs
-    unsigned int cmpt = 1;
-    while(cmpt < spstr.size() && spstr.at(cmpt) != '+' && spstr.at(cmpt) != '-') cmpt++;
-    // quoi qu'il en soit, on vient d'extraire un taxon, qu'on doit ajouter ou supprimer à la liste
-    if(toAdd)
-	addTaxon(spset,spstr.substr(1,cmpt-1));
-    else
-	deleteTaxon(spset,spstr.substr(1,cmpt-1));
-    // si on n'est pas arrivé à la fin, on passe la fin de la chaîne à la fonction
-    if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt));
+    if(spstr.size() != 0){
+	bool toAdd;
+	if(spstr.at(0) == '+') toAdd = true; else toAdd= false; //FIXME: il faudrait gérer les erreurs
+	unsigned int cmpt = 1;
+	while(cmpt < spstr.size() && spstr.at(cmpt) != '+' && spstr.at(cmpt) != '-') cmpt++;
+	// quoi qu'il en soit, on vient d'extraire un taxon, qu'on doit ajouter ou supprimer à la liste
+	if(toAdd)
+	    addTaxon(spset,spstr.substr(1,cmpt-1));
+	else
+	    deleteTaxon(spset,spstr.substr(1,cmpt-1));
+	// si on n'est pas arrivé à la fin, on passe la fin de la chaîne à la fonction
+	if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt));
+    }
 }
 
 void NodeConstraints::addTaxon(set<Taxon*>& spset,string taxon)
 {
     // très simple, on transforme ce taxon en une liste d'espèces
-    set<Taxon*> spList = refDB.nameToTaxon(taxon)->getDescendants() ;
+    // trying to find the taxon in the db
+    Taxon* foundTaxon = refDB.nameToTaxon(taxon);
+    if (foundTaxon == 00){
+	cout << "The taxon " << taxon << " in your pattern does not seem to appear in the species tree of your collection" << endl;
+	return;
+    }
+    set<Taxon*> spList = foundTaxon->getDescendants();
     // et on l'ajoute intégralement à la liste des taxons autorisés, le set ne disposant pas de doublons
     spset.insert(spList.begin(), spList.end());
 }
 
 void NodeConstraints::deleteTaxon(set<Taxon*>& spset,string taxon){
-    set<Taxon*> spList = refDB.nameToTaxon(taxon)->getDescendants();
+    // trying to find the taxon in the db
+    Taxon* foundTaxon = refDB.nameToTaxon(taxon);
+    if (foundTaxon == 00){
+	cout << "The taxon " << taxon << " in your pattern does not seem to appear in the species tree of your collection" << endl;
+	return;
+    }
+    set<Taxon*> spList = foundTaxon->getDescendants();
     for(set<Taxon*>::iterator taxonToDelete = spList.begin(); taxonToDelete != spList.end(); taxonToDelete++){
 	set<Taxon*>::iterator found = spset.find(*taxonToDelete);
 	if(found != spset.end())
