@@ -32,14 +32,11 @@ class NodeConstraints{
 	 **/
 	bool direct;
 	
-	void buildAllowedSpecies(std::set<tpms::Taxon*>& spset,std::string spstr);
+	void buildAllowedSpecies(std::set<tpms::Taxon*>& spset,std::string spstr, DataBase &pRefDB);
 	
 	void addTaxon(std::set<tpms::Taxon*>& spset,std::string);
 	void deleteTaxon(std::set<tpms::Taxon*>& spset,std::string);
-	
-	std::string initString;
-	void readConstraintsString();
-	
+		
 	bool speciesRestrictionsAsSon;
 	bool speciesRestrictions;
 	

@@ -20,25 +20,63 @@ NodeConstraints::NodeConstraints(DataBase &pRefDB): refDB(pRefDB) {
     type = NODE;
 }
 
-void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString, Type type){
-    initString = constraintsString;
-    readConstraintsString();
-    if(!initString.empty()){
-	// if authorized species start with a minus (or a ! - compat reasons), implicit +ALL before
-	if(initString.at(0) == '!')
-	    initString.at(0) = '-';
-	if(initString.at(0) == '-')
-	    initString = "+" + pRefDB.getSpeciesTree()->getRootNode()->getName() + initString;
-	// case of single species
-	if(initString.find('+')== string::npos && initString.find('-')== string::npos)
-	    initString = '+' + initString;
-	buildAllowedSpecies(allowedSpeciesOnSubtree,initString);
-	speciesRestrictionsAsSon=true;
-    }
+void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString, Type type){    
+    // the params are in the form :
+    // D!/+SUBTREE-SPECIES/+LEAVE+SPECIES
+    
+    this->type = type;
+    
+    istringstream initSString(constraintsString);
+    string paramsString;
+    getline(initSString,paramsString,'/');
+    
+    getline(initSString,subtreeConstraintsString,'/');
+    buildAllowedSpecies(allowedSpeciesOnSubtree,subtreeConstraintsString,pRefDB);
+    
+    getline(initSString,constraintsOnNodeString,'/');
+    buildAllowedSpecies(allowedSpeciesOnNode,constraintsOnNodeString,pRefDB);
+  
+
+
+    // dealing with nodeNature
+    if(paramsString.find('D') != string::npos) nature = DUPLICATION;
+    else if (paramsString.find('S') != string::npos) nature = SPECIATION;
+    else nature = ANY;
+    
+    // dealing with branch type
+    if(paramsString.find('!') != string::npos) direct = true;
+    
+//     readConstraintsString();
+//     if(!initString.empty()){
+// 	// if authorized species start with a minus (or a ! - compat reasons), implicit +ALL before
+// 	if(initString.at(0) == '!')
+// 	    initString.at(0) = '-';
+// 	if(initString.at(0) == '-')
+// 	    initString = "+" + pRefDB.getSpeciesTree()->getRootNode()->getName() + initString;
+// 	// case of single species
+// 	if(initString.find('+')== string::npos && initString.find('-')== string::npos)
+// 	    initString = '+' + initString;
+// 	buildAllowedSpecies(allowedSpeciesOnSubtree,initString);
+// 	speciesRestrictionsAsSon=true;
+//     }
 }
 
 
-void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr){
+void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataBase &pRefDB){
+    if(spstr.empty()) return;
+    cout << "Building species list with this string : " << spstr << endl;
+    
+    // if authorized species start with a minus (or a ! - compat reasons), implicit +ALL before
+	if(spstr.at(0) == '!')
+	    spstr.at(0) = '-';
+	if(spstr.at(0) == '-')
+	    spstr = "+" + pRefDB.getSpeciesTree()->getRootNode()->getName() + spstr;
+	// case of single species
+	if(spstr.find('+')== string::npos && spstr.find('-')== string::npos)
+	    spstr = '+' + spstr;
+    
+	cout << "    became this string : " << spstr << endl;
+    
     // fonction récursive qui analyse la liste des espèces à autoriser.
     // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
     if(spstr.size() != 0){
@@ -52,7 +90,7 @@ void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr){
 	else
 	    deleteTaxon(spset,spstr.substr(1,cmpt-1));
 	// si on n'est pas arrivé à la fin, on passe la fin de la chaîne à la fonction
-	if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt));
+	if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt),pRefDB);
     }
 }
 
@@ -68,6 +106,13 @@ void NodeConstraints::addTaxon(set<Taxon*>& spset,string taxon)
     set<Taxon*> spList = foundTaxon->getDescendants();
     // et on l'ajoute intégralement à la liste des taxons autorisés, le set ne disposant pas de doublons
     spset.insert(spList.begin(), spList.end());
+    
+// DEBUG:    
+//      cout << "Voici les espèces ajoutées :" << endl;
+//      for(set<Taxon*>::iterator ct = spList.begin(); ct != spList.end(); ct++){
+// 	cout << (*ct)->getName() << ' ';
+//     }
+//     cout << endl;
 }
 
 void NodeConstraints::deleteTaxon(set<Taxon*>& spset,string taxon){
@@ -84,33 +129,6 @@ void NodeConstraints::deleteTaxon(set<Taxon*>& spset,string taxon){
 	    spset.erase(found);
     }
 }
-
-void NodeConstraints::readConstraintsString()
-{
-    // the params are in the form :
-    // D!/+SUBTREE-SPECIES/+LEAVE+SPECIES
-    
-    istringstream initSString(initString);
-    string paramsString;
-    getline(initSString,paramsString,'/');
-    
-    getline(initSString,subtreeConstraintsString,'/');
-    buildAllowedSpecies(allowedSpeciesOnSubtree,subtreeConstraintsString);
-    
-    getline(initSString,constraintsOnNodeString,'/');
-    buildAllowedSpecies(allowedSpeciesOnNode,constraintsOnNodeString);
-
-
-    // dealing with nodeNature
-    if(paramsString.find('D') != string::npos) nature = DUPLICATION;
-    else if (paramsString.find('S') != string::npos) nature = SPECIATION;
-    else nature = ANY;
-    
-    // dealing with branch type
-    if(paramsString.find('!') != string::npos) direct = true;
-    
-}
-
 
 bool NodeConstraints::allows(Family& family, bpp::Node* node)
 {

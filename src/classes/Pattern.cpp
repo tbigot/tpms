@@ -315,7 +315,7 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 	
 	// we need to check if the target node is accepted (nature) by the pattern
 	
-	if(constraintsOf(target)->allows(family,pattern)){
+	if(constraintsOf(pattern)->allows(family,target)){
 	
 	    CandidateNode * candidate = new CandidateNode(fatherCandidate, target, pattern);
 	    

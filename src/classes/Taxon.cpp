@@ -5,28 +5,32 @@ using namespace std;
 using namespace bpp;
 using namespace tpms;
 
-Taxon::Taxon(string name, Node* nodeInSpTree,DataBase &database): name(name)
+Taxon::Taxon(string name, Node* nodeInSpTree,DataBase &database): name(name), db(database), nodeInSpTree(nodeInSpTree)
 {
-    genDescendantsList(nodeInSpTree,database);
-    genAncestorsList(nodeInSpTree,database);
+   
 }
 
-void Taxon::genAncestorsList(Node* localNode, DataBase &database)
+void Taxon::genRelations(){
+    genDescendantsList(nodeInSpTree);
+    genAncestorsList(nodeInSpTree);
+}
+
+void Taxon::genAncestorsList(Node* localNode)
 {
     if(localNode->hasName())
-	ancestors.insert(database.nameToTaxon(localNode->getName()));
+	ancestors.insert(db.nameToTaxon(localNode->getName()));
     if(localNode->hasFather())
-        genAncestorsList(localNode->getFather(),database);
+        genAncestorsList(localNode->getFather());
 }
 
-void Taxon::genDescendantsList(Node* localNode, DataBase &database)
+void Taxon::genDescendantsList(Node* localNode)
 {
     if(localNode->hasName())
-	descendants.insert(database.nameToTaxon(localNode->getName()));
+	descendants.insert(db.nameToTaxon(localNode->getName()));
 
     vector<Node*> sons = localNode->getSons();
     for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++) {
-	genDescendantsList(*currSon,database);
+	genDescendantsList(*currSon);
     }
 }
 
@@ -37,11 +41,13 @@ string Taxon::getName()
 
 std::set< Taxon* >& Taxon::getAncestors()
 {
+    cout << "Nous avons " << ancestors.size() << " ancètres." << endl;
     return(ancestors);
 }
 
 std::set< Taxon* >& Taxon::getDescendants()
 {
+    cout << "Nous avons " << ancestors.size() << " descendants ." << endl;
     return(descendants);
 }
 

@@ -154,7 +154,7 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	bool crochetFermant;
 	Family * laFamille;
 	Waiter patienteur(&cout, nbFamilies, '#');
-	while(famillesChargees < nbFamilies && famillesChargees < 1000) {
+	while(famillesChargees < nbFamilies) {
 		// la première ligne est le nom de la famille, on l'ajoute
 		curPreambule.str("");
 		familleSuivante = false;
@@ -213,8 +213,13 @@ void DataBase::loadSpeciesTree(string newickLine)
 	vector<Node *> listeNoeuds = speciesTree->getNodes();
 		
 	for(vector<Node *>::iterator it = listeNoeuds.begin(); it != listeNoeuds.end(); it++) {
-		if((*it)->hasName())
+		if((*it)->hasName()) {
 		    taxa.insert(pair<string,Taxon*>((*it)->getName(),new tpms::Taxon((*it)->getName(),(*it),*this)));
+		}
+	}
+	
+	for(map<string,Taxon*>::iterator ct = taxa.begin(); ct != taxa.end(); ct++){
+	    ct->second->genRelations();
 	}
 }
 
@@ -302,6 +307,7 @@ tpms::Taxon* DataBase::nameToTaxon(string taxonName)
 {
     map<string,Taxon*>::iterator foundTaxon = taxa.find(taxonName);
     if(foundTaxon != taxa.end()) return(foundTaxon->second);
+    cout << "Unable to find the taxon named " << taxonName << " in the database" << endl;
     return(00);
 }
 

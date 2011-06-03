@@ -14,9 +14,11 @@ namespace tpms{
 	    std::string name;
 	    std::set<tpms::Taxon*> ancestors;
 	    std::set<tpms::Taxon*> descendants;
+	    DataBase &db;
+	    bpp::Node *nodeInSpTree;
 	    
-	    void genDescendantsList(bpp::Node* localNode, DataBase& database);
-	    void genAncestorsList(bpp::Node* localNode, DataBase& database);
+	    void genDescendantsList(bpp::Node* localNode);
+	    void genAncestorsList(bpp::Node* localNode);
 	    
 	    
 	public:
@@ -28,6 +30,8 @@ namespace tpms{
 	    
 	    std::set<tpms::Taxon*>& getDescendants();
 	    std::set<tpms::Taxon*>& getAncestors();
+	    
+	    void genRelations();
     };
 }
 
