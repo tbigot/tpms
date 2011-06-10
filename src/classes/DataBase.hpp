@@ -10,6 +10,7 @@
 #include <map>
 
 #include "Family.hpp"
+#include "Taxon.hpp"
 
 //inclusions bio++
 #include <Bpp/Phyl/Tree.h>
@@ -17,6 +18,7 @@
 class DataBase {
 	
 	private:
+		std::map<std::string,tpms::Taxon*> taxa;
 		unsigned int nbFamilies;
 		bool reconciled;
 		bpp::TreeTemplate<bpp::Node> * speciesTree;
@@ -46,7 +48,7 @@ class DataBase {
 		bool taxonExists(std::string ptax);
 		
 		//nombre de familles contenant un taxon donné
-		int nbFamiliesContaining(std::string pTax);
+		// int nbFamiliesContaining(std::string pTax);
 		
 		std::set<std::string> getAllNodes(bpp::Node * localRoot,bool nodesWanted = true);
 		std::set<std::string> getDescendants(std::string taxon, bool nodesWanted = true);
@@ -59,6 +61,7 @@ class DataBase {
 		void genBestUnicityScores();
 		
 		std::set<std::string> * getSpecies();
+		tpms::Taxon* nameToTaxon(std::string taxonName);
 
 };
 #else

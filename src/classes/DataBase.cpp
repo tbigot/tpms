@@ -13,11 +13,14 @@
 #include "DataBase.hpp"
 #include "Waiter.hpp"
 #include "Family.hpp"
+#include "Taxon.hpp"
 
 #include <Bpp/Phyl/Tree.h>
 
+
 using namespace std;
 using namespace bpp;
+using namespace tpms;
 
 namespace fs = boost::filesystem;
 
@@ -78,8 +81,7 @@ void DataBase::iNeedSpeciesTrees(bool verbose, string path, bool generate) {
 	cout << "Generating trees with species names as labels:" << endl;
 	Waiter patienteur(&cout, nbFamilies, '#');
 	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    if(generate) (*currFamily)->genSpTree(false,path);
-	    else (*currFamily)->loadSpTreeFromFile(path);
+	    (*currFamily)->genLeaveToSpecies();
 	    patienteur.step();
 	} 
     speciesTreesBuilded = true;
@@ -87,20 +89,20 @@ void DataBase::iNeedSpeciesTrees(bool verbose, string path, bool generate) {
     }
 }
 
-void DataBase::iNeedMapping(bool verbose, string path, bool generate) {
-    iNeedSpeciesTrees(verbose,path,generate);
-    if(!refTreesBuilded){
-	Waiter patienteur(&cout, nbFamilies, '#');
-	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    if(generate) (*currFamily)->genRefTree(false,path);
-	    else (*currFamily)->loadRefTreeFromFile(path);
-	    patienteur.step();
-	}
-    refTreesBuilded = true;
-    patienteur.drawFinal();
-    }
-	
-}
+// void DataBase::iNeedMapping(bool verbose, string path, bool generate) {
+//     iNeedSpeciesTrees(verbose,path,generate);
+//     if(!refTreesBuilded){
+// 	Waiter patienteur(&cout, nbFamilies, '#');
+// 	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
+// 	    if(generate) (*currFamily)->genRefTree(false,path);
+// 	    else (*currFamily)->loadRefTreeFromFile(path);
+// 	    patienteur.step();
+// 	}
+//     refTreesBuilded = true;
+//     patienteur.drawFinal();
+//     }
+// 	
+// }
 
 void DataBase::genUnicityScores() {
     if(!unicityScoresComputed) {
@@ -198,19 +200,22 @@ void DataBase::loadSpeciesTree(string newickLine)
 	stringstream sNewickPropre;
 	char currChar;
 	
-	bool premierGuillemet = false;
-	bool deuxiemeGuillemet = false;
+	
+	bool insideQuote = false;
+	bool firstQuoteSeen = false;
 	
 	for(unsigned int jogger=0; jogger < newickLine.size(); jogger++) {
 		currChar = newickLine.at(jogger);
 		
 		if(currChar == '"')
-			if(premierGuillemet) deuxiemeGuillemet = true;
-			else premierGuillemet = true;
+			if(insideQuote) {insideQuote = false; firstQuoteSeen = true;}
+			else insideQuote = true;
 				
-		else if(currChar == ':') { premierGuillemet = false; deuxiemeGuillemet = false; sNewickPropre << currChar;}
+		else if(firstQuoteSeen && currChar == ':')
+		    //reinitialization
+		    { firstQuoteSeen = false; sNewickPropre << currChar;}
 			
-		else if((premierGuillemet && !deuxiemeGuillemet) || !premierGuillemet)
+		else if(!firstQuoteSeen) if(!(insideQuote && (currChar == ',' || currChar == ':')))
 			sNewickPropre << currChar;
 	}
 	
@@ -222,11 +227,16 @@ void DataBase::loadSpeciesTree(string newickLine)
 	//cout << "\n\n\n### Voici la liste de toutes les espèces de l'abre des espèces :" << endl;	
 	
 	vector<Node *> listeNoeuds = speciesTree->getNodes();
-	
+		
 	for(vector<Node *>::iterator it = listeNoeuds.begin(); it != listeNoeuds.end(); it++) {
-		if((*it)->hasName()) species.insert((*it)->getName());
+		if((*it)->hasName()) {
+		    taxa.insert(pair<string,Taxon*>((*it)->getName(),new tpms::Taxon((*it)->getName(),(*it),*this)));
+		}
 	}
 	
+	for(map<string,Taxon*>::iterator ct = taxa.begin(); ct != taxa.end(); ct++){
+	    ct->second->genRelations();
+	}
 }
 
 vector<Family *> & DataBase::getFamilies() {return(families);}
@@ -250,26 +260,26 @@ bool DataBase::taxonExists(string ptax) {
 	}
 }
 
-int DataBase::nbFamiliesContaining(string pTax){
-	// première possibilité : on a déjà fait la recherche
-	map<string,int>::iterator nbIt = nbFC.find(pTax);
-	if(nbIt != nbFC.end()) return(nbIt->second);
-	
-	// deuxième cas, il faut faire la recherche et lister les familles
-	int result = 0;
-	
-	// on développe le taxon
-	set<string> tMembers = getDescendants(pTax); // contient la liste de toutes les taxons appartenant au taxon pTax
-	
-	for(vector<Family *>::iterator oneFam = families.begin(); oneFam != families.end(); oneFam++) {
-		bool auMoinsUnTaxonPourCetteFamille = false;
-		for(set<string>::iterator unTaxon = tMembers.begin(); !auMoinsUnTaxonPourCetteFamille && unTaxon != tMembers.end(); unTaxon++)
-			auMoinsUnTaxonPourCetteFamille = auMoinsUnTaxonPourCetteFamille || (*oneFam)->getSpecies()->find(*unTaxon) != (*oneFam)->getSpecies()->end();
-		if(auMoinsUnTaxonPourCetteFamille) result++;
-	}
-	nbFC.insert(pair<string,int>(pTax,result));
-	return(result);
-}
+// int DataBase::nbFamiliesContaining(string pTax){
+// 	// première possibilité : on a déjà fait la recherche
+// 	map<string,int>::iterator nbIt = nbFC.find(pTax);
+// 	if(nbIt != nbFC.end()) return(nbIt->second);
+// 	
+// 	// deuxième cas, il faut faire la recherche et lister les familles
+// 	int result = 0;
+// 	
+// 	// on développe le taxon
+// 	set<string> tMembers = getDescendants(pTax); // contient la liste de toutes les taxons appartenant au taxon pTax
+// 	
+// 	for(vector<Family *>::iterator oneFam = families.begin(); oneFam != families.end(); oneFam++) {
+// 		bool auMoinsUnTaxonPourCetteFamille = false;
+// 		for(set<string>::iterator unTaxon = tMembers.begin(); !auMoinsUnTaxonPourCetteFamille && unTaxon != tMembers.end(); unTaxon++)
+// 			auMoinsUnTaxonPourCetteFamille = auMoinsUnTaxonPourCetteFamille || (*oneFam)->getSpecies()->find(*unTaxon) != (*oneFam)->getSpecies()->end();
+// 		if(auMoinsUnTaxonPourCetteFamille) result++;
+// 	}
+// 	nbFC.insert(pair<string,int>(pTax,result));
+// 	return(result);
+// }
 
 std::set<std::string> DataBase::getDescendants(string taxon, bool nodesWanted){
 	return(getAllNodes(speciesTree->getNode(taxon),nodesWanted));
@@ -309,5 +319,12 @@ set<string> * DataBase::getSpecies(){
     return(&species);
 }
 
+tpms::Taxon* DataBase::nameToTaxon(string taxonName)
+{
+    map<string,Taxon*>::iterator foundTaxon = taxa.find(taxonName);
+    if(foundTaxon != taxa.end()) return(foundTaxon->second);
+    cout << "Unable to find the taxon named " << taxonName << " in the database" << endl;
+    return(00);
+}
 
 
