@@ -4,7 +4,6 @@
 #include <sstream>
 #include <cmath>
 #include <iostream>
-
 class Waiter {
   
   private:

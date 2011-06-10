@@ -6,6 +6,7 @@
 
 using namespace std;
 
+namespace tpms{
 Query::Query(string queryLine, string defaultsParams) {
 	// à partir d'ici on décompose la ligne queryLine
 	// rappel : elle est du format :
@@ -97,4 +98,5 @@ bool Query::check(DataBase * db){
 	}
 	
 	return(true);
+}
 }

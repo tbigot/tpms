@@ -25,6 +25,8 @@ using namespace tpms;
 namespace fs = boost::filesystem;
 
 
+namespace tpms{
+
 DataBase::DataBase(string path): refTreesBuilded(false), speciesTreesBuilded(false) {
 	
 	// checking this file exists
@@ -328,3 +330,4 @@ tpms::Taxon* DataBase::nameToTaxon(string taxonName)
 }
 
 
+}

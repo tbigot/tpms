@@ -8,6 +8,7 @@
 #include <set>
 
 #include "DataBase.hpp"
+namespace tpms{
 
 class Query {
 	
@@ -34,9 +35,11 @@ class Query {
 		
 		bool check(DataBase * db);
 };
-
+}
 #else
+namespace tpms{
 
 class Family;
 
+}
 #endif

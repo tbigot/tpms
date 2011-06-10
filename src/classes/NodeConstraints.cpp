@@ -14,6 +14,8 @@ using namespace std;
 using namespace tpms;
 
 
+namespace tpms{
+
 NodeConstraints::NodeConstraints(DataBase &pRefDB): refDB(pRefDB) {
     nature = ANY;
     speciesRestrictionsAsSon = false;
@@ -196,4 +198,4 @@ string NodeConstraints::getStr()
     return(result);
 }
 
-
+}

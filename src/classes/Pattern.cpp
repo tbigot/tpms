@@ -19,6 +19,8 @@ using namespace std;
 using namespace bpp;
 using namespace tpms;
 
+
+namespace tpms{
 Pattern::Pattern(TreeTemplate<Node> &tree, DataBase &db): db(db), tree(tree){
     
     extractConstraints();
@@ -345,3 +347,4 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
     
 }
 
+}

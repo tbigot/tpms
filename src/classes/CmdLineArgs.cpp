@@ -7,6 +7,8 @@
 
 using namespace std;
 
+
+namespace tpms{
 std::string CmdLineArgs::getArg(std::string argName)
 {
     map<string,string>::iterator foundArg = argsList.find(argName);
@@ -76,3 +78,4 @@ void CmdLineArgs::requireArgs(string reqArgs)
     }
 }
 
+}

@@ -1,3 +1,4 @@
+
 #ifndef DATABASE_HPP_TPMS
 #define DATABASE_HPP_TPMS
 
@@ -14,7 +15,7 @@
 
 //inclusions bio++
 #include <Bpp/Phyl/Tree.h>
-
+namespace tpms{
 class DataBase {
 	
 	private:
@@ -63,9 +64,11 @@ class DataBase {
 		std::set<std::string> * getSpecies();
 		tpms::Taxon* nameToTaxon(std::string taxonName);
 
-};
+};}
 #else
 
-class DataBase;
+namespace tpms{
+    class DataBase;
+}
 
 #endif

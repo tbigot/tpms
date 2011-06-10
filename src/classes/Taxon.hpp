@@ -1,3 +1,4 @@
+
 #ifndef TPMS_TAXON
 #define TPMS_TAXON
 
@@ -6,8 +7,6 @@
 
 
 #include "DataBase.hpp"
-
-
 namespace tpms{
     class Taxon{
 	private:
@@ -34,10 +33,10 @@ namespace tpms{
 	    void genRelations();
     };
 }
-
 #else
 
 namespace tpms{
+
     class Taxon;
 }
 #endif

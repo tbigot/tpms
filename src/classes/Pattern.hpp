@@ -12,6 +12,7 @@
 
 //inclusions bio++
 #include <Bpp/Phyl/Tree.h>
+namespace tpms{
 
 class Pattern {
     
@@ -19,7 +20,7 @@ private:
     /**
      * @brief The database associated to this pattern.
      **/
-    DataBase &db;
+    tpms::DataBase &db;
     
     
      /**
@@ -84,3 +85,4 @@ public:
     std::vector<int> xferDetected(std::map<int,Family *> * families, std::vector<int> famList, std::string sourceTaxon, std::string targetTaxon, std::string monophylyTaxon, unsigned int verifDeep, std::vector<unsigned int> bootstraps,  std::vector<unsigned int> sourceRates);
     std::vector<int> xferGapDetect(std::map<int,Family *> families, std::set<std::string>);
 };
+}

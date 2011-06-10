@@ -9,6 +9,7 @@
 #include <vector>
 #include <set>
 #include <string>
+namespace tpms{
 
 class NodeConstraints{
     
@@ -53,9 +54,12 @@ class NodeConstraints{
 	
     
 };
+    
+}
 
 #else
+namespace tpms{
 
 class NodeConstraints;
-
+}
 #endif

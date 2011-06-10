@@ -15,6 +15,7 @@
 #include "NodeConstraints.hpp"
 #include "DataBase.hpp"
 #include "Taxon.hpp"
+namespace tpms{
 
 class Family {
     
@@ -103,10 +104,11 @@ public:
     NodeNature getNatureOf(bpp::Node* node);
     
     
-};
+};}
 
 #else
+namespace tpms{
 
 class Family;
-
+}
 #endif

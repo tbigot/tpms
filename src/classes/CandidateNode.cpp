@@ -4,7 +4,9 @@ using namespace std;
 using namespace tpms;
 using namespace bpp;
 
-tpms::CandidateNode::~CandidateNode(){
+
+namespace tpms{
+CandidateNode::~CandidateNode(){
     // deleting sons
     for(map<bpp::Node*,vector<CandidateNode*> >::iterator currSons = sons.begin(); currSons != sons.end(); currSons++){
 	for(vector<CandidateNode*>::iterator currSon = currSons->second.begin(); currSon != currSons->second.end(); currSon++){
@@ -13,14 +15,14 @@ tpms::CandidateNode::~CandidateNode(){
     }
 }
 
-tpms::CandidateNode::CandidateNode(CandidateNode* father, Node* treeNode, Node* patternNode):
+CandidateNode::CandidateNode(CandidateNode* father, Node* treeNode, Node* patternNode):
 father(father), treeNode(treeNode), patternNode(patternNode), isRoot(false), addsons(0)
 {
 }
 
-Node * tpms::CandidateNode::getTreeNode(){ return(treeNode);}
+Node * CandidateNode::getTreeNode(){ return(treeNode);}
 
-void tpms::CandidateNode::confirm(){
+void CandidateNode::confirm(){
     if(sons.size() == 2 || sons.size() == 0)
 	father->addSon(this,patternNode);
     else {
@@ -30,7 +32,7 @@ void tpms::CandidateNode::confirm(){
     }
 }
 
-tpms::CandidateNode::CandidateNode(): isRoot(true), addsons(0)
+CandidateNode::CandidateNode(): isRoot(true), addsons(0)
 {
 }
 
@@ -42,14 +44,14 @@ bool CandidateNode::isLeaf()
 
 
 
-void tpms::CandidateNode::addSon(CandidateNode* son, Node* sonPatternNode)
+void CandidateNode::addSon(CandidateNode* son, Node* sonPatternNode)
 {
     addsons++;
     sons[sonPatternNode].push_back(son);
 }
 
 
-unsigned int tpms::CandidateNode::genTrees(std::vector< TreeTemplate< Node >* >& trees)
+unsigned int CandidateNode::genTrees(std::vector< TreeTemplate< Node >* >& trees)
 {
     vector<Node *> roots;
     if(isRoot){
@@ -69,7 +71,7 @@ unsigned int tpms::CandidateNode::genTrees(std::vector< TreeTemplate< Node >* >&
     return(roots.size());
 }
 
-unsigned int tpms::CandidateNode::getWholeMatchingSubtrees(std::vector< TreeTemplate< Node >* >& trees)
+unsigned int CandidateNode::getWholeMatchingSubtrees(std::vector< TreeTemplate< Node >* >& trees)
 {
     vector<Node *> roots;
     if(isRoot){
@@ -89,7 +91,7 @@ unsigned int tpms::CandidateNode::getWholeMatchingSubtrees(std::vector< TreeTemp
 }
 
 
-void tpms::CandidateNode::print(unsigned int lvl){
+void CandidateNode::print(unsigned int lvl){
     for(unsigned int i = 0; i <= lvl; i++) cout << ' ';
     if(!isRoot){
     cout << this << ' ' << patternNode->getId();
@@ -111,7 +113,7 @@ void tpms::CandidateNode::print(unsigned int lvl){
     }
 }
 
-vector<Node *> tpms::CandidateNode::recGenTrees(){
+vector<Node *> CandidateNode::recGenTrees(){
     vector<Node *> result;
     
     Node * currNode = new Node;
@@ -177,7 +179,7 @@ vector<Node *> tpms::CandidateNode::recGenTrees(){
 }
 
 /*
-vector<Node *> tpms::CandidateNode::recGenTrees(){
+vector<Node *> CandidateNode::recGenTrees(){
     vector<Node *> result;
     
     Node * currNode = new Node;
@@ -241,4 +243,4 @@ vector<Node *> tpms::CandidateNode::recGenTrees(){
     
     return(result);
 }*/
-
+}

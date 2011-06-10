@@ -21,6 +21,8 @@ using namespace std;
 using namespace bpp;
 using namespace tpms;
 
+
+namespace tpms{
 Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
     // extraction du nom de la famille
     string currLigne;
@@ -361,4 +363,6 @@ void Family::getTaxaOnThisSubtree(Node* node, std::vector< Taxon* >& speciesList
     }
     if(sons.size() == 0) // leave case, return the species of this leave
 	speciesList.push_back(leave2spe.at(node->getId()));
+}
+
 }

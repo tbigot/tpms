@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 
+namespace tpms{
 
 class CmdLineArgs {
   
@@ -28,10 +29,11 @@ class CmdLineArgs {
 	void print(std::ostream & output);
 	void requireArgs(std::string reqArgs);
 };
-
+}
 
 #else
+namespace tpms{
 
 class CmdLineArgs;
-
+}
 #endif
