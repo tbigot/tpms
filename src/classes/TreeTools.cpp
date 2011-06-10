@@ -1,5 +1,6 @@
 #include <string>
 #include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/TreeTools.h>
 
 #include "TreeTools.hpp"
 
@@ -43,7 +44,9 @@ Node * TreeTools::newickToNode(string & in, unsigned int * jogger, Node * father
 		
 		// on se retrouve ici : soit un groupe qui est fini, soit on était sur une feuille. Dans tous les cas, c'est le nom du nœud créé dans cette itération qu'on va chercher
 		
+		ssDist.clear();
 		ssDist.str("");
+		ssNom.clear();
 		ssNom.str("");
 				
 		// le nom n'est pas terminé tant qu'on ne tombe pas sur deux points
@@ -62,7 +65,14 @@ Node * TreeTools::newickToNode(string & in, unsigned int * jogger, Node * father
 			    (*jogger)++;
 		    }
 		}
-		if(!ssNom.str().empty()) thisNode->setName(ssNom.str());
+		if(!ssNom.str().empty()) {
+		    unsigned int bootstrap=0;
+		    thisNode->setName(ssNom.str());
+		    ssNom >> bootstrap;
+		    if(bootstrap != 0) {
+			thisNode->setBranchProperty(bpp::TreeTools::BOOTSTRAP, Number<double>(bootstrap));
+		    }
+		}
 		else if(sharp) thisNode->setName("#");
 		ssDist >> distance;
 		thisNode->setDistanceToFather(distance);

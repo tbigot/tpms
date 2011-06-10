@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <cmath>
 
 
 
@@ -45,6 +46,17 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
     
     // dealing with branch type
     if(paramsString.find('!') != string::npos) direct = true;
+    
+    size_t colonPos = paramsString.find('$');
+    if(colonPos != string::npos) {
+	string minBootstrapS;
+	minBootstrapS =  paramsString.substr(colonPos+1);
+		
+	istringstream minBootstrapSs(minBootstrapS);
+	minBootstrapSs >> minBootstrap;
+	
+	
+    } else minBootstrap = 0;
     
 //     readConstraintsString();
 //     if(!initString.empty()){
@@ -136,8 +148,10 @@ bool NodeConstraints::allows(Family& family, bpp::Node* node)
 	Taxon* nodeSpecies = family.getSpeciesOfNode(node);
 	return(allowedSpeciesOnNode.find(nodeSpecies)!= allowedSpeciesOnNode.end());
     } else {
-	// a node is accepted if the nature matches
-	return(nature==ANY || family.getNatureOf(node) == nature);
+	// a node is accepted if the nature matches & sufficient bootstrap
+	double nodeBootstrap = 0;
+	if(node->hasBootstrapValue()) nodeBootstrap = node->getBootstrapValue();
+	return((nature==ANY || family.getNatureOf(node) == nature) && nodeBootstrap >= minBootstrap);
     }
 }
 
@@ -176,7 +190,9 @@ string NodeConstraints::getStr()
 	case SPECIATION: result = "<SPE>"; break;
 	case ANY: result = "<ANY>"; break;
     }
-    result += "{"+ subtreeConstraintsString +"} " + constraintsOnNodeString ;
+    ostringstream minBootstrapSs;
+    minBootstrapSs << minBootstrap;
+    result += "{"+ subtreeConstraintsString +"} " + constraintsOnNodeString + " :" + minBootstrapSs.str();
     return(result);
 }
 

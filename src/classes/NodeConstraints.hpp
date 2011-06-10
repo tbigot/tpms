@@ -23,6 +23,7 @@ class NodeConstraints{
 	std::set<tpms::Taxon*> allowedSpeciesOnNode;
 	
 	Type type;
+	unsigned int minBootstrap;
 	
 	std::string constraintsOnNodeString;
 	std::string subtreeConstraintsString;
