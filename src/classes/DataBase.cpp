@@ -103,8 +103,8 @@ void DataBase::doFamiliesMapping_LeavesToSpecies() {
 	    vector<Family*>::iterator familyBegin, familyEnd;
 	    familyBegin = families.begin() + (blockSize*currThreadIndex);
 	    if(currThreadIndex != nbThreads) familyEnd = families.begin() + (blockSize*currThreadIndex+blockSize); else familyEnd = families.end();
-	    boost::thread currThread(doFamiliesMapping_LeavesToSpecies_oneThread,patienteur,&waiterMutex,familyBegin,familyEnd);
-	    tg.add_thread(&currThread);
+	    boost::thread *currThread = new boost::thread(doFamiliesMapping_LeavesToSpecies_oneThread,patienteur,&waiterMutex,familyBegin,familyEnd);
+	    tg.add_thread(currThread);
 	}
     tg.join_all();
     mappingDone_LeavesToSpecies = true;
