@@ -102,8 +102,9 @@ void DataBase::doFamiliesMapping_LeavesToSpecies() {
 	for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
 	    vector<Family*>::iterator familyBegin, familyEnd;
 	    familyBegin = families.begin() + (blockSize*currThreadIndex);
-	    if(currThreadIndex != nbThreads) familyEnd = families.begin() + (blockSize*currThreadIndex+blockSize); else familyEnd = families.end();
-	    boost::thread *currThread = new boost::thread(doFamiliesMapping_LeavesToSpecies_oneThread,patienteur,&waiterMutex,familyBegin,familyEnd);
+	    if(currThreadIndex+1 != nbThreads) familyEnd = families.begin() + (blockSize*(currThreadIndex+1)); else familyEnd = families.end();
+	    cout << "Un thread de " << (blockSize*currThreadIndex) << " à " << blockSize*(currThreadIndex+1) << endl;
+	    boost::thread *currThread = new boost::thread(doFamiliesMapping_LeavesToSpecies_oneThread,&patienteur,&waiterMutex,familyBegin,familyEnd);
 	    tg.add_thread(currThread);
 	}
     tg.join_all();
@@ -112,11 +113,11 @@ void DataBase::doFamiliesMapping_LeavesToSpecies() {
     }
 }
 
-void DataBase::doFamiliesMapping_LeavesToSpecies_oneThread(Waiter &waiter, boost::mutex *waiterMutex, vector<Family*>::iterator &familiesBegin, vector<Family*>::iterator &familiesEnd) {
+void DataBase::doFamiliesMapping_LeavesToSpecies_oneThread(Waiter *waiter, boost::mutex *waiterMutex, vector<Family*>::iterator &familiesBegin, vector<Family*>::iterator &familiesEnd) {
 	for(vector<Family*>::iterator currFamily = familiesBegin; currFamily != familiesEnd; currFamily++){
 	    (*currFamily)->doMapping_LeavesToSpecies();
 	    waiterMutex->lock();
-	    waiter.step();
+	    waiter->step();
 	    waiterMutex->unlock();
 	} 
     

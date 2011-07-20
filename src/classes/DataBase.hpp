@@ -67,7 +67,7 @@ class DataBase {
 		
 		std::set<std::string> getAllNodes(bpp::Node * localRoot,bool nodesWanted = true);
 		
-		static void doFamiliesMapping_LeavesToSpecies_oneThread(Waiter &waiter, boost::mutex *waiterMutex, std::vector<tpms::Family*>::iterator &familiesBegin, std::vector<tpms::Family*>::iterator &familiesEnd);
+		static void doFamiliesMapping_LeavesToSpecies_oneThread(Waiter * waiter, boost::mutex *waiterMutex, std::vector<tpms::Family*>::iterator &familiesBegin, std::vector<tpms::Family*>::iterator &familiesEnd);
 
 		
 		void doFamiliesMapping_LeavesToSpecies();
