@@ -20,7 +20,12 @@ int main(int argc, char *argv[]) {
    try{
     CmdLineArgs args(argc, argv, "database,output",cerr);
     args.print(cout);
-	DataBase dbTest(args.getArg("database"));
+	istringstream nbThreadsSS(args.getArg("threads"));
+	unsigned int nbThreads;
+	nbThreadsSS >> nbThreads;
+	if(nbThreads < 1 || nbThreads > 128) nbThreads = 1;
+	cout << nbThreads << " threads will be used." << endl;
+	DataBase dbTest(args.getArg("database"),nbThreads);
 	dbTest.doFamiliesMapping_LeavesToSpecies();
 	
 	

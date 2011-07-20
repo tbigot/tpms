@@ -6,6 +6,8 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/algorithm/string.hpp>
+
 
 #include "TreeTools.hpp"
 #include "DataBase.hpp"
@@ -25,7 +27,7 @@ namespace fs = boost::filesystem;
 
 namespace tpms{
 
-DataBase::DataBase(string path): mappingDone_NodesToTaxa(false), mappingDone_LeavesToSpecies(false) {
+DataBase::DataBase(string path, unsigned int nbThreads): mappingDone_NodesToTaxa(false), mappingDone_LeavesToSpecies(false), nbThreads(nbThreads) {
 	
 	// checking this file exists
 	fs::path dbFile(path);
@@ -76,18 +78,51 @@ DataBase::DataBase(string path): mappingDone_NodesToTaxa(false), mappingDone_Lea
 
 bpp::TreeTemplate<bpp::Node> * DataBase::getSpeciesTree() { return(speciesTree); }
 
+// void DataBase::doFamiliesMapping_LeavesToSpecies() {
+//     if(!mappingDone_LeavesToSpecies){
+// 	cout << "Mapping leaves to Species:" << endl;
+// 	Waiter patienteur(&cout, nbFamilies, '#');
+// 	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
+// 	    (*currFamily)->doMapping_LeavesToSpecies();
+// 	    patienteur.step();
+// 	} 
+//     mappingDone_LeavesToSpecies = true;
+//     patienteur.drawFinal();
+//     }
+// }
+
+// 
 void DataBase::doFamiliesMapping_LeavesToSpecies() {
+    // multithreading version
     if(!mappingDone_LeavesToSpecies){
 	cout << "Mapping leaves to Species:" << endl;
 	Waiter patienteur(&cout, nbFamilies, '#');
-	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    (*currFamily)->doMapping_LeavesToSpecies();
-	    patienteur.step();
-	} 
+	boost::thread_group tg;
+	unsigned int blockSize = families.size() / nbThreads;
+	for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
+	    vector<Family*>::iterator familyBegin, familyEnd;
+	    familyBegin = families.begin() + (blockSize*currThreadIndex);
+	    if(currThreadIndex != nbThreads) familyEnd = families.begin() + (blockSize*currThreadIndex+blockSize); else familyEnd = families.end();
+	    boost::thread currThread(doFamiliesMapping_LeavesToSpecies_oneThread,patienteur,&waiterMutex,familyBegin,familyEnd);
+	    tg.add_thread(&currThread);
+	}
+    tg.join_all();
     mappingDone_LeavesToSpecies = true;
     patienteur.drawFinal();
     }
 }
+
+void DataBase::doFamiliesMapping_LeavesToSpecies_oneThread(Waiter &waiter, boost::mutex *waiterMutex, vector<Family*>::iterator &familiesBegin, vector<Family*>::iterator &familiesEnd) {
+	for(vector<Family*>::iterator currFamily = familiesBegin; currFamily != familiesEnd; currFamily++){
+	    (*currFamily)->doMapping_LeavesToSpecies();
+	    waiterMutex->lock();
+	    waiter.step();
+	    waiterMutex->unlock();
+	} 
+    
+	
+}
+
 
 void DataBase::doFamiliesMapping_NodesToTaxa() {
     // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
@@ -311,6 +346,7 @@ set<string> * DataBase::getSpecies(){
 
 tpms::Taxon* DataBase::nameToTaxon(string taxonName)
 {
+    boost::to_upper(taxonName);
     map<string,Taxon*>::iterator foundTaxon = taxa.find(taxonName);
     if(foundTaxon != taxa.end()) return(foundTaxon->second);
     cout << "Unable to find the taxon named " << taxonName << " in the database" << endl;

@@ -30,7 +30,7 @@ include_directories(${BPP_INCLUDE_DIR})
 #system, thread, wave
 
 #SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43.0")
-find_package(Boost COMPONENTS filesystem system REQUIRED)
+find_package(Boost COMPONENTS filesystem system thread REQUIRED)
 
 link_directories ( ${Boost_LIBRARY_DIRS} )
 include_directories ( ${Boost_INCLUDE_DIRS} )
