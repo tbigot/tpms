@@ -21,22 +21,24 @@ int main(int argc, char *argv[]) {
     CmdLineArgs args(argc, argv, "database,output",cerr);
     args.print(cout);
 	DataBase dbTest(args.getArg("database"));
-	dbTest.iNeedSpeciesTrees(true,"",true);
+	dbTest.doFamiliesMapping_LeavesToSpecies();
 	
 	
 	
 	
 	string fileName;
-	cout << "\nquery name> " << flush;
+	cout << "\nPlease enter the name in which the results will be recorded\nFILENAME> " << flush;
 	getline(cin,fileName);
-	// passons la ligne en majuscules :
-	// std::transform(laligne.begin(), laligne.end(), laligne.begin(), (int(*)(int)) toupper);
-	// boucle d'interaction
+
+	
 	while(fileName != ""){
 		ofstream ooo(string(args.getArg("output")+"/"+fileName).c_str(), ofstream::out);
 		string queryLine;
-		cout << "\n# " << flush;
+		cout << "Now enter the pattern in pseudo-newick formalism (please read the doc)\nPATTERN> " << flush;
 		getline(cin,queryLine);
+		
+		ooo << "; PATTERN ENTERED :" << queryLine << endl;
+		
 		vector<pair<Family *,CandidateNode *> > familles;
 		try{
 			// REQUÊTE
@@ -69,19 +71,20 @@ int main(int argc, char *argv[]) {
 			// DÉPOUILLAGE DES RÉSULTATS
 			cout << "\n   Writing results to the file " << args.getArg("output")+"/"+fileName << endl;
 			
-			
 			cout << "   - Building all matching subtrees, this could take a while..." << endl;
 			
 			Waiter waitB(&cout, familles.size(),'-');
 			
 			for(vector<pair<Family *,CandidateNode * > >::iterator curFam = familles.begin(); curFam != familles.end(); curFam++) {
 				waitB.step();
+				
+				ooo << "; family_name " << curFam->first->getName() << endl;
+				ooo << "; number_of_species " << curFam->first->getSpecies().size() << endl;
+				
 				// retrieving all trees corresponding to CandidateNode :
 				vector<TreeTemplate<Node> *> resultTrees;
 				
-				if(!args.getArg("onlyFamNames").empty()){
-				    ooo << curFam->first->getName() << '\n';
-				} else if(args.getArg("pleaseReturnWholeMatchingSubtrees").empty()){
+				if(args.getArg("onlyFamNames").empty()) if(args.getArg("pleaseReturnWholeMatchingSubtrees").empty()){
 				    trouve += curFam->second->genTrees(resultTrees);
 				    for(vector<TreeTemplate<Node> *>::iterator currTree = resultTrees.begin(); currTree != resultTrees.end(); currTree++){
 					curFam->first->addSequencesNames((*currTree)->getRootNode());

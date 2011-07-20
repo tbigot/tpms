@@ -32,9 +32,9 @@ class DataBase {
 		void loadFromFile(std::ifstream& RAPfile);
 		void renameNodes(bpp::TreeTemplate<bpp::Node> *);
 		
-		bool speciesTreesBuilded;
-		bool refTreesBuilded;
-		bool unicityScoresComputed;
+		bool mappingDone_LeavesToSpecies;
+		bool mappingDone_NodesToTaxa;
+		bool mappingDone_NodesToUnicityScores;
 
 				
 		
@@ -52,18 +52,16 @@ class DataBase {
 		// int nbFamiliesContaining(std::string pTax);
 		
 		std::set<std::string> getAllNodes(bpp::Node * localRoot,bool nodesWanted = true);
-		std::set<std::string> getDescendants(std::string taxon, bool nodesWanted = true);
-		std::set<std::string> getDescendants(std::vector<std::string> taxaList, bool nodesWanted = true);
 		
 		
-		void iNeedSpeciesTrees(bool verbose, std::string path,bool generate=false);
-		void iNeedMapping(bool verbose, std::string path, bool generate=false);
-		void genUnicityScores();
-		void genBestUnicityScores();
+		void doFamiliesMapping_LeavesToSpecies();
+		void doFamiliesMapping_NodesToTaxa();
+		void doFamiliesMapping_NodesToUnicityScores();
+		void doFamiliesMapping_NodesToBestUnicityScores();
 		
 		std::set<std::string> * getSpecies();
 		tpms::Taxon* nameToTaxon(std::string taxonName);
-
+		
 };}
 #else
 

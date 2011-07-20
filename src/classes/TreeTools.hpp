@@ -18,6 +18,7 @@ class TreeTools{
 	static bool isAtLeastBinaryTree(bpp::Node * node);
 	static std::string nodeToNewick(bpp::Node * node);
 	static void multifurcated2binary(bpp::TreeTemplate< bpp::Node >* currTree, unsigned int parentID, std::vector< bpp::TreeTemplate< bpp::Node > * >& trees);
+	static double getDistanceBetweenTwoNodes(bpp::Node * ancestor, bpp::Node * descendant);
 };
 }
 

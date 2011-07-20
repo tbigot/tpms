@@ -126,6 +126,7 @@ string TreeTools::nodeToNewick(Node* node)
 	result << ')';
     }
     if(node->hasName()) result << node->getName();
+    if(node->hasDistanceToFather()) result << ":" << node->getDistanceToFather();
     return(result.str());
 }
 
@@ -184,6 +185,14 @@ string TreeTools::extractNewickLineFromFile(ifstream& in)
 	}
     }
     return(string());
+}
+
+
+double TreeTools::getDistanceBetweenTwoNodes(Node* ancestor, Node* descendant)
+{
+    // root case : ancestor has not been met
+    if(!descendant->hasFather() || descendant == ancestor) return(0);
+    return(descendant->getDistanceToFather() + getDistanceBetweenTwoNodes(ancestor, descendant->getFather()));
 }
 
 

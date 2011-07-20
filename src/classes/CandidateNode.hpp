@@ -12,6 +12,7 @@ namespace tpms{
 	    bpp::Node * treeNode;
 	    bpp::Node * patternNode;
 	    tpms::CandidateNode * father;
+	    double distanceToFather;
 	    std::map<bpp::Node *, std::vector<tpms::CandidateNode *> > sons;
 	    bool isRoot;
 	    unsigned int addsons;

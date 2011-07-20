@@ -1,4 +1,5 @@
 #include "CandidateNode.hpp"
+#include "TreeTools.hpp"
 
 using namespace std;
 using namespace tpms;
@@ -30,6 +31,9 @@ void CandidateNode::confirm(){
 	if(patternNode->hasFather()) cout << "pas racine";
 	cout << endl;
     }
+    
+    // setting the distance to the matching node father
+    distanceToFather = tpms::TreeTools::getDistanceBetweenTwoNodes(father->getTreeNode(),treeNode);
 }
 
 CandidateNode::CandidateNode(): isRoot(true), addsons(0)
@@ -118,6 +122,7 @@ vector<Node *> CandidateNode::recGenTrees(){
     
     Node * currNode = new Node;
     currNode->setId(treeNode->getId());
+    currNode->setDistanceToFather(distanceToFather);
     if(patternNode->hasName()) currNode->setName(patternNode->getName());
     
     result.push_back(currNode);

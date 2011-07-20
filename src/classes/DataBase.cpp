@@ -7,8 +7,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-
-
 #include "TreeTools.hpp"
 #include "DataBase.hpp"
 #include "Waiter.hpp"
@@ -27,7 +25,7 @@ namespace fs = boost::filesystem;
 
 namespace tpms{
 
-DataBase::DataBase(string path): refTreesBuilded(false), speciesTreesBuilded(false) {
+DataBase::DataBase(string path): mappingDone_NodesToTaxa(false), mappingDone_LeavesToSpecies(false) {
 	
 	// checking this file exists
 	fs::path dbFile(path);
@@ -78,54 +76,56 @@ DataBase::DataBase(string path): refTreesBuilded(false), speciesTreesBuilded(fal
 
 bpp::TreeTemplate<bpp::Node> * DataBase::getSpeciesTree() { return(speciesTree); }
 
-void DataBase::iNeedSpeciesTrees(bool verbose, string path, bool generate) {
-    if(!speciesTreesBuilded){
-	cout << "Generating trees with species names as labels:" << endl;
+void DataBase::doFamiliesMapping_LeavesToSpecies() {
+    if(!mappingDone_LeavesToSpecies){
+	cout << "Mapping leaves to Species:" << endl;
 	Waiter patienteur(&cout, nbFamilies, '#');
 	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    (*currFamily)->genLeaveToSpecies();
+	    (*currFamily)->doMapping_LeavesToSpecies();
 	    patienteur.step();
 	} 
-    speciesTreesBuilded = true;
+    mappingDone_LeavesToSpecies = true;
     patienteur.drawFinal();
     }
 }
 
-// void DataBase::iNeedMapping(bool verbose, string path, bool generate) {
-//     iNeedSpeciesTrees(verbose,path,generate);
-//     if(!refTreesBuilded){
-// 	Waiter patienteur(&cout, nbFamilies, '#');
-// 	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-// 	    if(generate) (*currFamily)->genRefTree(false,path);
-// 	    else (*currFamily)->loadRefTreeFromFile(path);
-// 	    patienteur.step();
-// 	}
-//     refTreesBuilded = true;
-//     patienteur.drawFinal();
-//     }
-// 	
-// }
-
-void DataBase::genUnicityScores() {
-    if(!unicityScoresComputed) {
-	Waiter patienteur(&cout, nbFamilies, 'o');
+void DataBase::doFamiliesMapping_NodesToTaxa() {
+    // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
+    doFamiliesMapping_LeavesToSpecies();
+    
+    if(!mappingDone_NodesToTaxa){
+	cout << "Mapping nodes to Taxa:" << endl;
+	Waiter patienteur(&cout, nbFamilies, '#');
 	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    (*currFamily)->genUnicityScores();
+	    (*currFamily)->doMapping_NodesToTaxa();
 	    patienteur.step();
 	}
-	unicityScoresComputed = true;
+    mappingDone_NodesToTaxa = true;
+    patienteur.drawFinal();
+    }
+	
+}
+
+void DataBase::doFamiliesMapping_NodesToUnicityScores() {
+    if(!mappingDone_NodesToUnicityScores) {
+	Waiter patienteur(&cout, nbFamilies, 'o');
+	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
+	    (*currFamily)->doMapping_NodesToUnicityScores();
+	    patienteur.step();
+	}
+	mappingDone_NodesToUnicityScores = true;
 	patienteur.drawFinal();
     }
 }
 
-void DataBase::genBestUnicityScores() {
-    if(!unicityScoresComputed) {
+void DataBase::doFamiliesMapping_NodesToBestUnicityScores() {
+    if(!mappingDone_NodesToUnicityScores) {
 	Waiter patienteur(&cout, nbFamilies, 'o');
 	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    (*currFamily)->genBestUnicityScores();
+	    (*currFamily)->doMapping_NodesToBestUnicityScores();
 	    patienteur.step();
 	}
-	unicityScoresComputed = true;
+	mappingDone_NodesToUnicityScores = true;
 	patienteur.drawFinal();
     }
 }
@@ -283,18 +283,6 @@ bool DataBase::taxonExists(string ptax) {
 // 	return(result);
 // }
 
-std::set<std::string> DataBase::getDescendants(string taxon, bool nodesWanted){
-	return(getAllNodes(speciesTree->getNode(taxon),nodesWanted));
-}
-
-std::set<std::string> DataBase::getDescendants(vector<string> taxaList, bool nodesWanted){
-	set<string> speciesList;
-	for(vector<string>::iterator taxon = taxaList.begin(); taxon != taxaList.end(); taxon++){
-	  set<string> currSpecies = getDescendants(*taxon,nodesWanted);
-	  speciesList.insert(currSpecies.begin(), currSpecies.end());
-	}
-	return(speciesList);
-}
 
 // fonction récursive qui retourne le noms de tous les noeuds sous un noeud
 
@@ -328,6 +316,7 @@ tpms::Taxon* DataBase::nameToTaxon(string taxonName)
     cout << "Unable to find the taxon named " << taxonName << " in the database" << endl;
     return(00);
 }
+
 
 
 }

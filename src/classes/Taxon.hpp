@@ -15,6 +15,7 @@ namespace tpms{
 	    std::set<tpms::Taxon*> descendants;
 	    DataBase &db;
 	    bpp::Node *nodeInSpTree;
+	    Taxon* directAncestor;
 	    
 	    void genDescendantsList(bpp::Node* localNode);
 	    void genAncestorsList(bpp::Node* localNode);
@@ -29,8 +30,12 @@ namespace tpms{
 	    
 	    std::set<tpms::Taxon*>& getDescendants();
 	    std::set<tpms::Taxon*>& getAncestors();
+	    tpms::Taxon* getDirectAncestor();
+	    bool hasAncestor();
+	    bool containsAllTheseSpecies(std::set<tpms::Taxon*> species);
 	    
 	    void genRelations();
+	    static tpms::Taxon* findSmallestCommonTaxon(std::set<tpms::Taxon*> taxa);
     };
 }
 #else

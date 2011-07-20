@@ -25,63 +25,61 @@ private:
     enum Type {NODE,LEAF};
     
     std::string name;
-    
     DataBase * db;
-    std::vector<tpms::Taxon*> leave2spe;
     bpp::TreeTemplate<bpp::Node> * tree;
     std::map<std::string,tpms::Taxon*> mne2tax;
     std::set<tpms::Taxon*> species;
-    std::vector<NodeNature> node2nat;
-    bpp::TreeTemplate<bpp::Node> * refTree;
-    std::vector<unsigned int> unicityScores;
+   
     
-    void renameNodes(bpp::TreeTemplate<bpp::Node> *);
+    std::vector<tpms::Taxon*> mapping_LeavesToSpecies;
+    std::vector<NodeNature> mapping_NodesToNatures;
+    std::vector<unsigned int> mapping_NodesToUnicityScores;
+    std::vector<Taxon *> mapping_NodesToTaxa;
+        
     
+    std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * orignNode);
+
     
-    void deleteFromLeavesToBif(bpp::Node * pnode);
-    
-    std::map<tpms::Taxon*, unsigned int> computeUnicity(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * originNode);
-    
-    bpp::Node * removeUniqueSons(bpp::Node* localRoot);
-    
-    std::string mapNodeOnTaxon(bpp::Node& nodep);
+    void mapNodeOnTaxon(bpp::Node& node);
     
     void writeRefTreeToFile(std::string path);
     void writeSpTreeToFile(std::string path);
     
     
-   
+    // utilities, unrelated to family, has to be moved to TreeTools
+    void deleteFromLeavesToBif(bpp::Node * pnode);
+    bpp::Node * removeUniqueSons(bpp::Node* localRoot);   
     
     
 public:
+    
+    
     //constructeur à partir d'un fichier
     Family(std::stringstream* sIntro, std::string sNewick, DataBase* dbp);
     
+    std::string getName();
     bpp::TreeTemplate<bpp::Node> * getTree();
-    void genUnicityScores();
-    void genBestUnicityScores();
-    void genLeaveToSpecies();
-    void genNatures();
+    
+    
+    void doMapping_NodesToUnicityScores();
+    void doMapping_NodesToBestUnicityScores();
+    void doMapping_LeavesToSpecies();
+    void doMapping_NodesToNatures();
+    void doMapping_NodesToTaxa();
+    
     
     tpms::Taxon* getSpeciesOfNode(bpp::Node * node);
     NodeNature getNatureOfNode(bpp::Node * node);
     
     bool containsSpecie(tpms::Taxon* taxon);
-    // bool containsSpecies(std::set<std::string> speciesList);
-    // std::set<std::string> * getSpecies();
+
     static void getLeavesFromNode(bpp::Node * pnode, std::vector< bpp::Node* >& leaves);
     static void getLeavesFromNode(bpp::Node * pnode, std::set< bpp::Node* >& leaves, int &leavesNumber);
     static void getLeavesFromNode(bpp::Node * pnode, std::set< bpp::Node* >& leaves);
     
     std::set<std::string> getLeavesNamesFromNode(bpp::Node * pnode);
-    std::string getName();
     void writeTreeToStream(bpp::Node* root, std::ostream& sortie, unsigned int deep);
     
-    //! Génération du Vrai arbre
-    /*!
-     *	Ce générateur va partir d'un arbre vrai de référence et n'en garder que les espèces présentes dans la famille
-     */
-    void genRefTree(bool save=true, std::string path="");
     
     std::vector<unsigned int> &getUnicityScores();
     
@@ -93,6 +91,8 @@ public:
     void addSequencesNames(bpp::Node* currNode);
     
     void getTaxaOnThisSubtree(bpp::Node * node, std::vector<tpms::Taxon*>& speciesList);
+    
+    std::set<tpms::Taxon *> &getSpecies();
     
     /**
      * @brief Replace names of the pieces of pattern trees nodes by the name of the sequences

@@ -67,7 +67,7 @@ private:
     int enumerateTaxon(bpp::Node * localRoot, std::set<std::string> * tsMembers, bool tsComplementary, bpp::Node * impasse, unsigned int * totsize);
     
     std::vector<NodeConstraints *> constraints;
-    void print(bpp::Node * noeud, int spc);
+    void toString(bpp::Node * noeud, int spc, std::ostream &outputStream);
     
     NodeConstraints* constraintsOf(bpp::Node* node);
     bool isTreeBinary();
@@ -77,6 +77,7 @@ public:
     Pattern(bpp::TreeTemplate< bpp::Node >& tree, DataBase& pRefDB);
     ~Pattern();
     
+    void toString(std::ostream&);
     
     static bool nodeOnlyContainsTheseTaxa(bpp::Node * localRoot, std::set<tpms::Taxon*> & taxonMembers, bool invert=false);
     

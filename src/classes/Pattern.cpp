@@ -25,7 +25,7 @@ Pattern::Pattern(TreeTemplate<Node> &tree, DataBase &db): db(db), tree(tree){
     
     extractConstraints();
     cout << "\n -- Constraints visual representation:" << endl;
-    print(tree.getRootNode(),0);
+    toString(tree.getRootNode(),0,std::cout);
 }
 
 Pattern::~Pattern(){
@@ -275,12 +275,16 @@ vector<int> xferGapDetect(map<int,Family *> & families, set<string> startTaxa){
     return(famillesSelectionnees);
 }
 
-void Pattern::print(Node * noeud, int cpt){
+void Pattern::toString(ostream &outputStream){
+    toString(tree.getRootNode(),0,outputStream);
+}
+
+void Pattern::toString(Node * noeud, int cpt, ostream &outputStream){
     for(unsigned int i=0; i<cpt; i++) cout << " ";
-	cout << noeud->getId();
-	cout << constraintsOf(noeud)->getStr();
-	cout << endl;
-	for(unsigned int i=0; i< noeud->getNumberOfSons(); i++) print(noeud->getSon(i),cpt+1);
+	outputStream << noeud->getId();
+	outputStream << constraintsOf(noeud)->getStr();
+	outputStream << endl;
+	for(unsigned int i=0; i< noeud->getNumberOfSons(); i++) toString(noeud->getSon(i),cpt+1,outputStream);
 }
 
 bool Pattern::isTreeBinary(){
