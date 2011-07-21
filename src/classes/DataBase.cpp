@@ -107,9 +107,9 @@ void DataBase::doFamiliesMapping_LeavesToSpecies() {
 	    boost::thread *currThread = new boost::thread(doFamiliesMapping_LeavesToSpecies_oneThread,&patienteur,&waiterMutex,familyBegin,familyEnd);
 	    tg.add_thread(currThread);
 	}
-    tg.join_all();
-    mappingDone_LeavesToSpecies = true;
-    patienteur.drawFinal();
+	tg.join_all();
+	mappingDone_LeavesToSpecies = true;
+	patienteur.drawFinal();
     }
 }
 
@@ -202,32 +202,49 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	cout << "Loading family trees:" << endl;
 	
 	unsigned int famillesChargees = 0;
-	stringstream curPreambule;
-	string curNewick;
+	stringstream * curPreambule;
+	string *curNewick;
 	bool familleSuivante;
 	bool crochetFermant;
 	Family * laFamille;
 	Waiter patienteur(&cout, nbFamilies, '#');
 	while(famillesChargees < nbFamilies) {
 		// la première ligne est le nom de la famille, on l'ajoute
-		curPreambule.str("");
+		// dynamic allocation: will be destroyed during family creation
+		curPreambule = new stringstream;
+		curNewick = new string;
 		familleSuivante = false;
 		crochetFermant = false;
 		while(!familleSuivante && getline(RAPfile,currLigne)){
 			if(crochetFermant) { // on est sur la dernière ligne
 				familleSuivante = true;
-				curNewick = currLigne + '\n';
+				*curNewick = currLigne + '\n';
 			} else {
-				curPreambule << currLigne << endl;
+				*curPreambule << currLigne << endl;
 				if(currLigne.at(0) == ']') crochetFermant = true;
 			}
 		}
-		laFamille = new Family(&curPreambule,curNewick,this);
+		laFamille = new Family(curPreambule,curNewick,this);
 		families.push_back(laFamille);
 		famillesChargees++;
 		patienteur.step();
 		
 	}
+	
+	cout << "Initializing families:" << endl;
+	Waiter patienteur2(&cout, nbFamilies, '#');
+	boost::thread_group tg;
+	unsigned int blockSize = families.size() / nbThreads;
+	for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
+	    vector<Family*>::iterator familyBegin, familyEnd;
+	    familyBegin = families.begin() + (blockSize*currThreadIndex);
+	    if(currThreadIndex+1 != nbThreads) familyEnd = families.begin() + (blockSize*(currThreadIndex+1)); else familyEnd = families.end();
+	    cout << "Un thread de " << (blockSize*currThreadIndex) << " à " << blockSize*(currThreadIndex+1) << endl;
+	    boost::thread *currThread = new boost::thread(Family::threadWork_initialize,&patienteur2,&waiterMutex,familyBegin,familyEnd);
+	    tg.add_thread(currThread);
+	}
+	tg.join_all();
+	patienteur2.drawFinal();
 	
 	
 }

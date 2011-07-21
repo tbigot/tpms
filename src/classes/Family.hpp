@@ -15,6 +15,9 @@
 #include "NodeConstraints.hpp"
 #include "DataBase.hpp"
 #include "Taxon.hpp"
+#include "Waiter.hpp"
+
+
 namespace tpms{
 
 class Family {
@@ -29,6 +32,10 @@ private:
     bpp::TreeTemplate<bpp::Node> * tree;
     std::map<std::string,tpms::Taxon*> mne2tax;
     std::set<tpms::Taxon*> species;
+    
+    // before initialization: these objects are deleted after initialization
+    std::stringstream *preamble;
+    std::string *newick;
    
     
     std::vector<tpms::Taxon*> mapping_LeavesToSpecies;
@@ -52,10 +59,11 @@ private:
     
     
 public:
-    
+    void initialize();
+
     
     //constructeur à partir d'un fichier
-    Family(std::stringstream* sIntro, std::string sNewick, DataBase* dbp);
+    Family(std::stringstream* sIntro, std::string* sNewick, DataBase* dbp);
     
     std::string getName();
     bpp::TreeTemplate<bpp::Node> * getTree();
@@ -103,6 +111,9 @@ public:
     
     NodeNature getNatureOf(bpp::Node* node);
     
+    
+    
+    static void threadWork_initialize(Waiter *waiter, boost::mutex *waiterMutex, std::vector<tpms::Family*>::iterator &familiesBegin, std::vector<tpms::Family*>::iterator &familiesEnd);
     
 };}
 

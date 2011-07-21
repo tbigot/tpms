@@ -23,19 +23,24 @@ using namespace tpms;
 
 
 namespace tpms{
-Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
+Family::Family(stringstream* sIntro, string* sNewick, DataBase* dbp): db(dbp), preamble(sIntro), newick(sNewick) {
+    
+}
+
+
+void Family::initialize(){
     // extraction du nom de la famille
     string currLigne;
-    getline(*sIntro,currLigne);
+    getline(*preamble,currLigne);
     istringstream sFamilleName(currLigne);
     sFamilleName >> name;
     // extraction des synonymes
-    getline(*sIntro, currLigne);
+    getline(*preamble, currLigne);
     if(currLigne.at(0) != '[') std::cerr << "Bracket (newick comments beginning) expected at family " << name << endl;
     
     // cas du fichier avec deux arbres en plus (concerne les arbres réconciliés
-    getline(*sIntro, currLigne);
-    if(currLigne.at(0) == '#') { getline(*sIntro, currLigne);getline(*sIntro, currLigne);getline(*sIntro, currLigne);} // on saute ces lignes
+    getline(*preamble, currLigne);
+    if(currLigne.at(0) == '#') { getline(*preamble, currLigne);getline(*preamble, currLigne);getline(*preamble, currLigne);} // on saute ces lignes
 	
 	bool mneFini;
 	bool specFini;
@@ -79,7 +84,7 @@ Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
 	      cout << "o Unable to find this specie in the species tree:" << cleanSpeciesName.str() << endl;
 	    }
 	    
-	    getline(*sIntro, currLigne);
+	    getline(*preamble, currLigne);
 	}
 	
 	// on fabrique l'arbre
@@ -87,13 +92,15 @@ Family::Family(stringstream* sIntro, string sNewick, DataBase* dbp): db(dbp) {
 	//Newick newickReader(false);
 	//tree = newickReader.read(ssNewick);
 	
-	tree = tpms::TreeTools::newickToTree(sNewick,false);
+	tree = tpms::TreeTools::newickToTree(*newick,false);
 	
 	/*if(tree->getNumberOfNodes() != tree2->getNumberOfNodes()) cout << "Incoherence famille " << _name << " bpp=" << tree->getNumberOfNodes() << " tpms=" <<tree2->getNumberOfNodes() << endl  ;
 	*/
 	
-	doMapping_LeavesToSpecies
-();
+	delete newick;
+	delete preamble;
+	
+	doMapping_LeavesToSpecies();
 	doMapping_NodesToNatures();
 }
 
@@ -380,5 +387,15 @@ void Family::doMapping_NodesToTaxa(){
     mapping_NodesToTaxa.resize(tree->getNumberOfNodes());
     mapNodeOnTaxon(*tree->getRootNode());
 }
+
+void Family::threadWork_initialize(Waiter *waiter, boost::mutex *waiterMutex, std::vector<tpms::Family*>::iterator &familiesBegin, std::vector<tpms::Family*>::iterator &familiesEnd){
+    for(vector<Family*>::iterator currFamily = familiesBegin; currFamily != familiesEnd; currFamily++){
+	(*currFamily)->initialize();
+	waiterMutex->lock();
+	waiter->step();
+	waiterMutex->unlock();
+    }
+}
+
 
 }
