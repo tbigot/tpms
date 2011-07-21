@@ -99,11 +99,11 @@ void DataBase::doFamiliesMapping_LeavesToSpecies() {
 	Waiter patienteur(&cout, nbFamilies, '#');
 	boost::thread_group tg;
 	unsigned int blockSize = families.size() / nbThreads;
+	cout << "Multithreaded operation. Lot size : " << blockSize << endl;
 	for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
 	    vector<Family*>::iterator familyBegin, familyEnd;
 	    familyBegin = families.begin() + (blockSize*currThreadIndex);
 	    if(currThreadIndex+1 != nbThreads) familyEnd = families.begin() + (blockSize*(currThreadIndex+1)); else familyEnd = families.end();
-	    cout << "Un thread de " << (blockSize*currThreadIndex) << " à " << blockSize*(currThreadIndex+1) << endl;
 	    boost::thread *currThread = new boost::thread(doFamiliesMapping_LeavesToSpecies_oneThread,&patienteur,&waiterMutex,familyBegin,familyEnd);
 	    tg.add_thread(currThread);
 	}
@@ -235,11 +235,11 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	Waiter patienteur2(&cout, nbFamilies, '#');
 	boost::thread_group tg;
 	unsigned int blockSize = families.size() / nbThreads;
+	cout << "Multithreaded operation. Lot size : " << blockSize << endl;
 	for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
 	    vector<Family*>::iterator familyBegin, familyEnd;
 	    familyBegin = families.begin() + (blockSize*currThreadIndex);
 	    if(currThreadIndex+1 != nbThreads) familyEnd = families.begin() + (blockSize*(currThreadIndex+1)); else familyEnd = families.end();
-	    cout << "Multithread. Lot size : " << blockSize << endl;
 	    boost::thread *currThread = new boost::thread(Family::threadWork_initialize,&patienteur2,&waiterMutex,familyBegin,familyEnd);
 	    tg.add_thread(currThread);
 	}
