@@ -230,6 +230,7 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 		patienteur.step();
 		
 	}
+	patienteur.drawFinal();
 	
 	cout << "Initializing families:" << endl;
 	Waiter patienteur2(&cout, nbFamilies, '#');
