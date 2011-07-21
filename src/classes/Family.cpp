@@ -389,11 +389,16 @@ void Family::doMapping_NodesToTaxa(){
 }
 
 void Family::threadWork_initialize(Waiter *waiter, boost::mutex *waiterMutex, std::vector<tpms::Family*>::iterator &familiesBegin, std::vector<tpms::Family*>::iterator &familiesEnd){
+    unsigned int waiterUpdate = 0;
     for(vector<Family*>::iterator currFamily = familiesBegin; currFamily != familiesEnd; currFamily++){
 	(*currFamily)->initialize();
-	waiterMutex->lock();
-	waiter->step();
-	waiterMutex->unlock();
+	waiterUpdate++;
+	if(waiterUpdate == 50){
+	    waiterUpdate = 0;
+	    waiterMutex->lock();
+	    waiter->step(50);
+	    waiterMutex->unlock();
+	}
     }
 }
 

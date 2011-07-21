@@ -27,7 +27,7 @@ class Waiter {
     Waiter(std::ostream * pOutput,int pTotal, char pIndic);
     Waiter(std::ostream * pOutput, char pIndic);
     ~Waiter();
-    void step();
+    void step(unsigned int step = 1);
     void setDone(int newDone);
     int getDone();
     void drawFinal();

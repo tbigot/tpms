@@ -22,8 +22,8 @@ Waiter::~Waiter(){
   
 }
 
-void Waiter::step(){
-  setDone(done+1);
+void Waiter::step(unsigned int step){
+  setDone(done+step);
 }
 
 int Waiter::getDone() {
