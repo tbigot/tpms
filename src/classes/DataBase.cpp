@@ -239,7 +239,7 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	    vector<Family*>::iterator familyBegin, familyEnd;
 	    familyBegin = families.begin() + (blockSize*currThreadIndex);
 	    if(currThreadIndex+1 != nbThreads) familyEnd = families.begin() + (blockSize*(currThreadIndex+1)); else familyEnd = families.end();
-	    cout << "Un thread de " << (blockSize*currThreadIndex) << " à " << blockSize*(currThreadIndex+1) << endl;
+	    cout << "Multithread. Lot size : " << blockSize << endl;
 	    boost::thread *currThread = new boost::thread(Family::threadWork_initialize,&patienteur2,&waiterMutex,familyBegin,familyEnd);
 	    tg.add_thread(currThread);
 	}
