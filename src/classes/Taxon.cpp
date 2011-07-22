@@ -15,6 +15,7 @@ Taxon::Taxon(string name, Node* nodeInSpTree,DataBase &database): name(name), db
 void Taxon::genRelations(){
     genDescendantsList(nodeInSpTree);
     genAncestorsList(00);
+    depth = ancestors.size();
 }
 
 
@@ -122,6 +123,11 @@ tpms::Taxon* Taxon::findSmallestCommonTaxon(set<Taxon*> taxa){
     }
     if(currTaxon->containsAllTheseSpecies(taxa)) return(currTaxon);
     else return(00);
+}
+
+
+unsigned int Taxon::getDepth(){
+   return(depth);    
 }
 
 }

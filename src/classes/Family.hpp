@@ -32,6 +32,7 @@ private:
     bpp::TreeTemplate<bpp::Node> * tree;
     std::map<std::string,tpms::Taxon*> mne2tax;
     std::set<tpms::Taxon*> species;
+    bool containsUndefinedSequences;
     
     // before initialization: these objects are deleted after initialization
     std::stringstream *preamble;
@@ -46,7 +47,7 @@ private:
     std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * orignNode);
 
     
-    void mapNodeOnTaxon(bpp::Node& node);
+    unsigned int mapNodeOnTaxon(bpp::Node& node, bpp::Node* origin=00);
     
     void writeRefTreeToFile(std::string path);
     void writeSpTreeToFile(std::string path);
@@ -67,6 +68,7 @@ public:
     std::string getName();
     bpp::TreeTemplate<bpp::Node> * getTree();
     
+    bool getContainsUndefinedSequences();
     
     void doMapping_NodesToUnicityScores();
     void doMapping_NodesToBestUnicityScores();
@@ -74,6 +76,8 @@ public:
     void doMapping_NodesToNatures();
     void doMapping_NodesToTaxa();
     
+    
+    void doMapping_NodesToLowestTaxa();
     
     tpms::Taxon* getSpeciesOfNode(bpp::Node * node);
     NodeNature getNatureOfNode(bpp::Node * node);

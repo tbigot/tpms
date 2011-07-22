@@ -23,7 +23,7 @@ using namespace tpms;
 
 
 namespace tpms{
-Family::Family(stringstream* sIntro, string* sNewick, DataBase* dbp): db(dbp), preamble(sIntro), newick(sNewick) {
+Family::Family(stringstream* sIntro, string* sNewick, DataBase* dbp): db(dbp), preamble(sIntro), newick(sNewick), containsUndefinedSequences(false) {
     
 }
 
@@ -107,8 +107,10 @@ void Family::doMapping_LeavesToSpecies(){
     mapping_NodesToTaxa.resize(tree->getNodes().size());
     for(vector<Node *>::iterator leave = leaves.begin(); leave != leaves.end(); leave++){
 	std::map<string,Taxon*>::iterator found = mne2tax.find((*leave)->getName());
-	if(found==mne2tax.end())
+	if(found==mne2tax.end()){
+	    containsUndefinedSequences=true;
 	    cout << "Danger: The sequence " << (*leave)->getName() << " has not been associated to a species in family " << name << "." << endl;
+	}
 	mapping_NodesToTaxa.at((*leave)->getId())=found->second;
     }
 }
@@ -170,6 +172,35 @@ void Family::doMapping_NodesToBestUnicityScores() {
     
     // after reroot, nodes id might have changed, we must recalculate scores
     doMapping_NodesToUnicityScores();
+    
+}
+
+
+void Family::doMapping_NodesToLowestTaxa() {
+    doMapping_LeavesToSpecies();
+    unsigned int initDepth = mapNodeOnTaxon(*tree->getRootNode());
+    unsigned int currDepthSum;
+    unsigned int lowestDepthSum;
+    Node * bestRoot = 00;
+    vector<Node *> nodes = tree->getNodes();
+    for(vector<Node *>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++) {
+	if((*currNode)->isLeaf()) continue;
+	doMapping_LeavesToSpecies();
+	currDepthSum = mapNodeOnTaxon(**currNode);
+	if(mapping_NodesToTaxa.at((*currNode)->getId())==00) continue;
+	if(bestRoot == 00 || currDepthSum <  lowestDepthSum){
+	    // we've found a first or better root candidate
+	    bestRoot = *currNode;
+	    lowestDepthSum = currDepthSum;
+	}
+    }
+    
+    
+    tree->rootAt(bestRoot);
+    doMapping_NodesToTaxa();
+    if(mapping_NodesToTaxa.at(tree->getRootId()) == 0)
+	return;
+    if(initDepth != lowestDepthSum) cout << "init=" << initDepth << " finale=" << lowestDepthSum << endl;
     
 }
 
@@ -314,19 +345,22 @@ std::string Family::getName(){
     return(name);
 }
 
-void Family::mapNodeOnTaxon(bpp::Node & node){
+unsigned int Family::mapNodeOnTaxon(bpp::Node & node, bpp::Node* origin){
     unsigned int currNodeID = node.getId();
-    vector<Node*> sons = node.getSons();
-    if(sons.size() == 0) // BASE CASE: leaf
+    vector<Node*> neighbors = node.getNeighbors();
+    if(neighbors.size() == 1) // BASE CASE: leaf
     {
-	return;
+	return(1);
     }
     set<Taxon*> taxaListOnSons;
-    for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
-	mapNodeOnTaxon(**currSon);
-	taxaListOnSons.insert(mapping_NodesToTaxa[(*currSon)->getId()]);
+    unsigned int depthSum=0;
+    for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor != neighbors.end(); currNeighbor++){
+	if(*currNeighbor == origin) continue;
+	depthSum += mapNodeOnTaxon(**currNeighbor,&node);
+	taxaListOnSons.insert(mapping_NodesToTaxa[(*currNeighbor)->getId()]);
     }
     mapping_NodesToTaxa.at(currNodeID) = Taxon::findSmallestCommonTaxon(taxaListOnSons);
+    return(depthSum);
     
 }
 
@@ -407,7 +441,8 @@ void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Famil
 void Family::threadedWork_oneThread(void(Family::*function)(),Waiter *progressbar, boost::mutex *progressbarMutex, std::vector<tpms::Family*>::iterator &currPartBegin, std::vector<tpms::Family*>::const_iterator &currPartEnd){
     unsigned int waiterUpdate = 0;
     for(vector<Family*>::iterator currFamily = currPartBegin; currFamily != currPartEnd; currFamily++){
-	(*currFamily->*function)();
+	if(!(*currFamily)->getContainsUndefinedSequences())
+	    (*currFamily->*function)();
 	waiterUpdate++;
 	if(waiterUpdate == 50){
 	    waiterUpdate = 0;
@@ -418,5 +453,9 @@ void Family::threadedWork_oneThread(void(Family::*function)(),Waiter *progressba
     }
 }
 
+
+bool Family::getContainsUndefinedSequences(){
+ return(containsUndefinedSequences);
+}
 
 }

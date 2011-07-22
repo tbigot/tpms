@@ -11,6 +11,7 @@ namespace tpms{
     class Taxon{
 	private:
 	    std::string name;
+	    unsigned int depth;
 	    std::set<tpms::Taxon*> ancestors;
 	    std::set<tpms::Taxon*> descendants;
 	    DataBase &db;
@@ -37,6 +38,11 @@ namespace tpms{
 	    
 	    void genRelations();
 	    static tpms::Taxon* findSmallestCommonTaxon(std::set<tpms::Taxon*> taxa);
+	    
+	    
+	    // computes distance between this taxon and "taxon"
+	    // positive distance = "taxon" is an ancestor of this taxon
+	    unsigned int getDepth();
 	    
     };
 }

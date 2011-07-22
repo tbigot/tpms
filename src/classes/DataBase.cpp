@@ -100,6 +100,18 @@ void DataBase::doFamiliesMapping_NodesToTaxa() {
 
 }
 
+void DataBase::doFamiliesMapping_NodesToLowestTaxa() {
+    // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
+    doFamiliesMapping_LeavesToSpecies();
+    if(!mappingDone_NodesToTaxa){
+	cout << "Mapping nodes to Taxa:" << endl;
+	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToLowestTaxa,nbThreads);
+	mappingDone_NodesToTaxa = true;
+    }
+
+}
+
+
 void DataBase::doFamiliesMapping_NodesToUnicityScores() {
     doFamiliesMapping_LeavesToSpecies();
 	cout << "UnicityScores computing:" << endl;
