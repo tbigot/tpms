@@ -27,7 +27,7 @@ namespace fs = boost::filesystem;
 
 namespace tpms{
 
-DataBase::DataBase(string path, unsigned int nbThreads): mappingDone_NodesToTaxa(false), mappingDone_LeavesToSpecies(false), nbThreads(nbThreads) {
+DataBase::DataBase(string path, unsigned int nbThreads): mappingDone_NodesToTaxa(false), mappingDone_LeavesToSpecies(false), mappingDone_NodesToUnicityScores(false), nbThreads(nbThreads) {
 	
 	// checking this file exists
 	fs::path dbFile(path);
@@ -78,94 +78,42 @@ DataBase::DataBase(string path, unsigned int nbThreads): mappingDone_NodesToTaxa
 
 bpp::TreeTemplate<bpp::Node> * DataBase::getSpeciesTree() { return(speciesTree); }
 
-// void DataBase::doFamiliesMapping_LeavesToSpecies() {
-//     if(!mappingDone_LeavesToSpecies){
-// 	cout << "Mapping leaves to Species:" << endl;
-// 	Waiter patienteur(&cout, nbFamilies, '#');
-// 	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-// 	    (*currFamily)->doMapping_LeavesToSpecies();
-// 	    patienteur.step();
-// 	} 
-//     mappingDone_LeavesToSpecies = true;
-//     patienteur.drawFinal();
-//     }
-// }
 
-// 
 void DataBase::doFamiliesMapping_LeavesToSpecies() {
     // multithreading version
     if(!mappingDone_LeavesToSpecies){
-	cout << "Mapping leaves to Species:" << endl;
-	Waiter patienteur(&cout, nbFamilies, '#');
-	boost::thread_group tg;
-	unsigned int blockSize = families.size() / nbThreads;
-	cout << "Multithreaded operation. Lot size : " << blockSize << endl;
-	for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
-	    vector<Family*>::iterator familyBegin, familyEnd;
-	    familyBegin = families.begin() + (blockSize*currThreadIndex);
-	    if(currThreadIndex+1 != nbThreads) familyEnd = families.begin() + (blockSize*(currThreadIndex+1)); else familyEnd = families.end();
-	    boost::thread *currThread = new boost::thread(doFamiliesMapping_LeavesToSpecies_oneThread,&patienteur,&waiterMutex,familyBegin,familyEnd);
-	    tg.add_thread(currThread);
-	}
-	tg.join_all();
-	mappingDone_LeavesToSpecies = true;
-	patienteur.drawFinal();
+	cout << "Mapping leaves to species:" << endl;
+	Family::threadedWork_launchJobs(families,&Family::doMapping_LeavesToSpecies,nbThreads);
     }
-}
-
-void DataBase::doFamiliesMapping_LeavesToSpecies_oneThread(Waiter *waiter, boost::mutex *waiterMutex, vector<Family*>::iterator &familiesBegin, vector<Family*>::iterator &familiesEnd) {
-	for(vector<Family*>::iterator currFamily = familiesBegin; currFamily != familiesEnd; currFamily++){
-	    (*currFamily)->doMapping_LeavesToSpecies();
-	    waiterMutex->lock();
-	    waiter->step();
-	    waiterMutex->unlock();
-	} 
-    
-	
+    mappingDone_LeavesToSpecies=true;
 }
 
 
 void DataBase::doFamiliesMapping_NodesToTaxa() {
     // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
     doFamiliesMapping_LeavesToSpecies();
-    
     if(!mappingDone_NodesToTaxa){
 	cout << "Mapping nodes to Taxa:" << endl;
-	Waiter patienteur(&cout, nbFamilies, '#');
-	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    (*currFamily)->doMapping_NodesToTaxa();
-	    patienteur.step();
-	}
-    mappingDone_NodesToTaxa = true;
-    patienteur.drawFinal();
+	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToTaxa,nbThreads);
+	mappingDone_NodesToTaxa = true;
     }
-	
+
 }
 
 void DataBase::doFamiliesMapping_NodesToUnicityScores() {
-    if(!mappingDone_NodesToUnicityScores) {
-	Waiter patienteur(&cout, nbFamilies, 'o');
-	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    (*currFamily)->doMapping_NodesToUnicityScores();
-	    patienteur.step();
-	}
+    doFamiliesMapping_LeavesToSpecies();
+	cout << "UnicityScores computing:" << endl;
+	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToUnicityScores,nbThreads);
 	mappingDone_NodesToUnicityScores = true;
-	patienteur.drawFinal();
-    }
 }
+
 
 void DataBase::doFamiliesMapping_NodesToBestUnicityScores() {
-    if(!mappingDone_NodesToUnicityScores) {
-	Waiter patienteur(&cout, nbFamilies, 'o');
-	for(vector<Family*>::iterator currFamily = families.begin(); currFamily != families.end(); currFamily++){
-	    (*currFamily)->doMapping_NodesToBestUnicityScores();
-	    patienteur.step();
-	}
+    doFamiliesMapping_LeavesToSpecies();
+	cout << "UnicityScores computing:" << endl;
+	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToBestUnicityScores,nbThreads);
 	mappingDone_NodesToUnicityScores = true;
-	patienteur.drawFinal();
-    }
 }
-
 
 void DataBase::loadFromFile(ifstream & RAPfile) {
 	// on extrait les lignes
@@ -232,21 +180,10 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	}
 	patienteur.drawFinal();
 	
-	cout << "Initializing families:" << endl;
-	Waiter patienteur2(&cout, nbFamilies, '#');
-	boost::thread_group tg;
-	unsigned int blockSize = families.size() / nbThreads;
-	cout << "Multithreaded operation. Lot size : " << blockSize << endl;
-	for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
-	    vector<Family*>::iterator familyBegin, familyEnd;
-	    familyBegin = families.begin() + (blockSize*currThreadIndex);
-	    if(currThreadIndex+1 != nbThreads) familyEnd = families.begin() + (blockSize*(currThreadIndex+1)); else familyEnd = families.end();
-	    boost::thread *currThread = new boost::thread(Family::threadWork_initialize,&patienteur2,&waiterMutex,familyBegin,familyEnd);
-	    tg.add_thread(currThread);
-	}
-	tg.join_all();
-	patienteur2.drawFinal();
+	// initializing families
 	
+	Family::threadedWork_launchJobs(families,&Family::initialize, nbThreads);
+
 	
 }
 
@@ -315,27 +252,6 @@ bool DataBase::taxonExists(string ptax) {
 		return(false);
 	}
 }
-
-// int DataBase::nbFamiliesContaining(string pTax){
-// 	// première possibilité : on a déjà fait la recherche
-// 	map<string,int>::iterator nbIt = nbFC.find(pTax);
-// 	if(nbIt != nbFC.end()) return(nbIt->second);
-// 	
-// 	// deuxième cas, il faut faire la recherche et lister les familles
-// 	int result = 0;
-// 	
-// 	// on développe le taxon
-// 	set<string> tMembers = getDescendants(pTax); // contient la liste de toutes les taxons appartenant au taxon pTax
-// 	
-// 	for(vector<Family *>::iterator oneFam = families.begin(); oneFam != families.end(); oneFam++) {
-// 		bool auMoinsUnTaxonPourCetteFamille = false;
-// 		for(set<string>::iterator unTaxon = tMembers.begin(); !auMoinsUnTaxonPourCetteFamille && unTaxon != tMembers.end(); unTaxon++)
-// 			auMoinsUnTaxonPourCetteFamille = auMoinsUnTaxonPourCetteFamille || (*oneFam)->getSpecies()->find(*unTaxon) != (*oneFam)->getSpecies()->end();
-// 		if(auMoinsUnTaxonPourCetteFamille) result++;
-// 	}
-// 	nbFC.insert(pair<string,int>(pTax,result));
-// 	return(result);
-// }
 
 
 // fonction récursive qui retourne le noms de tous les noeuds sous un noeud

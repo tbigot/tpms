@@ -388,16 +388,36 @@ void Family::doMapping_NodesToTaxa(){
     mapNodeOnTaxon(*tree->getRootNode());
 }
 
-void Family::threadWork_initialize(Waiter *waiter, boost::mutex *waiterMutex, std::vector<tpms::Family*>::iterator &familiesBegin, std::vector<tpms::Family*>::iterator &familiesEnd){
+
+void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Family::*function)(), unsigned int nbThreads){
+    unsigned int nbFamilies = families.size();
+    Waiter progressbar(&cout, nbFamilies, '#');
+    boost::mutex progressbarMutex;
+    boost::thread_group tg;
+    unsigned int blockSize = nbFamilies / nbThreads;
+    cout << "Multithreaded operation. We use " << nbThreads << " threads. Lot size : " << blockSize << endl;
+    for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
+	vector<Family*>::iterator currPartBegin;
+	vector<Family*>::const_iterator currPartEnd;
+	currPartBegin = families.begin() + (blockSize*currThreadIndex);
+	if(currThreadIndex+1 != nbThreads) currPartEnd = families.begin() + (blockSize*(currThreadIndex+1)); else currPartEnd = families.end();
+	boost::thread *currThread = new boost::thread(Family::threadedWork_oneThread,function,&progressbar,&progressbarMutex,currPartBegin,currPartEnd);
+	tg.add_thread(currThread);
+    }
+    tg.join_all();
+    progressbar.drawFinal();
+}
+
+void Family::threadedWork_oneThread(void(Family::*function)(),Waiter *progressbar, boost::mutex *progressbarMutex, std::vector<tpms::Family*>::iterator &currPartBegin, std::vector<tpms::Family*>::const_iterator &currPartEnd){
     unsigned int waiterUpdate = 0;
-    for(vector<Family*>::iterator currFamily = familiesBegin; currFamily != familiesEnd; currFamily++){
-	(*currFamily)->initialize();
+    for(vector<Family*>::iterator currFamily = currPartBegin; currFamily != currPartEnd; currFamily++){
+	(*currFamily->*function)();
 	waiterUpdate++;
 	if(waiterUpdate == 50){
 	    waiterUpdate = 0;
-	    waiterMutex->lock();
-	    waiter->step(50);
-	    waiterMutex->unlock();
+	    progressbarMutex->lock();
+	    progressbar->step(50);
+	    progressbarMutex->unlock();
 	}
     }
 }

@@ -27,6 +27,9 @@ int main(int argc, char *argv[]) {
 	cout << nbThreads << " threads will be used." << endl;
 	DataBase dbTest(args.getArg("database"),nbThreads);
 	dbTest.doFamiliesMapping_LeavesToSpecies();
+	dbTest.doFamiliesMapping_NodesToTaxa();
+	dbTest.doFamiliesMapping_NodesToUnicityScores();
+
 	
 	
 	
