@@ -31,11 +31,13 @@ namespace tpms{
 	    std::set<tpms::Taxon*>& getDescendants();
 	    std::set<tpms::Taxon*>& getAncestors();
 	    tpms::Taxon* getDirectAncestor();
+	    bool hasDirectAncestor();
 	    bool hasAncestor();
 	    bool containsAllTheseSpecies(std::set<tpms::Taxon*> species);
 	    
 	    void genRelations();
 	    static tpms::Taxon* findSmallestCommonTaxon(std::set<tpms::Taxon*> taxa);
+	    
     };
 }
 #else

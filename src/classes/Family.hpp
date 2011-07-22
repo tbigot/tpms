@@ -38,7 +38,6 @@ private:
     std::string *newick;
    
     
-    std::vector<tpms::Taxon*> mapping_LeavesToSpecies;
     std::vector<NodeNature> mapping_NodesToNatures;
     std::vector<unsigned int> mapping_NodesToUnicityScores;
     std::vector<Taxon *> mapping_NodesToTaxa;

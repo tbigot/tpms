@@ -244,15 +244,6 @@ string DataBase::getParentTaxon(string pTaxon, unsigned int level) {
 	return(pNode->getName());
 }
 
-bool DataBase::taxonExists(string ptax) {
-	try{
-		speciesTree->getNode(ptax);
-		return(true);
-	} catch (bpp::NodeNotFoundException e) {
-		return(false);
-	}
-}
-
 
 // fonction récursive qui retourne le noms de tous les noeuds sous un noeud
 

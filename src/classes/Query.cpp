@@ -70,10 +70,7 @@ Query::Query(string queryLine, string defaultsParams) {
 	
 }
 
-string Query::getPatternString() {
-	// return("(" + sourceTaxon + ",(!" + sourceTaxon + ",(!" + sourceTaxon + "," + targetTaxon + ")));");
-	return("(!" + sourceTaxon + ",(!" + sourceTaxon + "," + targetTaxon + "));");
-}
+
 
 string Query::getTarget() { return(targetTaxon); }
 
@@ -87,16 +84,5 @@ unsigned int Query::getMonophilyLevel() { return(monophilyLevel); }
 
 unsigned int Query::getDepth() { return(verifDepth); }
 
-bool Query::check(DataBase * db){
-	if(!db->taxonExists(sourceTaxon)) {
-		cerr << "###ERR : Taxon source " << sourceTaxon << " inconnu" << endl;
-		return(false);
-	}
-	if(!db->taxonExists(targetTaxon)) {
-		cerr << "###ERR : Taxon cible " << targetTaxon << " inconnu" << endl;
-		return(false);
-	}
-	
-	return(true);
-}
+
 }

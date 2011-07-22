@@ -33,7 +33,7 @@ class Query {
 		std::vector<unsigned int> getBootstraps();
 		std::vector<unsigned int> getSourceRates();
 		
-		bool check(DataBase * db);
+    
 };
 }
 #else

@@ -58,7 +58,6 @@ class DataBase {
 		std::vector<Family *> & getFamilies();
 		unsigned int getNbFamilies();
 		std::string getParentTaxon(std::string pTaxon, unsigned int level);
-		bool taxonExists(std::string ptax);
 		
 		
 

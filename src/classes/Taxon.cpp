@@ -33,10 +33,14 @@ void Taxon::genAncestorsList(Node* localNode)
         genAncestorsList(localNode->getFather());
     
     if(firstTime){
-	if(localNode->hasFather() && localNode->getFather()->hasName())
-	    directAncestor = db.nameToTaxon(localNode->getFather()->getName());
-	else
+	Node* currNode = localNode;
+	do{
+	if(currNode->hasFather() && currNode->getFather()->hasName()){
+	    directAncestor = db.nameToTaxon(currNode->getFather()->getName());
+	    currNode = currNode->getFather();
+	} else
 	    directAncestor = 00;
+	} while (directAncestor != 00 && directAncestor->getName() == name);
     }
 }
 
@@ -90,6 +94,9 @@ Taxon* Taxon::getDirectAncestor()
     return(directAncestor);
 }
 
+bool Taxon::hasDirectAncestor(){
+    return(directAncestor != 00);
+}
 
 bool Taxon::containsAllTheseSpecies(std::set< Taxon* > species)
 {
@@ -103,9 +110,16 @@ bool Taxon::containsAllTheseSpecies(std::set< Taxon* > species)
 
 tpms::Taxon* Taxon::findSmallestCommonTaxon(set<Taxon*> taxa){
     //starting with the first taxon
-    Taxon *currTaxon = *(taxa.begin());
-    while(currTaxon->hasAncestor() && !currTaxon->containsAllTheseSpecies(taxa))
+    set<Taxon*>::iterator currTaxonIt = taxa.begin();
+    // to manage unresolved nodes : propagates unresolution to nodes
+    while(*currTaxonIt == 00 && currTaxonIt != taxa.end()) currTaxonIt++;
+    if(*currTaxonIt == 00) return 00;
+    
+    Taxon *currTaxon = *currTaxonIt;
+   
+    while(currTaxon->hasDirectAncestor() && !currTaxon->containsAllTheseSpecies(taxa)){
 	currTaxon = currTaxon->getDirectAncestor();
+    }
     if(currTaxon->containsAllTheseSpecies(taxa)) return(currTaxon);
     else return(00);
 }

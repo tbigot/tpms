@@ -104,13 +104,14 @@ void Family::initialize(){
 	doMapping_NodesToNatures();
 }
 
-void Family::doMapping_LeavesToSpecies
-
-(){
-    vector<Node *> leaves = tree->getNodes();
-    mapping_LeavesToSpecies.resize(leaves.size());
+void Family::doMapping_LeavesToSpecies(){
+    vector<Node *> leaves = tree->getLeaves();
+    mapping_NodesToTaxa.resize(tree->getNodes().size());
     for(vector<Node *>::iterator leave = leaves.begin(); leave != leaves.end(); leave++){
-	mapping_LeavesToSpecies.at((*leave)->getId())=mne2tax[(*leave)->getName()];
+	std::map<string,Taxon*>::iterator found = mne2tax.find((*leave)->getName());
+	if(found==mne2tax.end())
+	    cout << "Danger: The sequence " << (*leave)->getName() << " has not been associated to a species in family " << name << "." << endl;
+	mapping_NodesToTaxa.at((*leave)->getId())=found->second;
     }
 }
 
@@ -192,7 +193,7 @@ map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<unsigned int
     }
     
     if(neighbors.size() == 1){ // leave case
-	    thisNodeCount.insert(pair<Taxon*,unsigned int>(mapping_LeavesToSpecies.at(id),1));
+	    thisNodeCount.insert(pair<Taxon*,unsigned int>(mapping_NodesToTaxa.at(id),1));
 	    
     }
     
@@ -263,7 +264,7 @@ bool Family::containsSpecie(Taxon* taxon) {
 
 
 Taxon* Family::getSpeciesOfNode(Node* node){
-    return(mapping_LeavesToSpecies.at(node->getId()));
+    return(mapping_NodesToTaxa.at(node->getId()));
 }
 
 // bool Family::containsSpecies(set<string> speciesList) {
@@ -321,14 +322,12 @@ void Family::mapNodeOnTaxon(bpp::Node & node){
     vector<Node*> sons = node.getSons();
     if(sons.size() == 0) // BASE CASE: leaf
     {
-	mapping_NodesToTaxa.at(currNodeID) = mapping_LeavesToSpecies.at(node.getId());
 	return;
     }
     set<Taxon*> taxaListOnSons;
     for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
 	mapNodeOnTaxon(**currSon);
-	taxaListOnSons.insert(mapping_NodesToTaxa
-[(*currSon)->getId()]);
+	taxaListOnSons.insert(mapping_NodesToTaxa[(*currSon)->getId()]);
     }
     mapping_NodesToTaxa.at(currNodeID) = Taxon::findSmallestCommonTaxon(taxaListOnSons);
     
@@ -375,7 +374,7 @@ void Family::getTaxaOnThisSubtree(Node* node, std::vector< Taxon* >& speciesList
 	getTaxaOnThisSubtree(*currSon,speciesList);
     }
     if(sons.size() == 0) // leave case, return the species of this leave
-	speciesList.push_back(mapping_LeavesToSpecies.at(node->getId()));
+	speciesList.push_back(mapping_NodesToTaxa.at(node->getId()));
 }
 
 set<Taxon *> &Family::getSpecies(){
@@ -384,7 +383,6 @@ set<Taxon *> &Family::getSpecies(){
 
 void Family::doMapping_NodesToTaxa(){
     // initializing the node2Taxon vector
-    mapping_NodesToTaxa.resize(tree->getNumberOfNodes());
     mapNodeOnTaxon(*tree->getRootNode());
 }
 
