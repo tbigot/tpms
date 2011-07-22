@@ -100,8 +100,6 @@ void Family::initialize(){
 	delete newick;
 	delete preamble;
 	
-	doMapping_LeavesToSpecies();
-	doMapping_NodesToNatures();
 }
 
 void Family::doMapping_LeavesToSpecies(){
@@ -115,8 +113,7 @@ void Family::doMapping_LeavesToSpecies(){
     }
 }
 
-void Family::doMapping_NodesToNatures
-(){
+void Family::doMapping_NodesToNatures(){
     vector<Node *> nodes = tree->getNodes();
     mapping_NodesToNatures.resize(nodes.size());
     for(vector<Node *>::iterator node = nodes.begin(); node != nodes.end(); node++){
@@ -384,6 +381,7 @@ set<Taxon *> &Family::getSpecies(){
 void Family::doMapping_NodesToTaxa(){
     // initializing the node2Taxon vector
     mapNodeOnTaxon(*tree->getRootNode());
+    if(species.find(00) != species.end()) cout << "Exclusion de la famille " << name << endl;
 }
 
 

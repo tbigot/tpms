@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 	DataBase dbTest(args.getArg("database"),nbThreads);
 	dbTest.doFamiliesMapping_LeavesToSpecies();
 	dbTest.doFamiliesMapping_NodesToTaxa();
-	dbTest.doFamiliesMapping_NodesToUnicityScores();
+	dbTest.doFamiliesMapping_NodesToBestUnicityScores();
 
 	
 	
