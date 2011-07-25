@@ -23,24 +23,24 @@ using namespace tpms;
 
 
 namespace tpms{
-Family::Family(stringstream* sIntro, string* sNewick, DataBase* dbp): db(dbp), preamble(sIntro), newick(sNewick), containsUndefinedSequences(false) {
+    Family::Family(stringstream* sIntro, string* sNewick, DataBase* dbp): db(dbp), preamble(sIntro), newick(sNewick), containsUndefinedSequences(false) {
+	
+    }
     
-}
-
-
-void Family::initialize(){
-    // extraction du nom de la famille
-    string currLigne;
-    getline(*preamble,currLigne);
-    istringstream sFamilleName(currLigne);
-    sFamilleName >> name;
-    // extraction des synonymes
-    getline(*preamble, currLigne);
-    if(currLigne.at(0) != '[') std::cerr << "Bracket (newick comments beginning) expected at family " << name << endl;
     
-    // cas du fichier avec deux arbres en plus (concerne les arbres réconciliés
-    getline(*preamble, currLigne);
-    if(currLigne.at(0) == '#') { getline(*preamble, currLigne);getline(*preamble, currLigne);getline(*preamble, currLigne);} // on saute ces lignes
+    void Family::initialize(){
+	// extraction du nom de la famille
+	string currLigne;
+	getline(*preamble,currLigne);
+	istringstream sFamilleName(currLigne);
+	sFamilleName >> name;
+	// extraction des synonymes
+	getline(*preamble, currLigne);
+	if(currLigne.at(0) != '[') std::cerr << "Bracket (newick comments beginning) expected at family " << name << endl;
+	   
+	   // cas du fichier avec deux arbres en plus (concerne les arbres réconciliés
+	getline(*preamble, currLigne);
+	if(currLigne.at(0) == '#') { getline(*preamble, currLigne);getline(*preamble, currLigne);getline(*preamble, currLigne);} // on saute ces lignes
 	
 	bool mneFini;
 	bool specFini;
@@ -60,12 +60,12 @@ void Family::initialize(){
 	    for(unsigned int i = 0; !specFini && i <currLigne.size(); i++) {
 		lecar = currLigne.at(i);
 		if(lecar == '"') mneFini=true;
-		else if (lecar == ':') specFini=true;
-		else {
-		    if(mneFini) espece << lecar;
-		    else mnemonique << lecar;
-		}
-		
+	   else if (lecar == ':') specFini=true;
+	   else {
+	       if(mneFini) espece << lecar;
+	   else mnemonique << lecar;
+	   }
+	   
 	    }
 	    
 	    // removing commas (that are forbidden in species names)
@@ -78,10 +78,10 @@ void Family::initialize(){
 	    
 	    Taxon * currTaxon = db->nameToTaxon(cleanSpeciesName.str());
 	    if(currTaxon != 00){
-	      mne2tax.insert(pair<string,Taxon *>(mnemonique.str(),currTaxon ));
-	      species.insert(currTaxon);
+		mne2tax.insert(pair<string,Taxon *>(mnemonique.str(),currTaxon ));
+		species.insert(currTaxon);
 	    } else {
-	      cout << "o Unable to find this specie in the species tree:" << cleanSpeciesName.str() << endl;
+		cout << "o Unable to find this specie in the species tree:" << cleanSpeciesName.str() << endl;
 	    }
 	    
 	    getline(*preamble, currLigne);
@@ -95,7 +95,7 @@ void Family::initialize(){
 	tree = tpms::TreeTools::newickToTree(*newick,false);
 	
 	/*if(tree->getNumberOfNodes() != tree2->getNumberOfNodes()) cout << "Incoherence famille " << _name << " bpp=" << tree->getNumberOfNodes() << " tpms=" <<tree2->getNumberOfNodes() << endl  ;
-	*/
+	 */
 	
 	delete newick;
 	delete preamble;
@@ -177,30 +177,29 @@ void Family::doMapping_NodesToBestUnicityScores() {
 
 
 void Family::doMapping_NodesToLowestTaxa() {
-    doMapping_LeavesToSpecies();
-    unsigned int initDepth = mapNodeOnTaxon(*tree->getRootNode());
-    unsigned int currDepthSum;
-    unsigned int lowestDepthSum;
+    unsigned int initDepthSum, currDepthSum;
+    unsigned int highestDepthSum = 0;
     Node * bestRoot = 00;
     vector<Node *> nodes = tree->getNodes();
+    
+    // we’ll try each node as the root, and see taxonomic mapping
     for(vector<Node *>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++) {
-	if((*currNode)->isLeaf()) continue;
-	doMapping_LeavesToSpecies();
-	currDepthSum = mapNodeOnTaxon(**currNode);
-	if(mapping_NodesToTaxa.at((*currNode)->getId())==00) continue;
-	if(bestRoot == 00 || currDepthSum <  lowestDepthSum){
+	if((*currNode)->isLeaf()) continue; // we don’t want to root by a leaf
+	mapNodeOnTaxon(true,**currNode);
+	currDepthSum = 0;
+	for(vector<Taxon*>::iterator currTaxon = mapping_NodesToTaxa.begin(); currTaxon != mapping_NodesToTaxa.end(); currTaxon++)
+	    currDepthSum += (*currTaxon)->getDepth();
+	if(bestRoot == 00 || currDepthSum > highestDepthSum){
 	    // we've found a first or better root candidate
 	    bestRoot = *currNode;
-	    lowestDepthSum = currDepthSum;
+	    highestDepthSum = currDepthSum;
 	}
     }
     
-    
     tree->rootAt(bestRoot);
     doMapping_NodesToTaxa();
-    if(mapping_NodesToTaxa.at(tree->getRootId()) == 0)
-	return;
-    if(initDepth != lowestDepthSum) cout << "init=" << initDepth << " finale=" << lowestDepthSum << endl;
+    // DEBUG to see depth sum medification
+    // cout << initDepth << "->" << highestDepthSum << endl;
     
 }
 
@@ -209,15 +208,15 @@ map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<unsigned int
     map<Taxon*, unsigned int> thisNodeCount;
     
     // step 1 : this node count
-        
+    
     vector<Node *> neighbors = node->getNeighbors();
     for(vector<Node *>::iterator currSon = neighbors.begin(); currSon < neighbors.end(); currSon ++) {
 	if(*currSon == origin) continue;
-	map<Taxon*,unsigned int> currSonCount = compute_UnicityScoreOnNode(scores,*currSon,node);
+	   map<Taxon*,unsigned int> currSonCount = compute_UnicityScoreOnNode(scores,*currSon,node);
 	// adding this new map to the current
-	for(map<Taxon*,unsigned int>::iterator currCount = currSonCount.begin(); currCount != currSonCount.end(); currCount++){	    
-	    thisNodeCount[currCount->first] += currCount->second;
-	}
+	   for(map<Taxon*,unsigned int>::iterator currCount = currSonCount.begin(); currCount != currSonCount.end(); currCount++){	    
+	       thisNodeCount[currCount->first] += currCount->second;
+	   }
     }
     
     if(neighbors.size() == 1){ // leave case
@@ -229,19 +228,19 @@ map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<unsigned int
     unsigned int score = 1;
     
     for(map<Taxon*,unsigned int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
-	 score *= currCount->second;
+	score *= currCount->second;
     }    
     
     scores[id] = score;
-        
+    
     return(thisNodeCount);
 }
 
 void Family::writeTreeToStream(Node* root, ostream & sortie, unsigned int deep){
     for(unsigned int i=0; i< deep; i++) sortie << " ";
-    if(root->hasName()) sortie << root->getName();
-    else sortie << "<NONAME>";
-    sortie << endl;
+	   if(root->hasName()) sortie << root->getName();
+	   else sortie << "<NONAME>";
+	   sortie << endl;
     for(unsigned int i = 0; i < root->getNumberOfSons() ; i++)
 	writeTreeToStream(root->getSon(i), sortie, deep+1);
 }
@@ -249,7 +248,7 @@ void Family::writeTreeToStream(Node* root, ostream & sortie, unsigned int deep){
 
 int Family::numberOfNodesBetween(Node * ancestor, Node * pnode){
     if(ancestor == pnode) return 0;
-    else return(1+numberOfNodesBetween(ancestor, pnode->getFather()));
+	   else return(1+numberOfNodesBetween(ancestor, pnode->getFather()));
 }
 
 
@@ -262,7 +261,7 @@ void Family::deleteFromLeavesToBif(Node * pnode){
 	    deleteFromLeavesToBif(father);
 	else
 	    father->removeSon(pnode);
-        delete pnode;
+	delete pnode;
     } else cout << "deleteFromLeavesToBif : On essaye de supprimer la racine !!!" << endl;
 }
 
@@ -296,8 +295,8 @@ Taxon* Family::getSpeciesOfNode(Node* node){
 }
 
 // bool Family::containsSpecies(set<string> speciesList) {
-//     bool answer = true;
-//     for(set<string>::iterator specie = speciesList.begin(); answer && specie != speciesList.end(); specie++)
+	    //     bool answer = true;
+	    //     for(set<string>::iterator specie = speciesList.begin(); answer && specie != speciesList.end(); specie++)
 // 	answer = answer && containsSpecie(*specie);
 //     
 //     return(answer);
@@ -306,9 +305,9 @@ Taxon* Family::getSpeciesOfNode(Node* node){
 
 void Family::getLeavesFromNode(Node* pnode, std::vector< Node* >& leaves){
     if(pnode->isLeaf()) leaves.push_back(pnode);
-    else
-	for(unsigned int sonNr = 0; sonNr < pnode->getNumberOfSons() ; sonNr ++)
-	    getLeavesFromNode(pnode->getSon(sonNr),leaves);
+	   else
+	       for(unsigned int sonNr = 0; sonNr < pnode->getNumberOfSons() ; sonNr ++)
+		   getLeavesFromNode(pnode->getSon(sonNr),leaves);
 }
 
 
@@ -345,22 +344,27 @@ std::string Family::getName(){
     return(name);
 }
 
-unsigned int Family::mapNodeOnTaxon(bpp::Node & node, bpp::Node* origin){
+Taxon* Family::mapNodeOnTaxon(bool recordResult,bpp::Node & node, bpp::Node* origin,bool recursive, bpp::Node* ignoredNode){
     unsigned int currNodeID = node.getId();
     vector<Node*> neighbors = node.getNeighbors();
-    if(neighbors.size() == 1) // BASE CASE: leaf
+    if(neighbors.size() == 1 || !recursive) // BASE CASE: leaf, or don’t continue if asked
     {
-	return(1);
+	return(mapping_NodesToTaxa.at(currNodeID));
     }
     set<Taxon*> taxaListOnSons;
-    unsigned int depthSum=0;
+ 
+    // if the ignored node is in the sons no need to keep the funciton recursive: nothing has changed
+    if(ignoredNode!=00 &&  find(neighbors.begin(),neighbors.end(),ignoredNode) != neighbors.end())
+	recursive = false;
+    
+    //collecting taxa on sons (neighbors without origin)
     for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor != neighbors.end(); currNeighbor++){
-	if(*currNeighbor == origin) continue;
-	depthSum += mapNodeOnTaxon(**currNeighbor,&node);
-	taxaListOnSons.insert(mapping_NodesToTaxa[(*currNeighbor)->getId()]);
+	if(*currNeighbor == origin || *currNeighbor == ignoredNode) continue;
+	taxaListOnSons.insert(mapNodeOnTaxon(recordResult,**currNeighbor,&node,recursive,ignoredNode));
     }
-    mapping_NodesToTaxa.at(currNodeID) = Taxon::findSmallestCommonTaxon(taxaListOnSons);
-    return(depthSum);
+    Taxon* currTaxon = Taxon::findSmallestCommonTaxon(taxaListOnSons);
+    if(recordResult) mapping_NodesToTaxa.at(currNodeID) = currTaxon ;
+    return(currTaxon);
     
 }
 
@@ -370,9 +374,9 @@ void Family::addSequencesNames(Node * currNode)
     Node * seqNode = tree->getNode(currNode->getId());
     string oldname;
     if(currNode->hasName()) oldname = currNode->getName();
-    if(seqNode->hasName()&& currNode->isLeaf()) currNode->setName(oldname + "=" + seqNode->getName());
-    else currNode->deleteName();
-    vector<Node*> sons = currNode->getSons();
+	   if(seqNode->hasName()&& currNode->isLeaf()) currNode->setName(oldname + "=" + seqNode->getName());
+	   else currNode->deleteName();
+	   vector<Node*> sons = currNode->getSons();
     for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++)
 	addSequencesNames(*currSon);
 }
@@ -381,8 +385,8 @@ void Family::labelWithSequencesNames(Node * currNode)
 {
     Node * seqNode = tree->getNode(currNode->getId());
     if(seqNode->hasName()&& currNode->isLeaf()) currNode->setName(seqNode->getName());
-    else currNode->deleteName();
-    vector<Node*> sons = currNode->getSons();
+	   else currNode->deleteName();
+	   vector<Node*> sons = currNode->getSons();
     for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++)
 	labelWithSequencesNames(*currSon);
 }
@@ -409,13 +413,21 @@ void Family::getTaxaOnThisSubtree(Node* node, std::vector< Taxon* >& speciesList
 }
 
 set<Taxon *> &Family::getSpecies(){
- return species;   
+    return species;   
 }
 
 void Family::doMapping_NodesToTaxa(){
-    // initializing the node2Taxon vector
-    mapNodeOnTaxon(*tree->getRootNode());
-    if(species.find(00) != species.end()) cout << "Exclusion de la famille " << name << endl;
+    mapNodeOnTaxon(true,*tree->getRootNode());
+}
+
+void Family::doMapping_NodesToTaxonomicShift(){
+    // initializing the vector
+    vector<Node*> nodes = tree->getNodes();
+    mapping_NodesToTaxonomicShift.resize(nodes.size());
+    for(vector<Node*>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++){
+	computeMappingShiftWithoutTheNode(*currNode);
+    }
+    
 }
 
 
@@ -425,13 +437,13 @@ void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Famil
     boost::mutex progressbarMutex;
     boost::thread_group tg;
     unsigned int blockSize = nbFamilies / nbThreads;
-    cout << "Multithreaded operation. We use " << nbThreads << " threads. Lot size : " << blockSize << endl;
+    cout << "Multithreaded operation. Number of threads: " << nbThreads << ". Lot size : " << blockSize << endl;
     for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
 	vector<Family*>::iterator currPartBegin;
 	vector<Family*>::const_iterator currPartEnd;
 	currPartBegin = families.begin() + (blockSize*currThreadIndex);
 	if(currThreadIndex+1 != nbThreads) currPartEnd = families.begin() + (blockSize*(currThreadIndex+1)); else currPartEnd = families.end();
-	boost::thread *currThread = new boost::thread(Family::threadedWork_oneThread,function,&progressbar,&progressbarMutex,currPartBegin,currPartEnd);
+	   boost::thread *currThread = new boost::thread(Family::threadedWork_oneThread,function,&progressbar,&progressbarMutex,currPartBegin,currPartEnd);
 	tg.add_thread(currThread);
     }
     tg.join_all();
@@ -455,7 +467,24 @@ void Family::threadedWork_oneThread(void(Family::*function)(),Waiter *progressba
 
 
 bool Family::getContainsUndefinedSequences(){
- return(containsUndefinedSequences);
+    return(containsUndefinedSequences);
 }
+
+unsigned int Family::computeMappingShiftWithoutTheNode(Node* node){
+    if(!(node->hasFather() && node->getFather()->hasFather()))
+	return(0);
+    Node* grandFatherNode = node->getFather()->getFather();
+    Node* grandFatherNodeFather = 00;
+    if(grandFatherNode->hasFather()) grandFatherNodeFather = grandFatherNode->getFather();
+    Taxon* initialGfTaxon = mapping_NodesToTaxa[grandFatherNode->getId()];
+    Taxon* newTaxon = mapNodeOnTaxon(false,*grandFatherNode,grandFatherNodeFather,true,node);
+    
+    mapping_NodesToTaxonomicShift[node->getId()] = newTaxon->getDepth() - initialGfTaxon->getDepth();
+    
+    //DEBUG: printing result
+    //cout << "Initial Taxon Assignation : " << initialGfTaxon->getName() << ". Final : " << newTaxon->getName() << ". Difference : " << mapping_NodesToTaxonomicShift[node->getId()] << endl;
+    
+}
+
 
 }

@@ -104,7 +104,7 @@ void DataBase::doFamiliesMapping_NodesToLowestTaxa() {
     // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
     doFamiliesMapping_LeavesToSpecies();
     if(!mappingDone_NodesToTaxa){
-	cout << "Mapping nodes to Taxa:" << endl;
+	cout << "Mapping nodes to Lowest Taxa:" << endl;
 	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToLowestTaxa,nbThreads);
 	mappingDone_NodesToTaxa = true;
     }
@@ -114,17 +114,23 @@ void DataBase::doFamiliesMapping_NodesToLowestTaxa() {
 
 void DataBase::doFamiliesMapping_NodesToUnicityScores() {
     doFamiliesMapping_LeavesToSpecies();
-	cout << "UnicityScores computing:" << endl;
-	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToUnicityScores,nbThreads);
-	mappingDone_NodesToUnicityScores = true;
+    cout << "UnicityScores computing:" << endl;
+    Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToUnicityScores,nbThreads);
+    mappingDone_NodesToUnicityScores = true;
 }
 
 
 void DataBase::doFamiliesMapping_NodesToBestUnicityScores() {
     doFamiliesMapping_LeavesToSpecies();
-	cout << "UnicityScores computing:" << endl;
-	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToBestUnicityScores,nbThreads);
-	mappingDone_NodesToUnicityScores = true;
+    cout << "UnicityScores computing:" << endl;
+    Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToBestUnicityScores,nbThreads);
+    mappingDone_NodesToUnicityScores = true;
+}
+
+void DataBase::doFamiliesMapping_NodesToTaxonomicShift(){
+    doFamiliesMapping_LeavesToSpecies();
+    cout << "Nodes to taxonomic shift (grandfather affectation change):" << endl;
+    Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToTaxonomicShift,nbThreads);
 }
 
 void DataBase::loadFromFile(ifstream & RAPfile) {

@@ -74,6 +74,7 @@ class DataBase {
 		void doFamiliesMapping_NodesToUnicityScores();
 		void doFamiliesMapping_NodesToBestUnicityScores();
 		void doFamiliesMapping_NodesToLowestTaxa();
+		void doFamiliesMapping_NodesToTaxonomicShift();
 		
 		std::set<std::string> * getSpecies();
 		tpms::Taxon* nameToTaxon(std::string taxonName);

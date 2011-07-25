@@ -42,12 +42,19 @@ private:
     std::vector<NodeNature> mapping_NodesToNatures;
     std::vector<unsigned int> mapping_NodesToUnicityScores;
     std::vector<Taxon *> mapping_NodesToTaxa;
+    std::vector<unsigned int> mapping_NodesToTaxonomicShift;
         
     
     std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * orignNode);
-
+    tpms::Taxon* mapNodeOnTaxon(bool recordResults, bpp::Node& node, bpp::Node* origin=00, bool recursive=true, bpp::Node* ignoredNode=00);
     
-    unsigned int mapNodeOnTaxon(bpp::Node& node, bpp::Node* origin=00);
+    /**
+     * @brief gives the difference of taxonomic assignation depth (in the species tree), of a grandfather of a certain node, removing this node
+     * 
+     * @param node the node we want to test
+     * @return (init depth - final depth) of the grandfather node without the node given as parameter
+     */
+    unsigned int computeMappingShiftWithoutTheNode(bpp::Node* node);
     
     void writeRefTreeToFile(std::string path);
     void writeSpTreeToFile(std::string path);
@@ -55,7 +62,7 @@ private:
     
     // utilities, unrelated to family, has to be moved to TreeTools
     void deleteFromLeavesToBif(bpp::Node * pnode);
-    bpp::Node * removeUniqueSons(bpp::Node* localRoot);   
+    bpp::Node * removeUniqueSons(bpp::Node* localRoot);
     
     
 public:
@@ -75,6 +82,7 @@ public:
     void doMapping_LeavesToSpecies();
     void doMapping_NodesToNatures();
     void doMapping_NodesToTaxa();
+    void doMapping_NodesToTaxonomicShift();
     
     
     void doMapping_NodesToLowestTaxa();
