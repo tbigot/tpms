@@ -22,6 +22,12 @@ namespace tpms{
 
 class Family {
     
+struct transfer {
+	tpms::Taxon* donnor;
+	tpms::Taxon* receiver;
+	unsigned int perturbationIndex;
+    };
+    
 private:
     
     enum NodeNature {ANY, DUPLICATION, SPECIATION};
@@ -31,7 +37,13 @@ private:
     DataBase * db;
     bpp::TreeTemplate<bpp::Node> * tree;
     std::map<std::string,tpms::Taxon*> mne2tax;
-    std::set<tpms::Taxon*> species;
+    std::set<tpms::Taxon*> taxa;
+    /**
+     * @brief contains the list of original leaves of the tree. Even after a subtree deletion, we can know weather a node matches to a sequence (which is associated to a species).
+     */
+    std::set<bpp::Node*> leaves;
+    
+    
     bool containsUndefinedSequences;
     
     // before initialization: these objects are deleted after initialization
@@ -43,6 +55,26 @@ private:
     std::vector<unsigned int> mapping_NodesToUnicityScores;
     std::vector<Taxon *> mapping_NodesToTaxa;
     std::vector<unsigned int> mapping_NodesToTaxonomicShift;
+    
+     /**
+     * @brief contains, after each step of doMapping_NodesToTaxonomicShift, the taxonomic affectation of a grandfather node of a node
+     */
+    std::vector<Taxon*> mapping_grandFatherWithoutThisNode;
+    
+    /**
+     * @brief contains, after each step of doMapping_NodesToTaxonomicShift, the list of nodes with a taxonomic shift > 1
+     */
+    std::set<bpp::Node*> computed_nodesInducingPerturbation;
+    
+    /**
+     * @brief returns true if at least one node of the tree is mapped to a taxonomic perturbation > 1
+     */
+    bool transfersRemaining();
+    
+    /**
+     * @brief this mapping list is filled by the function doMapping_detectTransfers; It contains the list of each detected transfer
+     */
+    std::vector<transfer> computed_detectedTransfers;
         
     
     std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * orignNode);
@@ -67,7 +99,7 @@ private:
     
 public:
     void initialize();
-
+    
     
     //constructeur à partir d'un fichier
     Family(std::stringstream* sIntro, std::string* sNewick, DataBase* dbp);
@@ -83,7 +115,7 @@ public:
     void doMapping_NodesToNatures();
     void doMapping_NodesToTaxa();
     void doMapping_NodesToTaxonomicShift();
-    
+    void compute_detectTransfers();
     
     void doMapping_NodesToLowestTaxa();
     

@@ -196,5 +196,22 @@ double TreeTools::getDistanceBetweenTwoNodes(Node* ancestor, Node* descendant)
 }
 
 
+void TreeTools::getNodesOfTheSubtree(vector<Node*> &nodeListToFill,Node* node)
+{
+    vector<Node*> sons = node->getSons();
+    nodeListToFill.insert(nodeListToFill.begin(),sons.begin(),sons.end());
+    for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++)
+	getNodesOfTheSubtree(nodeListToFill,*currSon);
+}
+
+void TreeTools::destroySubtree(Node* node)
+{
+    for(unsigned int i = 0; i < node->getNumberOfSons(); i++)
+    {
+	Node* son = node->getSon(i);
+	destroySubtree(son);
+	delete son;
+    }
+}
 
 } //fin namespace tpms

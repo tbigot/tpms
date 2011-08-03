@@ -79,7 +79,7 @@ namespace tpms{
 	    Taxon * currTaxon = db->nameToTaxon(cleanSpeciesName.str());
 	    if(currTaxon != 00){
 		mne2tax.insert(pair<string,Taxon *>(mnemonique.str(),currTaxon ));
-		species.insert(currTaxon);
+		taxa.insert(currTaxon);
 	    } else {
 		cout << "o Unable to find this specie in the species tree:" << cleanSpeciesName.str() << endl;
 	    }
@@ -104,12 +104,13 @@ namespace tpms{
 
 void Family::doMapping_LeavesToSpecies(){
     vector<Node *> leaves = tree->getLeaves();
-    mapping_NodesToTaxa.resize(tree->getNodes().size());
+    this->leaves.insert(leaves.begin(),leaves.end());
+    mapping_NodesToTaxa.resize(tree->getNumberOfNodes(),00);
     for(vector<Node *>::iterator leave = leaves.begin(); leave != leaves.end(); leave++){
 	std::map<string,Taxon*>::iterator found = mne2tax.find((*leave)->getName());
 	if(found==mne2tax.end()){
 	    containsUndefinedSequences=true;
-	    cout << "Danger: The sequence " << (*leave)->getName() << " has not been associated to a species in family " << name << "." << endl;
+	    cout << "Warning: The sequence " << (*leave)->getName() << " has not been associated to a species in family " << name << ". This familly will be ignored." << endl;
 	}
 	mapping_NodesToTaxa.at((*leave)->getId())=found->second;
     }
@@ -117,7 +118,7 @@ void Family::doMapping_LeavesToSpecies(){
 
 void Family::doMapping_NodesToNatures(){
     vector<Node *> nodes = tree->getNodes();
-    mapping_NodesToNatures.resize(nodes.size());
+    mapping_NodesToNatures.resize(tree->getNumberOfNodes());
     for(vector<Node *>::iterator node = nodes.begin(); node != nodes.end(); node++){
 	if((*node)->hasName() && (*node)->getName().at(0) == '#')
 	    mapping_NodesToNatures.at((*node)->getId())=DUPLICATION;
@@ -286,7 +287,7 @@ TreeTemplate<Node> * Family::getTree() {
 }
 
 bool Family::containsSpecie(Taxon* taxon) {
-    return(species.find(taxon)!=species.end());
+    return(taxa.find(taxon)!=taxa.end());
 }
 
 
@@ -347,10 +348,16 @@ std::string Family::getName(){
 Taxon* Family::mapNodeOnTaxon(bool recordResult,bpp::Node & node, bpp::Node* origin,bool recursive, bpp::Node* ignoredNode){
     unsigned int currNodeID = node.getId();
     vector<Node*> neighbors = node.getNeighbors();
-    if(neighbors.size() == 1 || !recursive) // BASE CASE: leaf, or don’t continue if asked
+    if(leaves.find(&node) != leaves.end() || !recursive) // BASE CASE: leaf, or don’t continue if asked
     {
 	return(mapping_NodesToTaxa.at(currNodeID));
     }
+    // dealing with the case: topological leaf but not a real leaf (removed subtree)
+    if(neighbors.size() == 1){
+	if(recordResult) mapping_NodesToTaxa.at(currNodeID)=00;
+	return 00;
+    }
+    
     set<Taxon*> taxaListOnSons;
  
     // if the ignored node is in the sons no need to keep the funciton recursive: nothing has changed
@@ -364,6 +371,7 @@ Taxon* Family::mapNodeOnTaxon(bool recordResult,bpp::Node & node, bpp::Node* ori
     }
     Taxon* currTaxon = Taxon::findSmallestCommonTaxon(taxaListOnSons);
     if(recordResult) mapping_NodesToTaxa.at(currNodeID) = currTaxon ;
+    taxa.insert(currTaxon);
     return(currTaxon);
     
 }
@@ -413,7 +421,7 @@ void Family::getTaxaOnThisSubtree(Node* node, std::vector< Taxon* >& speciesList
 }
 
 set<Taxon *> &Family::getSpecies(){
-    return species;   
+    return taxa;   
 }
 
 void Family::doMapping_NodesToTaxa(){
@@ -423,10 +431,85 @@ void Family::doMapping_NodesToTaxa(){
 void Family::doMapping_NodesToTaxonomicShift(){
     // initializing the vector
     vector<Node*> nodes = tree->getNodes();
-    mapping_NodesToTaxonomicShift.resize(nodes.size());
+    if(mapping_NodesToTaxonomicShift.empty()) // first using? Initialization
+	mapping_NodesToTaxonomicShift.resize(tree->getNumberOfNodes(),0);
+    computed_nodesInducingPerturbation.clear();
+    // we must fill the vector with zeros, or else, some parts of the algorithm could belive putative transfers still exist!
+    fill(mapping_NodesToTaxonomicShift.begin(),mapping_NodesToTaxonomicShift.end(),0);
+    
+    if(mapping_grandFatherWithoutThisNode.empty())
+	mapping_grandFatherWithoutThisNode.resize(tree->getNumberOfNodes());
     for(vector<Node*>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++){
-	computeMappingShiftWithoutTheNode(*currNode);
+	if(computeMappingShiftWithoutTheNode(*currNode) > 1)
+	    computed_nodesInducingPerturbation.insert(*currNode);
+	
     }
+    
+}
+
+bool Family::transfersRemaining(){
+    bool transfersRemaining = false;
+    for(vector<unsigned int>::iterator currPerturbation = mapping_NodesToTaxonomicShift.begin(); !transfersRemaining && currPerturbation != mapping_NodesToTaxonomicShift.end(); currPerturbation++){
+	transfersRemaining |= (*currPerturbation > 1);
+    }
+    return transfersRemaining;
+}
+
+void Family::compute_detectTransfers(){
+    // doing the first mapping:
+    doMapping_NodesToTaxonomicShift();
+    // then, we keep transfers that are not included in another
+    //FIXME it would be better to confirm bootstrap are sufficient
+    //for each potential transfer, (1) does this node include no transfer, (2) if yes, transfer confirmed
+    // forbiddenNodes contains all the nodes that we know they can’t be transfers, because they include potential transfers
+    while(transfersRemaining()){
+	set<Node*> forbiddenNodes;
+	for(set<Node *>::iterator node = computed_nodesInducingPerturbation.begin(); node != computed_nodesInducingPerturbation.end(); node++){
+	    // (1.0) it this node in forbidden nodes (it would mean that a descendant node has been found under this node)
+	    if(forbiddenNodes.find(*node) != forbiddenNodes.end()) continue;
+	    // (1.1) it is here possible a descendant of this node is a potential transfer, but has not yet been explored
+	    bool transferFoundInDescendants = false;
+	    vector<Node*> descendants;
+	    tpms::TreeTools::getNodesOfTheSubtree(descendants,*node);
+	    for(vector<Node*>::iterator currDescendant = descendants.begin(); !transferFoundInDescendants && currDescendant != descendants.end(); currDescendant++){
+		transferFoundInDescendants |= computed_nodesInducingPerturbation.find(*currDescendant) != computed_nodesInducingPerturbation.end();
+	    }
+	    if(transferFoundInDescendants) continue;
+	    
+	    
+	    // if we’re here, it means that “node” includes no transfer, we can consider it as a potential transfer, and so remove the subtree from the tree
+	    // first, we can blacklist all the ancestors (see 1.0)
+	    Node* nodeToBlacklist = *node;
+	    while(nodeToBlacklist->hasFather()){
+		nodeToBlacklist = nodeToBlacklist->getFather();
+		forbiddenNodes.insert(nodeToBlacklist);
+	    }
+	    
+	    // then we need to insert the transfer into transfers
+	    transfer currTransfer;
+	    currTransfer.donnor = mapping_NodesToTaxa.at((*node)->getId());
+	    currTransfer.receiver = mapping_grandFatherWithoutThisNode.at((*node)->getId());
+	    currTransfer.perturbationIndex = mapping_NodesToTaxonomicShift.at((*node)->getId());
+	    computed_detectedTransfers.push_back(currTransfer);
+	    
+	    // then, we prune the subtree
+	    (*node)->getFather()->removeSon(*node);
+	    tpms::TreeTools::destroySubtree(*node);
+	    delete *node;
+	    
+	}
+	doMapping_NodesToTaxa();
+	doMapping_NodesToTaxonomicShift();
+	cout << "PASS " << flush;
+    }
+    
+    // now, the gene tree should be congruent with the species tree.
+    // outputing the result
+    if(computed_detectedTransfers.size() > 1){
+    cout << name << " : ";
+    cout << computed_detectedTransfers.size() << " transfers detected. Original number of leaves : " << mne2tax.size() << ". Final number of leaves : " << tree->getNumberOfLeaves() << endl;}
+    
+    
     
 }
 
@@ -471,18 +554,23 @@ bool Family::getContainsUndefinedSequences(){
 }
 
 unsigned int Family::computeMappingShiftWithoutTheNode(Node* node){
-    if(!(node->hasFather() && node->getFather()->hasFather()))
+    if(!(node->hasFather() && node->getFather()->hasFather()) || node->getNeighbors().size() <= 2)
 	return(0);
     Node* grandFatherNode = node->getFather()->getFather();
     Node* grandFatherNodeFather = 00;
     if(grandFatherNode->hasFather()) grandFatherNodeFather = grandFatherNode->getFather();
-    Taxon* initialGfTaxon = mapping_NodesToTaxa[grandFatherNode->getId()];
+    Taxon* initialGfTaxon = mapping_NodesToTaxa.at(grandFatherNode->getId());
     Taxon* newTaxon = mapNodeOnTaxon(false,*grandFatherNode,grandFatherNodeFather,true,node);
     
-    mapping_NodesToTaxonomicShift[node->getId()] = newTaxon->getDepth() - initialGfTaxon->getDepth();
+    if(newTaxon == 00) return 0;
+    
+    mapping_NodesToTaxonomicShift[node->getId()] = Taxon::computeRelativeDepthDifference(initialGfTaxon,newTaxon,&taxa);
+    mapping_grandFatherWithoutThisNode[node->getId()] = newTaxon;
     
     //DEBUG: printing result
-    //cout << "Initial Taxon Assignation : " << initialGfTaxon->getName() << ". Final : " << newTaxon->getName() << ". Difference : " << mapping_NodesToTaxonomicShift[node->getId()] << endl;
+    unsigned int gain = mapping_NodesToTaxonomicShift[node->getId()];
+    if(gain > 1)
+	cout << newTaxon->getName() << "->" << (mapping_NodesToTaxa[node->getId()])->getName() << " GAIN: " << gain << endl;
     
 }
 

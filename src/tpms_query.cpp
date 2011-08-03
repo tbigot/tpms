@@ -28,8 +28,9 @@ int main(int argc, char *argv[]) {
 	DataBase dbTest(args.getArg("database"),nbThreads);
 	dbTest.doFamiliesMapping_LeavesToSpecies();
 	dbTest.doFamiliesMapping_NodesToTaxa();
-	dbTest.doFamiliesMapping_NodesToTaxonomicShift();
+	//dbTest.doFamiliesMapping_NodesToTaxonomicShift();
 	//dbTest.doFamiliesMapping_NodesToLowestTaxa();
+	dbTest.doFamiliesComputation_detectTransfers();
 
 	
 	

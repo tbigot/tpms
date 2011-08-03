@@ -130,4 +130,19 @@ unsigned int Taxon::getDepth(){
    return(depth);    
 }
 
+unsigned int Taxon::computeRelativeDepthDifference(Taxon* ancestor, Taxon* descendant, set<Taxon*>* taxaList)
+{
+    if(ancestor == descendant)
+	return 0;
+    if(descendant->hasDirectAncestor()){
+	unsigned int toAdd = 0;
+	if(taxaList->find(descendant) != taxaList->end()) toAdd = 1;
+	return(toAdd + computeRelativeDepthDifference(ancestor,descendant->getDirectAncestor(), taxaList));
+	
+    }
+    return 0;
+}
+
+
+
 }
