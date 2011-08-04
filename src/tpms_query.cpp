@@ -32,6 +32,7 @@ int main(int argc, char *argv[]) {
 	//dbTest.doFamiliesMapping_NodesToLowestTaxa();
 	ofstream output(string(args.getArg("output")+"/"+"transferDetection").c_str(),  ofstream::out);
 	dbTest.doFamiliesComputation_detectTransfers(&output);
+	output.close();
 
 	
 	

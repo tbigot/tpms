@@ -583,7 +583,7 @@ unsigned int Family::computeMappingShiftWithoutTheNode(Node* node){
     Taxon* initialGfTaxon = mapping_NodesToTaxa.at(grandFatherNode->getId());
     Taxon* newTaxon = mapNodeOnTaxon(false,*grandFatherNode,grandFatherNodeFather,true,node);
     
-    if(newTaxon == 00) return 0;
+    if(newTaxon == 00 || initialGfTaxon == 00) return 0;
     
     mapping_NodesToTaxonomicShift[node->getId()] = Taxon::computeRelativeDepthDifference(initialGfTaxon,newTaxon,&taxa);
     mapping_grandFatherWithoutThisNode[node->getId()] = newTaxon;
