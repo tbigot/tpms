@@ -114,7 +114,7 @@ tpms::Taxon* Taxon::findSmallestCommonTaxon(set<Taxon*> taxa){
     set<Taxon*>::iterator currTaxonIt = taxa.begin();
     // to manage unresolved nodes : propagates unresolution to nodes
     while(*currTaxonIt == 00 && currTaxonIt != taxa.end()) currTaxonIt++;
-    if(*currTaxonIt == 00) return 00;
+    if(*currTaxonIt == 00 || currTaxonIt==taxa.end()) return 00;
     
     Taxon *currTaxon = *currTaxonIt;
    

@@ -372,7 +372,6 @@ Taxon* Family::mapNodeOnTaxon(bool recordResult,bpp::Node & node, bpp::Node* ori
     Taxon* currTaxon = Taxon::findSmallestCommonTaxon(taxaListOnSons);
     if(recordResult) mapping_NodesToTaxa.at(currNodeID) = currTaxon ;
     taxa.insert(currTaxon);
-    if(currTaxon != 00) currTaxon->getName();
     return(currTaxon);
     
 }
