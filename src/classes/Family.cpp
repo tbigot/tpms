@@ -507,7 +507,7 @@ void Family::compute_detectTransfers(){
 	}
 	doMapping_NodesToTaxa();
 	doMapping_NodesToTaxonomicShift();
-	cout << "PASS " << flush;
+	cout << computed_detectedTransfers.size() << ',' << flush;
     }
     
     // now, the gene tree should be congruent with the species tree.
