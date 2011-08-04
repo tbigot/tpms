@@ -350,7 +350,7 @@ Taxon* Family::mapNodeOnTaxon(bool recordResult,bpp::Node & node, bpp::Node* ori
     vector<Node*> neighbors = node.getNeighbors();
     if(leaves.find(&node) != leaves.end() || !recursive) // BASE CASE: leaf, or don’t continue if asked
     {
-	if(!mapping_NodesToTaxa.at(currNodeID))
+	if(mapping_NodesToTaxa.at(currNodeID) == 0x1)
 	    cout << '\n' << mapping_NodesToTaxa.at(currNodeID) << endl;
 	return(mapping_NodesToTaxa.at(currNodeID));
     }
