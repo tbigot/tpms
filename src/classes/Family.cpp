@@ -555,7 +555,7 @@ void Family::threadedWork_oneThread(void(Family::*function)(),Waiter *progressba
 	    (*currFamily->*function)();
 	    if(output != 00){
 		outputMutex->lock();
-		*output << (*currFamily)->threadedWork_getResults();
+		*output << (*currFamily)->threadedWork_getResults().str();
 		outputMutex->unlock();
 	    }
 	}
