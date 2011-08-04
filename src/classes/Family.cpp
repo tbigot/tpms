@@ -494,7 +494,14 @@ void Family::compute_detectTransfers(){
 	    
 	    // then, we prune the subtree
 	    (*node)->getFather()->removeSon(*node);
-	    tpms::TreeTools::destroySubtree(*node);
+	    std::vector<Node*> nodesToDelete;
+	    tpms::TreeTools::getNodesOfTheSubtree(nodesToDelete,*node);
+	    for(vector<Node*>::iterator currNode = nodesToDelete.begin(); currNode != nodesToDelete.end(); currNode++){
+		set<Taxon*>::iterator taxonToDelete = taxa.find(mapping_NodesToTaxa.at((*currNode)->getId()));
+		if(taxonToDelete != taxa.end())
+		    taxa.erase(taxonToDelete);
+		delete *currNode;
+	    }
 	    delete *node;
 	    
 	}
