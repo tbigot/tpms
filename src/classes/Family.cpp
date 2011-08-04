@@ -575,10 +575,10 @@ unsigned int Family::computeMappingShiftWithoutTheNode(Node* node){
     mapping_grandFatherWithoutThisNode[node->getId()] = newTaxon;
     
     //DEBUG: printing result
-    unsigned int gain = mapping_NodesToTaxonomicShift[node->getId()];
-    if(gain > 1)
-	cout << newTaxon->getName() << "->" << (mapping_NodesToTaxa[node->getId()])->getName() << " GAIN: " << gain << endl;
-    
+//     unsigned int gain = mapping_NodesToTaxonomicShift[node->getId()];
+//     if(gain > 1)
+// 	cout << newTaxon->getName() << "->" << (mapping_NodesToTaxa[node->getId()])->getName() << " GAIN: " << gain << endl;
+//     
 }
 
 
