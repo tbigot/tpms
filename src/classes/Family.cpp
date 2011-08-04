@@ -522,7 +522,7 @@ void Family::compute_detectTransfers(){
 //     cout << computed_detectedTransfers.size() << " transfers detected. Original number of leaves : " << mne2tax.size() << ". Final number of leaves : " << tree->getNumberOfLeaves() << endl;}
     
     for(vector<transfer>::iterator currTransfer = computed_detectedTransfers.begin(); currTransfer != computed_detectedTransfers.end(); currTransfer++){
-	results << name << ',' << currTransfer->perturbationIndex << ',' << currTransfer->receiver << ',' << currTransfer->donnor << endl;
+	results << name << ',' << currTransfer->perturbationIndex << ',' << currTransfer->receiver->getName() << ',' << currTransfer->donnor->getName() << endl;
     }
     
 }
@@ -587,6 +587,7 @@ unsigned int Family::computeMappingShiftWithoutTheNode(Node* node){
     
     mapping_NodesToTaxonomicShift[node->getId()] = Taxon::computeRelativeDepthDifference(initialGfTaxon,newTaxon,&taxa);
     mapping_grandFatherWithoutThisNode[node->getId()] = newTaxon;
+    return(mapping_NodesToTaxonomicShift[node->getId()]);
     
     //DEBUG: printing result
 //     unsigned int gain = mapping_NodesToTaxonomicShift[node->getId()];
