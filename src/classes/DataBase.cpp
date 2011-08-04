@@ -133,10 +133,10 @@ void DataBase::doFamiliesMapping_NodesToTaxonomicShift(){
     Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToTaxonomicShift,nbThreads);
 }
 
-void DataBase::doFamiliesComputation_detectTransfers(){
+void DataBase::doFamiliesComputation_detectTransfers(ofstream * output){
     doFamiliesMapping_LeavesToSpecies();
     cout << "Transfers Detection:" << endl;
-    Family::threadedWork_launchJobs(families,&Family::compute_detectTransfers,nbThreads);
+    Family::threadedWork_launchJobs(families,&Family::compute_detectTransfers,nbThreads,output);
 }
 
 void DataBase::loadFromFile(ifstream & RAPfile) {

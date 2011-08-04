@@ -486,11 +486,15 @@ void Family::compute_detectTransfers(){
 	    }
 	    
 	    // then we need to insert the transfer into transfers
-	    transfer currTransfer;
-	    currTransfer.donnor = mapping_NodesToTaxa.at((*node)->getId());
-	    currTransfer.receiver = mapping_grandFatherWithoutThisNode.at((*node)->getId());
-	    currTransfer.perturbationIndex = mapping_NodesToTaxonomicShift.at((*node)->getId());
-	    computed_detectedTransfers.push_back(currTransfer);
+	    
+	    // only if the bootstrap is enough
+	    if((*node)->getBootstrapValue() >= .90 && (*node)->getFather()->getBootstrapValue() >= .90){
+		transfer currTransfer;
+		currTransfer.donnor = mapping_NodesToTaxa.at((*node)->getId());
+		currTransfer.receiver = mapping_grandFatherWithoutThisNode.at((*node)->getId());
+		currTransfer.perturbationIndex = mapping_NodesToTaxonomicShift.at((*node)->getId());
+		computed_detectedTransfers.push_back(currTransfer);
+	    }
 	    
 	    // then, we prune the subtree
 	    (*node)->getFather()->removeSon(*node);
@@ -507,24 +511,28 @@ void Family::compute_detectTransfers(){
 	}
 	doMapping_NodesToTaxa();
 	doMapping_NodesToTaxonomicShift();
-	cout << computed_detectedTransfers.size() << ',' << flush;
+// 	cout << computed_detectedTransfers.size() << ',' << flush;
     }
     
     // now, the gene tree should be congruent with the species tree.
     // outputing the result
-    if(computed_detectedTransfers.size() > 1){
-    cout << name << " : ";
-    cout << computed_detectedTransfers.size() << " transfers detected. Original number of leaves : " << mne2tax.size() << ". Final number of leaves : " << tree->getNumberOfLeaves() << endl;}
     
+//     if(computed_detectedTransfers.size() > 1){
+//     cout << name << " : ";
+//     cout << computed_detectedTransfers.size() << " transfers detected. Original number of leaves : " << mne2tax.size() << ". Final number of leaves : " << tree->getNumberOfLeaves() << endl;}
     
+    for(vector<transfer>::iterator currTransfer = computed_detectedTransfers.begin(); currTransfer != computed_detectedTransfers.end(); currTransfer++){
+	results << name << ',' << currTransfer->perturbationIndex << ',' << currTransfer->receiver << ',' << currTransfer->donnor << endl;
+    }
     
 }
 
 
-void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Family::*function)(), unsigned int nbThreads){
+void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Family::*function)(), unsigned int nbThreads, ostream *output){
     unsigned int nbFamilies = families.size();
     Waiter progressbar(&cout, nbFamilies, '#');
     boost::mutex progressbarMutex;
+    boost::mutex outputMutex;
     boost::thread_group tg;
     unsigned int blockSize = nbFamilies / nbThreads;
     cout << "Multithreaded operation. Number of threads: " << nbThreads << ". Lot size : " << blockSize << endl;
@@ -533,18 +541,24 @@ void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Famil
 	vector<Family*>::const_iterator currPartEnd;
 	currPartBegin = families.begin() + (blockSize*currThreadIndex);
 	if(currThreadIndex+1 != nbThreads) currPartEnd = families.begin() + (blockSize*(currThreadIndex+1)); else currPartEnd = families.end();
-	   boost::thread *currThread = new boost::thread(Family::threadedWork_oneThread,function,&progressbar,&progressbarMutex,currPartBegin,currPartEnd);
+	   boost::thread *currThread = new boost::thread(Family::threadedWork_oneThread,function,&progressbar,&progressbarMutex,output,&outputMutex,currPartBegin,currPartEnd);
 	tg.add_thread(currThread);
     }
     tg.join_all();
     progressbar.drawFinal();
 }
 
-void Family::threadedWork_oneThread(void(Family::*function)(),Waiter *progressbar, boost::mutex *progressbarMutex, std::vector<tpms::Family*>::iterator &currPartBegin, std::vector<tpms::Family*>::const_iterator &currPartEnd){
+void Family::threadedWork_oneThread(void(Family::*function)(),Waiter *progressbar, boost::mutex *progressbarMutex, ostream *output, boost::mutex *outputMutex , std::vector<tpms::Family*>::iterator &currPartBegin, std::vector<tpms::Family*>::const_iterator &currPartEnd){
     unsigned int waiterUpdate = 0;
     for(vector<Family*>::iterator currFamily = currPartBegin; currFamily != currPartEnd; currFamily++){
-	if(!(*currFamily)->getContainsUndefinedSequences())
+	if(!(*currFamily)->getContainsUndefinedSequences()){
 	    (*currFamily->*function)();
+	    if(output != 00){
+		outputMutex->lock();
+		*output << (*currFamily)->threadedWork_getResults();
+		outputMutex->unlock();
+	    }
+	}
 	waiterUpdate++;
 	if(waiterUpdate == 50){
 	    waiterUpdate = 0;
@@ -579,6 +593,12 @@ unsigned int Family::computeMappingShiftWithoutTheNode(Node* node){
 //     if(gain > 1)
 // 	cout << newTaxon->getName() << "->" << (mapping_NodesToTaxa[node->getId()])->getName() << " GAIN: " << gain << endl;
 //     
+}
+
+
+ostringstream& Family::threadedWork_getResults()
+{
+    return(results);
 }
 
 

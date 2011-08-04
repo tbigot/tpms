@@ -30,7 +30,8 @@ int main(int argc, char *argv[]) {
 	dbTest.doFamiliesMapping_NodesToTaxa();
 	//dbTest.doFamiliesMapping_NodesToTaxonomicShift();
 	//dbTest.doFamiliesMapping_NodesToLowestTaxa();
-	dbTest.doFamiliesComputation_detectTransfers();
+	ofstream output(string(args.getArg("output")+"/"+"transferDetection").c_str(),  ofstream::out);
+	dbTest.doFamiliesComputation_detectTransfers(&output);
 
 	
 	
