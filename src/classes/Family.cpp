@@ -350,6 +350,8 @@ Taxon* Family::mapNodeOnTaxon(bool recordResult,bpp::Node & node, bpp::Node* ori
     vector<Node*> neighbors = node.getNeighbors();
     if(leaves.find(&node) != leaves.end() || !recursive) // BASE CASE: leaf, or don’t continue if asked
     {
+	if(!mapping_NodesToTaxa.at(currNodeID))
+	    cout << '\n' << mapping_NodesToTaxa.at(currNodeID) << endl;
 	return(mapping_NodesToTaxa.at(currNodeID));
     }
     // dealing with the case: topological leaf but not a real leaf (removed subtree)
