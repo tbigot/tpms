@@ -27,15 +27,6 @@ int main(int argc, char *argv[]) {
 	cout << nbThreads << " threads will be used." << endl;
 	DataBase dbTest(args.getArg("database"),nbThreads);
 	dbTest.doFamiliesMapping_LeavesToSpecies();
-	dbTest.doFamiliesMapping_NodesToTaxa();
-	//dbTest.doFamiliesMapping_NodesToTaxonomicShift();
-	//dbTest.doFamiliesMapping_NodesToLowestTaxa();
-	ofstream output(string(args.getArg("output")+"/"+"transferDetection").c_str(),  ofstream::out);
-	dbTest.doFamiliesComputation_detectTransfers(&output);
-	output.close();
-
-	
-	
 	
 	
 	string fileName;
