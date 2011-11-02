@@ -35,7 +35,8 @@ DataBase::DataBase(string path, unsigned int nbThreads): mappingDone_NodesToTaxa
 	    cout << "The file "<< path << " does not exists, exiting."<< endl;
 	    exit(1);
 	}
-    
+	
+	filename = dbFile.filename().string();
     
     // ouverture du fichier
 	ifstream RAPfile(path.c_str(), ifstream::in);
@@ -78,6 +79,14 @@ DataBase::DataBase(string path, unsigned int nbThreads): mappingDone_NodesToTaxa
 
 bpp::TreeTemplate<bpp::Node> * DataBase::getSpeciesTree() { return(speciesTree); }
 
+std::string DataBase::getStatus(std::string preText){
+    ostringstream out;
+    out << preText << "Database Status" << endl;
+    out << preText << "  name\t" << filename<<endl;
+    out << preText << "  reconciled\t" << (reconciled?"yes":"no")<< endl;
+    out << preText << "  unicity scores computed\t" << (mappingDone_NodesToUnicityScores?"yes":"no")<< endl;
+    return(out.str());
+}
 
 void DataBase::doFamiliesMapping_LeavesToSpecies() {
     // multithreading version

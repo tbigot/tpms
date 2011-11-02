@@ -15,6 +15,7 @@
 
 using namespace std;
 using namespace bpp;
+using namespace tpms;
 
 int main(int argc, char *argv[]) {
     try{
@@ -26,10 +27,10 @@ int main(int argc, char *argv[]) {
 	ofstream out(args.getArg("output").c_str(),ofstream::out);
 	
 	cout << "Building loading species trees." << endl;
-	currDB.iNeedSpeciesTrees(true,string("cache"),true);
+	currDB.doFamiliesMapping_LeavesToSpecies();
 	
 	cout << "Generating UnicityScores (may take a while, please have a coffe - ask Jos)." << endl;
-	currDB.genBestUnicityScores();
+	currDB.doFamiliesMapping_NodesToBestUnicityScores();
 	
 	// liste des familles
 	vector<Family*> & dbFamilies = currDB.getFamilies();

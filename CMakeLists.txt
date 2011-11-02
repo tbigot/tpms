@@ -61,8 +61,8 @@ target_link_libraries(tpms_query bpp-phyl bpp-core bpp-seq ${Boost_LIBRARIES})
 add_executable(tpms_mkdb src/tpms_mkdb.cpp ${classes})
 target_link_libraries(tpms_mkdb bpp-phyl bpp-core bpp-seq bpp-raa ${Boost_LIBRARIES})
 
-add_executable(tpms_unicity src/tpms_unicity.cpp ${classes})
-target_link_libraries(tpms_unicity bpp-phyl bpp-core bpp-seq bpp-raa ${Boost_LIBRARIES})
+add_executable(tpms_computations src/tpms_computations.cpp ${classes})
+target_link_libraries(tpms_computations bpp-phyl bpp-core bpp-seq bpp-raa ${Boost_LIBRARIES})
 
 
 #add_executable(tpms_mkdb_static src/tpms_mkdb.cpp ${classes})

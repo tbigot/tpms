@@ -230,7 +230,10 @@ map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<unsigned int
     
     for(map<Taxon*,unsigned int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
 	score *= currCount->second;
+	if(score > 20000) cout << score << ',' << flush;
     }    
+    
+    if(score == 0) cout << "PLOP MORTEL" << endl;
     
     scores[id] = score;
     
