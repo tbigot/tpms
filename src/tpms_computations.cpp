@@ -42,9 +42,9 @@ void save_to_file(tpms::DataBase& collection, std::string path, annotationsTypes
 
 void print_menu(){
     cout << "\n  +----------------------------\n  |        MENU" << endl;
-    cout << "  |\n  |SCORING\n  |=======\n  |   A1) annotate with unicity scores\n  |   A2) annotate with bipartition scores"<< endl;
-    cout << "  |\n  |RE-ROOTING\n  |==========\n  |   R1) reroot with unicity criteria\n  |   R2) reroot with taxonomic criteria" << endl;
-    cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |    M) help menu\n  |    S) SAVE COLLECTION IN A NEW FILE"<< endl;
+    cout << "  |\n  |SCORING\n  |=======\n  |   AU) annotate with unicity scores\n  |   AB) annotate with bipartition scores"<< endl;
+    cout << "  |\n  |RE-ROOTING\n  |==========\n  |   RU) reroot with unicity criteria\n  |   RT) reroot with taxonomic criteria" << endl;
+    cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |    M) help menu\n  |    SU) Save collection with Unicity scores"<< endl;
     cout << "  |    Q) QUIT"<< endl;
     
 }
@@ -118,19 +118,19 @@ int main(int argc, char *argv[]) {
 	
 	command = get_choice();
     
-	if(command == "A1"){
+	if(command == "AU"){
 	    cout << "Scoring: annotate with unicity scores" << endl;
 	    collection.doFamiliesMapping_NodesToUnicityScores();
 	    
-	}else if(command =="A2"){
+	}else if(command =="AB"){
 	    cout << "Scoring: annotate with bipartition scores" << endl;
 	    cout << "not available yet" << endl;
-	}else if(command == "R1"){
+	}else if(command == "RU"){
 	    cout << "Re-rooting with unicity criteria" << endl;
 	    
 	    collection.doFamiliesMapping_NodesToBestUnicityScores();
 	    
-	}else if(command == "R2"){
+	}else if(command == "RT"){
 	    cout << "Re-root with taxonomic criteria" << endl;
 	}else if(command == "Q" || command.empty()){
 	    cout << "Bye" << endl;
@@ -138,6 +138,8 @@ int main(int argc, char *argv[]) {
 	    print_menu();
 	}else if(command == "T"){
 	    print_status(collection);
+	}else if(command == "SU"){
+	    save_to_file(collection,args.getArg("output-dir")+"/ANNOTATEDunicityscores",UNICITY);
 	} else {
 	    cout << "The choice " << command << " is not possible." <<endl;
 	}
