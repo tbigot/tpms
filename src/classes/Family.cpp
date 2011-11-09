@@ -6,6 +6,7 @@
 #include <string>
 #include <numeric>
 #include <ios>
+#include <math.h>
 
 #include <Bpp/Phyl/Tree.h>
 #include <Bpp/Phyl/Io/Newick.h>
@@ -136,11 +137,11 @@ void Family::doMapping_NodesToBestUnicityScores() {
     // in this function, we'll try all nodes as potential roots, and keep the topology that gets the lower scores sum
     // then, the tree is rerooted
     
-    vector<unsigned int> currScores;
-    vector<unsigned int> bestScores;
+    vector<float> currScores;
+    vector<float> bestScores;
     Node * bestRoot = 00;
-    unsigned int bestScoresSum;
-    unsigned int currScoresSum;
+    float bestScoresSum;
+    float currScoresSum;
     currScores.resize(tree->getNumberOfNodes());
     vector<Node *> nodes = tree->getNodes();
     for(vector<Node *>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++) {
@@ -154,9 +155,9 @@ void Family::doMapping_NodesToBestUnicityScores() {
 	    bestScoresSum = currScoresSum;
 	}
     }
-    // here, we've the best root in bestRoot: we have to reRoot
-    // indicating a new outgroup (not to have a trifurcated root)
-    // FIXME:tree->rootAt(bestRoot);
+    
+    
+    // Step 2: rerooting at the best place (testing sons, find the best outgroup)
     
     vector<Node *> sons = bestRoot->getNeighbors();
     Node* bestOutgroup = 00;
@@ -204,11 +205,11 @@ void Family::doMapping_NodesToLowestTaxa() {
     
 }
 
-map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<unsigned int> &scores, Node * node, Node * origin){
+map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<float> &scores, Node * node, Node * origin){
     unsigned int id = node->getId();
     map<Taxon*, unsigned int> thisNodeCount;
     
-    // step 1 : this node count
+    // step 1: filling the species counts from this node
     
     vector<Node *> neighbors = node->getNeighbors();
     for(vector<Node *>::iterator currSon = neighbors.begin(); currSon < neighbors.end(); currSon ++) {
@@ -225,15 +226,12 @@ map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<unsigned int
 	    
     }
     
-    // step 2 : this node score computation
-    unsigned int score = 1;
+    // step 2: Score computation on this node
+    float score = 0;
     
     for(map<Taxon*,unsigned int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
-	score *= currCount->second;
-	if(score > 20000) cout << score << ',' << flush;
+	score += log(currCount->second);
     }    
-    
-    if(score == 0) cout << "PLOP MORTEL" << endl;
     
     scores[id] = score;
     
@@ -402,7 +400,7 @@ void Family::labelWithSequencesNames(Node * currNode)
 	labelWithSequencesNames(*currSon);
 }
 
-std::vector< unsigned int >& Family::getUnicityScores()
+std::vector<float>& Family::getUnicityScores()
 {
     return(mapping_NodesToUnicityScores);
 }

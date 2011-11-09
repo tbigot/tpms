@@ -58,7 +58,7 @@ private:
    
     
     std::vector<NodeNature> mapping_NodesToNatures;
-    std::vector<unsigned int> mapping_NodesToUnicityScores;
+    std::vector<float> mapping_NodesToUnicityScores;
     std::vector<Taxon *> mapping_NodesToTaxa;
     std::vector<unsigned int> mapping_NodesToTaxonomicShift;
     
@@ -83,7 +83,7 @@ private:
     std::vector<transfer> computed_detectedTransfers;
         
     
-    std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<unsigned int> &scores, bpp::Node * node, bpp::Node * orignNode);
+    std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<float> &scores, bpp::Node * node, bpp::Node * orignNode);
     tpms::Taxon* mapNodeOnTaxon(bool recordResults, bpp::Node& node, bpp::Node* origin=00, bool recursive=true, bpp::Node* ignoredNode=00);
     
     /**
@@ -138,7 +138,7 @@ public:
     void writeTreeToStream(bpp::Node* root, std::ostream& sortie, unsigned int deep);
     
     
-    std::vector<unsigned int> &getUnicityScores();
+    std::vector<float> &getUnicityScores();
     
     int numberOfNodesBetween(bpp::Node * ancestor, bpp::Node * pnode);
     

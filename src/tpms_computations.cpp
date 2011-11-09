@@ -74,7 +74,7 @@ void save_to_file(DataBase& collection, std::string path, annotationsTypes type)
     for(vector<Family*>::iterator currFamily = dbFamilies.begin(); currFamily != dbFamilies.end(); currFamily++){
 	patienteur.step();
 	
-	vector<unsigned int> scores;
+	vector<float> scores;
 	if(type == UNICITY)
 	    scores = (*currFamily)->getUnicityScores();
 	
@@ -126,7 +126,10 @@ int main(int argc, char *argv[]) {
 	    cout << "Scoring: annotate with bipartition scores" << endl;
 	    cout << "not available yet" << endl;
 	}else if(command == "R1"){
-	    cout << "Re-root with unicity criteria" << endl;
+	    cout << "Re-rooting with unicity criteria" << endl;
+	    
+	    collection.doFamiliesMapping_NodesToBestUnicityScores();
+	    
 	}else if(command == "R2"){
 	    cout << "Re-root with taxonomic criteria" << endl;
 	}else if(command == "Q" || command.empty()){
