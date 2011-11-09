@@ -230,7 +230,7 @@ map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<float> &scor
     float score = 0;
     
     for(map<Taxon*,unsigned int>::iterator currCount = thisNodeCount.begin(); currCount != thisNodeCount.end(); currCount++){
-	score += log(currCount->second);
+	score += log(float(currCount->second));
     }    
     
     scores[id] = score;
