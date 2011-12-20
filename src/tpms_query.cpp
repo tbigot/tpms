@@ -18,14 +18,14 @@ using namespace bpp;
 
 int main(int argc, char *argv[]) {
    try{
-    CmdLineArgs args(argc, argv, "database,output",cerr);
+    CmdLineArgs args(argc, argv, "collection,output-dir",cerr);
     args.print(cout);
 	istringstream nbThreadsSS(args.getArg("threads"));
 	unsigned int nbThreads;
 	nbThreadsSS >> nbThreads;
 	if(nbThreads < 1 || nbThreads > 128) nbThreads = 1;
 	cout << nbThreads << " threads will be used." << endl;
-	DataBase dbTest(args.getArg("database"),nbThreads);
+	DataBase dbTest(args.getArg("collection"),nbThreads);
 	dbTest.doFamiliesMapping_LeavesToSpecies();
 	
 	
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 
 	
 	while(fileName != ""){
-		ofstream ooo(string(args.getArg("output")+"/"+fileName).c_str(), ofstream::out);
+		ofstream ooo(string(args.getArg("output-dir")+"/"+fileName).c_str(), ofstream::out);
 		string queryLine;
 		cout << "Now enter the pattern in pseudo-newick formalism (please read the doc)\nPATTERN> " << flush;
 		getline(cin,queryLine);
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 			
 			unsigned int trouve = 0;
 			// DÉPOUILLAGE DES RÉSULTATS
-			cout << "\n   Writing results to the file " << args.getArg("output")+"/"+fileName << endl;
+			cout << "\n   Writing results to the file " << args.getArg("output-dir")+"/"+fileName << endl;
 			
 			cout << "   - Building all matching subtrees, this could take a while..." << endl;
 			
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
 			waitB.drawFinal();
 			cout << "   -[Done]\n" << endl;
 			ooo.close();
-			cout << "SELECTED: " << familles.size() << " / " << dbTest.getNbFamilies() << " families in the database." << endl;
+			cout << "SELECTED: " << familles.size() << " / " << dbTest.getNbFamilies() << " families in the collection." << endl;
 			cout << trouve << " patterns found." << endl;
 			
 		}catch (bpp::NodeNotFoundException e) {

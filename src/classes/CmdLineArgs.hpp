@@ -7,6 +7,11 @@
 #include <iostream>
 #include <vector>
 
+// Usage example:
+//  CmdLineArgs args(argc, argv, "collection,output-dir",cerr); à mettre au début du programme
+// pour appeler les arguments : args.getArg("collection") -> une string est retournée
+
+
 namespace tpms{
 
 class CmdLineArgs {

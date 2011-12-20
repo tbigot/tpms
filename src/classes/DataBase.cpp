@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 
+#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string.hpp>
@@ -36,7 +37,12 @@ DataBase::DataBase(string path, unsigned int nbThreads): mappingDone_NodesToTaxa
 	    exit(1);
 	}
 	
-	filename = dbFile.filename().string();
+	// using filesystem 3:
+	// filename = dbFile.filename().string();
+	
+	// but for compatibility, we use filesystem 2:
+	filename = dbFile.filename();
+	
     
     // ouverture du fichier
 	ifstream RAPfile(path.c_str(), ifstream::in);

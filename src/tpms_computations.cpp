@@ -44,7 +44,7 @@ void print_menu(){
     cout << "\n  +----------------------------\n  |        MENU" << endl;
     cout << "  |\n  |SCORING\n  |=======\n  |   AU) annotate with unicity scores\n  |   AB) annotate with bipartition scores"<< endl;
     cout << "  |\n  |RE-ROOTING\n  |==========\n  |   RU) reroot with unicity criteria\n  |   RT) reroot with taxonomic criteria" << endl;
-    cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |    M) help menu\n  |    SU) Save collection with Unicity scores"<< endl;
+    cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |    M) help menu\n  |   SU) Save collection with Unicity scores"<< endl;
     cout << "  |    Q) QUIT"<< endl;
     
 }
@@ -127,11 +127,12 @@ int main(int argc, char *argv[]) {
 	    cout << "not available yet" << endl;
 	}else if(command == "RU"){
 	    cout << "Re-rooting with unicity criteria" << endl;
-	    
 	    collection.doFamiliesMapping_NodesToBestUnicityScores();
 	    
 	}else if(command == "RT"){
-	    cout << "Re-root with taxonomic criteria" << endl;
+	    cout << "Re-rooting with taxonomic criteria" << endl;
+	    collection.doFamiliesMapping_NodesToLowestTaxa();
+	    
 	}else if(command == "Q" || command.empty()){
 	    cout << "Bye" << endl;
 	}else if(command == "M"){
@@ -139,7 +140,9 @@ int main(int argc, char *argv[]) {
 	}else if(command == "T"){
 	    print_status(collection);
 	}else if(command == "SU"){
-	    save_to_file(collection,args.getArg("output-dir")+"/ANNOTATEDunicityscores",UNICITY);
+	    string path = args.getArg("output-dir")+"/ANNOTATEDunicityscores";
+	    cout << "Saving to file" << path << endl;
+	    save_to_file(collection,path,UNICITY);
 	} else {
 	    cout << "The choice " << command << " is not possible." <<endl;
 	}
