@@ -44,10 +44,6 @@ file(
 )
 
 
-
-add_executable(tpms_ortho src/tpms_ortho.cpp ${classes})
-target_link_libraries(tpms_ortho bpp-phyl bpp-core bpp-seq ${Boost_LIBRARIES})
-
 add_executable(tpms_query src/tpms_query.cpp ${classes})
 target_link_libraries(tpms_query bpp-phyl bpp-core bpp-seq ${Boost_LIBRARIES})
 

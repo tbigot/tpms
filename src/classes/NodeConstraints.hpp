@@ -10,12 +10,8 @@
 #include <set>
 #include <string>
 namespace tpms{
-
-class NodeConstraints{
     
-    public:
-	enum NodeNature {ANY, DUPLICATION, SPECIATION};
-	enum Type {NODE,LEAF};
+class NodeConstraints{
     
     private:
 	DataBase &refDB;
@@ -23,7 +19,7 @@ class NodeConstraints{
 	std::set<tpms::Taxon*> allowedSpeciesOnSubtree;
 	std::set<tpms::Taxon*> allowedSpeciesOnNode;
 	
-	Type type;
+	NodeType type;
 	unsigned int minBootstrap;
 	
 	std::string constraintsOnNodeString;
@@ -44,7 +40,7 @@ class NodeConstraints{
 	
     public:
 	NodeConstraints(DataBase & pRefDB);
-	void setConstraints(DataBase &pRefDB, std::string constraintString, Type type);
+	void setConstraints(DataBase &pRefDB, std::string constraintString, NodeType type);
 	bool allowsAsSon(Family& family, bpp::Node* node);
 	bool allows(Family& family, bpp::Node * node);
 	std::set<tpms::Taxon*>& getAllowedSpecies();

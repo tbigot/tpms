@@ -406,7 +406,7 @@ std::vector<float>& Family::getUnicityScores()
 }
 
 
-Family::NodeNature Family::getNatureOf(Node* node)
+NodeNature Family::getNatureOf(Node* node)
 {
     return(mapping_NodesToNatures.at(node->getId()));
 }

@@ -23,7 +23,7 @@ NodeConstraints::NodeConstraints(DataBase &pRefDB): refDB(pRefDB) {
     type = NODE;
 }
 
-void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString, Type type){    
+void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString, NodeType type){    
     // the params are in the form :
     // D!/+SUBTREE-SPECIES/+LEAVE+SPECIES
     

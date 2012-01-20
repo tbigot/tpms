@@ -4,8 +4,8 @@
 #include <set>
 #include <vector>
 
-#include "NodeConstraints.hpp"
 #include "Family.hpp"
+#include "NodeConstraints.hpp"
 #include "DataBase.hpp"
 #include "CandidateNode.hpp"
 #include "Taxon.hpp"

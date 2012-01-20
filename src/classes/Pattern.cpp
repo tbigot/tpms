@@ -50,8 +50,8 @@ void Pattern::extractConstraints(){
 	if((*unNoeud)->hasName()) initName = (*unNoeud)->getName();
 	string nodeName = initName;
 	// if a pattern node has a name, it means it has constraints to extract
-	NodeConstraints::Type nodeType;
-	if((*unNoeud)->getNumberOfSons() == 0) nodeType = NodeConstraints::LEAF; else nodeType = NodeConstraints::NODE;
+	tpms::NodeType nodeType;
+	if((*unNoeud)->getNumberOfSons() == 0) nodeType = tpms::LEAF; else nodeType = tpms::NODE;
 	(constraints.at((*unNoeud)->getId()))->setConstraints(db,initName,nodeType);
 	
     }

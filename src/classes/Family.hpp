@@ -13,13 +13,15 @@
 
 
 //inclusions personnelles
-#include "NodeConstraints.hpp"
 #include "DataBase.hpp"
 #include "Taxon.hpp"
 #include "Waiter.hpp"
 
 
 namespace tpms{
+    
+    enum NodeNature {ANY, DUPLICATION, SPECIATION};
+    enum NodeType {NODE,LEAF};
 
 class Family {
     
@@ -30,9 +32,6 @@ struct transfer {
     };
     
 private:
-    
-    enum NodeNature {ANY, DUPLICATION, SPECIATION};
-    enum Type {NODE,LEAF};
     
     std::string name;
     DataBase * db;
@@ -57,7 +56,7 @@ private:
     std::string *newick;
    
     
-    std::vector<NodeNature> mapping_NodesToNatures;
+    std::vector<tpms::NodeNature> mapping_NodesToNatures;
     std::vector<float> mapping_NodesToUnicityScores;
     std::vector<Taxon *> mapping_NodesToTaxa;
     std::vector<unsigned int> mapping_NodesToTaxonomicShift;
