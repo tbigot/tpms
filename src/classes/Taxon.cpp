@@ -63,13 +63,13 @@ string Taxon::getName()
 
 std::set< Taxon* >& Taxon::getAncestors()
 {
-    cout << "Nous avons " << ancestors.size() << " ancètres." << endl;
+    cout << name << " has " << ancestors.size() << " ancestors." << endl;
     return(ancestors);
 }
 
 std::set< Taxon* >& Taxon::getDescendants()
 {
-    cout << "Nous avons " << ancestors.size() << " descendants ." << endl;
+    cout << name << " has " << ancestors.size() << " descendants." << endl;
     return(descendants);
 }
 

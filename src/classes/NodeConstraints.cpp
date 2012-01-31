@@ -95,7 +95,7 @@ void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataB
     // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
     if(spstr.size() != 0){
 	bool toAdd;
-	if(spstr.at(0) == '+') toAdd = true; else toAdd= false; //FIXME: il faudrait gérer les erreurs
+	if(spstr.at(0) == '+') toAdd = true; else toAdd = false; //FIXME: il faudrait gérer les erreurs
 	unsigned int cmpt = 1;
 	while(cmpt < spstr.size() && spstr.at(cmpt) != '+' && spstr.at(cmpt) != '-') cmpt++;
 	// quoi qu'il en soit, on vient d'extraire un taxon, qu'on doit ajouter ou supprimer à la liste
