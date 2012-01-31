@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 	istringstream nbThreadsSS(args.getArg("threads"));
 	unsigned int nbThreads;
 	nbThreadsSS >> nbThreads;
-	if(nbThreads < 1 || nbThreads > 128) nbThreads = 1;
+	if(nbThreads < 1) nbThreads = 1;
 	cout << nbThreads << " threads will be used." << endl;
 	DataBase dbTest(args.getArg("collection"),nbThreads);
 	dbTest.doFamiliesMapping_LeavesToSpecies();
@@ -42,6 +42,10 @@ int main(int argc, char *argv[]) {
 		
 		ooo << "; PATTERN ENTERED :" << queryLine << endl;
 		
+                if(queryLine.find(';') == string::npos){
+                    cout << "The pattern you entered does not contain a semi-colon character (;) are you sure it is complete? Please do it again." << endl;
+                }
+                
 		vector<pair<Family *,CandidateNode *> > familles;
 		try{
 			// REQUÊTE
