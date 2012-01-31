@@ -83,13 +83,13 @@ void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataB
     // if authorized species start with a minus (or a ! - compat reasons), implicit +ALL before
 	if(spstr.at(0) == '!')
 	    spstr.at(0) = '-';
-	if(spstr.at(0) == '-')
+	if(spstr.at(0) == '-' && spset.empty())
 	    spstr = "+" + pRefDB.getSpeciesTree()->getRootNode()->getName() + spstr;
 	// case of single species
 	if(spstr.find('+')== string::npos && spstr.find('-')== string::npos)
 	    spstr = '+' + spstr;
     
-	cout << "    became this string : " << spstr << endl;
+	cout << "    this string will be used : " << spstr << endl;
     
     // fonction récursive qui analyse la liste des espèces à autoriser.
     // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
