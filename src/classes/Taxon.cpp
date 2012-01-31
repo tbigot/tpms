@@ -69,7 +69,7 @@ std::set< Taxon* >& Taxon::getAncestors()
 
 std::set< Taxon* >& Taxon::getDescendants()
 {
-    cout << name << " has " << ancestors.size() << " descendants." << endl;
+    cout << name << " has " << descendants.size() << " descendants:" << endl;
     return(descendants);
 }
 
