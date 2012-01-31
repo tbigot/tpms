@@ -20,7 +20,9 @@ int main(int argc, char *argv[]) {
    try{
     CmdLineArgs args(argc, argv, "collection,output-dir",cerr);
     args.print(cout);
-	istringstream nbThreadsSS(args.getArg("threads"));
+        string nbThreadsS = args.getArg("threads");
+        if (nbThreadsS.empty()) nbThreadsS = "1";
+	istringstream nbThreadsSS(nbThreadsS);
 	unsigned int nbThreads;
 	nbThreadsSS >> nbThreads;
 	if(nbThreads < 1) nbThreads = 1;

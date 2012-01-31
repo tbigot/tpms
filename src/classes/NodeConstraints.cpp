@@ -104,6 +104,7 @@ void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataB
 	else
 	    deleteTaxon(spset,spstr.substr(1,cmpt-1));
 	// si on n'est pas arrivé à la fin, on passe la fin de la chaîne à la fonction
+            cout << "il reste " << spstr.substr(cmpt) <<endl;
 	if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt),pRefDB);
     }
 }
