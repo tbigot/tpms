@@ -93,13 +93,19 @@ private:
      */
     unsigned int computeMappingShiftWithoutTheNode(bpp::Node* node);
     
+    
+    std::vector<bpp::Node*> getUnicityBestRoots();
+
+    
+    
     void writeRefTreeToFile(std::string path);
     void writeSpTreeToFile(std::string path);
     
     
-    // utilities, unrelated to family, has to be moved to TreeTools
+    // utilities, unrelated to family, have to be moved to TreeTools
     void deleteFromLeavesToBif(bpp::Node * pnode);
     bpp::Node * removeUniqueSons(bpp::Node* localRoot);
+    
     
     
 public:
@@ -115,14 +121,17 @@ public:
     bool getContainsUndefinedSequences();
     
     void doMapping_NodesToUnicityScores();
-    void doMapping_NodesToBestUnicityScores();
     void doMapping_LeavesToSpecies();
     void doMapping_NodesToNatures();
     void doMapping_NodesToTaxa();
     void doMapping_NodesToTaxonomicShift();
+    
+    void doRerooting_Unicity();
+    void doRerooting_Taxonomy();
+    void doRerooting_UnicityTaxonomy();
+
     void compute_detectTransfers();
     
-    void doMapping_NodesToLowestTaxa();
     
     tpms::Taxon* getSpeciesOfNode(bpp::Node * node);
     NodeNature getNatureOfNode(bpp::Node * node);

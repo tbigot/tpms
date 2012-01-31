@@ -43,7 +43,7 @@ void save_to_file(tpms::DataBase& collection, std::string path, annotationsTypes
 void print_menu(){
     cout << "\n  +----------------------------\n  |        MENU" << endl;
     cout << "  |\n  |SCORING\n  |=======\n  |   AU) annotate with unicity scores\n  |   AB) annotate with bipartition scores"<< endl;
-    cout << "  |\n  |RE-ROOTING\n  |==========\n  |   RU) reroot with unicity criteria\n  |   RT) reroot with taxonomic criteria" << endl;
+    cout << "  |\n  |RE-ROOTING\n  |==========\n  |   RU) reroot with unicity criteria\n  |   RT) reroot with taxonomic criteria\n  |   RC) reroot with the unicity+taxonomy criteria" << endl;
     cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |    M) help menu\n  |   SU) Save collection with Unicity scores"<< endl;
     cout << "  |    Q) QUIT"<< endl;
     
@@ -126,12 +126,14 @@ int main(int argc, char *argv[]) {
 	    cout << "Scoring: annotate with bipartition scores" << endl;
 	    cout << "not available yet" << endl;
 	}else if(command == "RU"){
-	    cout << "Re-rooting with unicity criteria" << endl;
-	    collection.doFamiliesMapping_NodesToBestUnicityScores();
-	    
+	    cout << "Re-rooting with the unicity criteria" << endl;
+	    collection.doFamiliesRerooting_Unicity();
+	}else if(command == "RC"){
+            cout << "Re-rooting with the combo unicity+taxonomy criteria" << endl;
+            collection.doFamiliesRerooting_UnicityTaxonomy();
 	}else if(command == "RT"){
-	    cout << "Re-rooting with taxonomic criteria" << endl;
-	    collection.doFamiliesMapping_NodesToLowestTaxa();
+	    cout << "Re-rooting with the taxonomy criteria" << endl;
+	    collection.doFamiliesRerooting_Taxonomy();
 	    
 	}else if(command == "Q" || command.empty()){
 	    cout << "Bye" << endl;

@@ -133,38 +133,57 @@ void Family::doMapping_NodesToUnicityScores() {
     compute_UnicityScoreOnNode(mapping_NodesToUnicityScores,tree->getRootNode(),00); // 00 because no origin, we are at the real root
 }
 
-void Family::doMapping_NodesToBestUnicityScores() {
-    // in this function, we'll try all nodes as potential roots, and keep the topology that gets the lower scores sum
-    // then, the tree is rerooted
-    
+
+
+vector<Node*> Family::getUnicityBestRoots(){
+    // aim of this function: trying all branches as roots, and return those which minimize the unicity score sum.
     vector<float> currScores;
-    vector<float> bestScores;
-    Node * bestRoot = 00;
+    vector<Node*> bestRoots; // returned at the end
     float bestScoresSum;
     float currScoresSum;
     currScores.resize(tree->getNumberOfNodes());
     vector<Node *> nodes = tree->getNodes();
     for(vector<Node *>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++) {
-	if((*currNode)->isLeaf()) continue; // leaves cannot be roots, skipping
-	compute_UnicityScoreOnNode(currScores,*currNode,00);
-	currScoresSum = accumulate(currScores.begin(),currScores.end(),0);
-	if(bestRoot == 00 || currScoresSum <  bestScoresSum){
-	    // we've found a first or better root candidate
-	    bestRoot = *currNode;
-	    bestScores = currScores;
-	    bestScoresSum = currScoresSum;
-	}
+        if((*currNode)->isLeaf()) continue; // leaves cannot be roots, skipping
+        compute_UnicityScoreOnNode(currScores,*currNode,00);
+        currScoresSum = accumulate(currScores.begin(),currScores.end(),0);
+        if(bestRoots.empty() || currScoresSum <  bestScoresSum){
+            // we've found a first or better root candidate
+            bestRoots.clear();
+            bestRoots.push_back(*currNode);
+            bestScoresSum = currScoresSum;
+        } else if (currScoresSum == bestScoresSum){
+            bestRoots.push_back(*currNode);
+        }
     }
     
+    return(bestRoots);
+}
+
+
+void Family::doRerooting_Unicity() {
+    // aim of this function: choose the best branch to be a root according to minimum unicity scores sum
+    // and re-root the tree according to this branch
+    
+    vector<Node*> bestRoots = getUnicityBestRoots();
+    
+    // Step 1: we have to choose between the candidate roots, choosing the longer branch
+    Node* bestRoot = *bestRoots.begin();
+    double maxBranchSize = bestRoot->getDistanceToFather();
+    for(vector<Node*>::iterator currRoot = bestRoots.begin()+1; currRoot != bestRoots.end(); currRoot++){
+        if((*currRoot)->getDistanceToFather() > maxBranchSize)
+            bestRoot = *currRoot;
+    }
     
     // Step 2: rerooting at the best place (testing sons, find the best outgroup)
-    
+    vector<float> currScores;
+    compute_UnicityScoreOnNode(currScores,bestRoot,00);
     vector<Node *> sons = bestRoot->getNeighbors();
     Node* bestOutgroup = 00;
     unsigned int minScore = 0;
     for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
-	if(bestOutgroup == 00 || bestScores.at((*currSon)->getId())<minScore ){
-	    minScore = bestScores.at((*currSon)->getId());
+	if(bestOutgroup == 00 || currScores.at((*currSon)->getId())<minScore ){
+	    minScore = currScores.at((*currSon)->getId());
 	    bestOutgroup = *currSon;
 	}
     }
@@ -178,7 +197,7 @@ void Family::doMapping_NodesToBestUnicityScores() {
 }
 
 
-void Family::doMapping_NodesToLowestTaxa() {
+void Family::doRerooting_Taxonomy() {
     unsigned int initDepthSum, currDepthSum;
     unsigned int highestDepthSum = 0;
     Node * bestRoot = 00;

@@ -115,15 +115,33 @@ void DataBase::doFamiliesMapping_NodesToTaxa() {
 
 }
 
-void DataBase::doFamiliesMapping_NodesToLowestTaxa() {
+void DataBase::doFamiliesRerooting_Taxonomy() {
     // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
     doFamiliesMapping_LeavesToSpecies();
     if(!mappingDone_NodesToTaxa){
-	cout << "Mapping nodes to Lowest Taxa:" << endl;
-	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToLowestTaxa,nbThreads);
+	cout << "Re-rooting family trees using the taxonomic criteria:" << endl;
+	Family::threadedWork_launchJobs(families,&Family::doRerooting_Taxonomy,nbThreads);
 	mappingDone_NodesToTaxa = true;
     }
 
+}
+
+void DataBase::doFamiliesRerooting_UnicityTaxonomy() {
+    // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
+    doFamiliesMapping_LeavesToSpecies();
+    if(!mappingDone_NodesToTaxa){
+        cout << "Re-rooting families trees using a combo method Unicity+Taxonomy:" << endl;
+        Family::threadedWork_launchJobs(families,&Family::doRerooting_Taxonomy,nbThreads);
+        mappingDone_NodesToTaxa = true;
+    }
+
+}
+
+void DataBase::doFamiliesRerooting_Unicity() {
+    doFamiliesMapping_LeavesToSpecies();
+    cout << "Re-rooting families trees with the unicity criteria:" << endl;
+    Family::threadedWork_launchJobs(families,&Family::doRerooting_Unicity,nbThreads);
+    mappingDone_NodesToUnicityScores = true;
 }
 
 
@@ -134,13 +152,6 @@ void DataBase::doFamiliesMapping_NodesToUnicityScores() {
     mappingDone_NodesToUnicityScores = true;
 }
 
-
-void DataBase::doFamiliesMapping_NodesToBestUnicityScores() {
-    doFamiliesMapping_LeavesToSpecies();
-    cout << "UnicityScores computing:" << endl;
-    Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToBestUnicityScores,nbThreads);
-    mappingDone_NodesToUnicityScores = true;
-}
 
 void DataBase::doFamiliesMapping_NodesToTaxonomicShift(){
     doFamiliesMapping_LeavesToSpecies();

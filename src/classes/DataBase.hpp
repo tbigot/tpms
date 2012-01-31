@@ -51,7 +51,6 @@ namespace tpms{
 	
 	
 	
-	
     public:
 	
 	
@@ -82,9 +81,12 @@ namespace tpms{
 	void doFamiliesMapping_LeavesToSpecies();
 	void doFamiliesMapping_NodesToTaxa();
 	void doFamiliesMapping_NodesToUnicityScores();
-	void doFamiliesMapping_NodesToBestUnicityScores();
-	void doFamiliesMapping_NodesToLowestTaxa();
 	void doFamiliesMapping_NodesToTaxonomicShift();
+        
+        void doFamiliesRerooting_Unicity();
+        void doFamiliesRerooting_Taxonomy();
+        void doFamiliesRerooting_UnicityTaxonomy();
+
 	
 	void doFamiliesComputation_detectTransfers(std::ofstream *output);
 	
