@@ -1,3 +1,6 @@
+#include <cstdlib>
+#include <stdio.h>
+#include <sys/ioctl.h>
 
 #include "Waiter.hpp"
 
@@ -8,6 +11,17 @@ Waiter::Waiter(ostream * pOutput,int pTotal, char pIndic):output(pOutput), total
   displayStep = 1;
   direction = 1;
   done = 0;
+  char * cols_c;
+  string cols_s;
+  
+  struct winsize w;
+  ioctl(0, TIOCGWINSZ, &w);
+
+  cols = w.ws_col;
+  cout << "Interprete : "<< cols << endl;
+  
+  if(cols > 200 || cols < 10) cols = 48;
+  else if(cols >= 15) cols -= 10;
   writeFrame();
 }
 
@@ -34,7 +48,7 @@ void Waiter::setDone(int newDone){
   done = newDone;
   switch(type){
     case percent:
-      if((float)done/(float)total >= ((float)displayStep)/(double)48) {
+      if((float)done/(float)total >= ((float)displayStep)/(double)cols) {
 	displayStep++;
 	drawProgressBar();
       }
@@ -53,7 +67,7 @@ void Waiter::writeFrame(){
   switch(type){
     case percent:
       *output << "|0%";
-      for(unsigned int i = 0; i < (48 - 5); i++)
+      for(unsigned int i = 0; i < (cols - 5); i++)
 	*output << ' ';
       *output << "100%|" << endl;
       break;
@@ -91,7 +105,7 @@ void Waiter::drawFinal(){
   switch(type){
     case percent:
       *output << "\r[";
-      for(unsigned int i = 0; i<=48; i++)
+      for(unsigned int i = 0; i<=cols; i++)
 	*output << indic;
       *output << "]      " << endl;
       break;

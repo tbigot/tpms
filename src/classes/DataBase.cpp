@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 
+
 #define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -197,7 +198,7 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	cout << "    [DONE]" << endl;
 
 	// maintenant, prise en charge des familles : blocs suivants :
-	cout << "Loading family trees:" << endl;
+	cout << "\n --  Reading the families from the collection file:" << endl;
 	
 	unsigned int famillesChargees = 0;
 	stringstream * curPreambule;
@@ -232,6 +233,7 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	
 	// initializing families
 	
+        cout << "\n --  Building families from the read data:" << endl ;
 	Family::threadedWork_launchJobs(families,&Family::initialize, nbThreads);
 
 	

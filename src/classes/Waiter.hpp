@@ -20,6 +20,7 @@ class Waiter {
     void drawProgressBar();
     bool finished;
     float realstep;
+    unsigned int cols;
     
     
   public:

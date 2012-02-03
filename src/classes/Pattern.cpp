@@ -298,6 +298,7 @@ NodeConstraints* Pattern::constraintsOf(Node* node){
 
 bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, CandidateNode * fatherCandidate) {
     // Dufayard et al, 2005
+    // Bigot et al, in prep.
     
     
     if(isLeaf(target) && isLeaf(pattern)){
