@@ -253,7 +253,7 @@ void Family::doRerooting_UnicityTaxonomy(){
     bestRoots = getTaxonomyBestRoots(bestRoots);
     
     // then, keep the longest branch.
-    // Step 1: we have to choose between the candidate roots, choosing the longer branch
+    // we have to choose between the possible roots, choosing the longer branch
     Node* bestRoot = *bestRoots.begin();
     double maxBranchSize = bestRoot->getDistanceToFather();
     for(vector<Node*>::iterator currRoot = bestRoots.begin()+1; currRoot != bestRoots.end(); currRoot++){
@@ -261,21 +261,9 @@ void Family::doRerooting_UnicityTaxonomy(){
             bestRoot = *currRoot;
     }
     
-    // Step 2: rerooting at the best place (testing sons, find the best outgroup)
-    vector<float> currScores;
-    compute_UnicityScoreOnNode(currScores,bestRoot,00);
-    vector<Node *> sons = bestRoot->getNeighbors();
-    Node* bestOutgroup = 00;
-    unsigned int minScore = 0;
-    for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
-	if(bestOutgroup == 00 || currScores.at((*currSon)->getId())<minScore ){
-	    minScore = currScores.at((*currSon)->getId());
-	    bestOutgroup = *currSon;
-	}
-    }
     
     // "rerooting" the tree according to this new outgroup :
-    tree->newOutGroup(bestOutgroup);
+    tree->newOutGroup(bestRoot);
 }
 
 map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<float> &scores, Node * node, Node * origin, bool virtualRootOnTheBranch){
