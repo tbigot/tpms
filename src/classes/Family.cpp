@@ -186,6 +186,8 @@ void Family::doRerooting_Unicity() {
 }
 
 vector<Node*> Family::getTaxonomyBestRoots(vector<Node *> nodes){
+    if(!doneMapping_NodeToTaxa) doMapping_NodesToTaxa();
+    
     vector<Node*> bestRoots; // returned at the end
     unsigned int initDepthSum, currDepthSum;
     unsigned int highestDepthSum = 0;
@@ -497,6 +499,7 @@ set<Taxon *> &Family::getSpecies(){
 
 void Family::doMapping_NodesToTaxa(){
     mapNodeOnTaxon(false,true,*tree->getRootNode());
+    doneMapping_NodeToTaxa = true;
 }
 
 void Family::doMapping_NodesToTaxonomicShift(){

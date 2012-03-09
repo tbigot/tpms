@@ -33,6 +33,8 @@ struct transfer {
     
 private:
     
+    bool doneMapping_NodeToTaxa;
+    
     std::string name;
     DataBase * db;
     bpp::TreeTemplate<bpp::Node> * tree;
