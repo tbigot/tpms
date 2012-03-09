@@ -132,7 +132,7 @@ void DataBase::doFamiliesRerooting_UnicityTaxonomy() {
     doFamiliesMapping_LeavesToSpecies();
     if(!mappingDone_NodesToTaxa){
         cout << "Re-rooting families trees using a combo method Unicity+Taxonomy:" << endl;
-        Family::threadedWork_launchJobs(families,&Family::doRerooting_Taxonomy,nbThreads);
+        Family::threadedWork_launchJobs(families,&Family::doRerooting_UnicityTaxonomy,nbThreads);
         mappingDone_NodesToTaxa = true;
     }
 

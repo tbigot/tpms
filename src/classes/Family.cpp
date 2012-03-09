@@ -135,17 +135,17 @@ void Family::doMapping_NodesToUnicityScores() {
 
 
 
-vector<Node*> Family::getUnicityBestRoots(){
+vector<Node*> Family::getUnicityBestRoots(vector<Node *> nodes){
     // aim of this function: trying all branches as roots, and return those which minimize the unicity score sum.
     vector<float> currScores;
     vector<Node*> bestRoots; // returned at the end
     float bestScoresSum;
     float currScoresSum;
-    currScores.resize(tree->getNumberOfNodes());
-    vector<Node *> nodes = tree->getNodes();
+    currScores.resize(tree->getNumberOfNodes()+1);
+    // we root at the branches leading to the node
     for(vector<Node *>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++) {
-        if((*currNode)->isLeaf()) continue; // leaves cannot be roots, skipping
-        compute_UnicityScoreOnNode(currScores,*currNode,00);
+        if(!(*currNode)->hasFather()) continue; // root has not father branch
+        compute_UnicityScoreOnNode(currScores,*currNode,00,true);
         currScoresSum = accumulate(currScores.begin(),currScores.end(),0);
         if(bestRoots.empty() || currScoresSum <  bestScoresSum){
             // we've found a first or better root candidate
@@ -161,11 +161,58 @@ vector<Node*> Family::getUnicityBestRoots(){
 }
 
 
+
+
 void Family::doRerooting_Unicity() {
     // aim of this function: choose the best branch to be a root according to minimum unicity scores sum
     // and re-root the tree according to this branch
+    vector<Node *> nodes = tree->getNodes();
+    vector<Node*> bestRoots = getUnicityBestRoots(nodes);
     
-    vector<Node*> bestRoots = getUnicityBestRoots();
+    // we have to choose between the possible roots, choosing the longer branch
+    Node* bestRoot = *bestRoots.begin();
+    double maxBranchSize = bestRoot->getDistanceToFather();
+    for(vector<Node*>::iterator currRoot = bestRoots.begin()+1; currRoot != bestRoots.end(); currRoot++){
+        if((*currRoot)->getDistanceToFather() > maxBranchSize)
+            bestRoot = *currRoot;
+    }
+    
+    // "rerooting" the tree according to this new outgroup :
+    tree->newOutGroup(bestRoot);
+    
+    // after reroot, nodes id might have changed, we must recalculate scores
+    doMapping_NodesToUnicityScores();
+    
+}
+
+vector<Node*> Family::getTaxonomyBestRoots(vector<Node *> nodes){
+    vector<Node*> bestRoots; // returned at the end
+    unsigned int initDepthSum, currDepthSum;
+    unsigned int highestDepthSum = 0;
+    // aim of this function: trying all branches as roots, and return those which maximize the taxo level sum
+    // we’ll try each node as the root, and see taxonomic mapping
+    for(vector<Node *>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++) {
+	if(!(*currNode)->hasFather()) continue;
+	Taxon* thisRoot = mapNodeOnTaxon(true,true,**currNode);
+	currDepthSum = thisRoot->getDepth();
+	for(vector<Taxon*>::iterator currTaxon = mapping_NodesToTaxa.begin(); currTaxon != mapping_NodesToTaxa.end(); currTaxon++)
+	    currDepthSum += (*currTaxon)->getDepth();
+	if(bestRoots.empty() || currDepthSum > highestDepthSum){
+	    // we've found a first or better root candidate
+	    bestRoots.clear();
+	    bestRoots.push_back(*currNode);
+	    highestDepthSum = currDepthSum;
+	} else if(currDepthSum == highestDepthSum)
+	    bestRoots.push_back(*currNode);
+    }
+    
+    return(bestRoots);
+}
+
+void Family::doRerooting_Taxonomy() {
+    vector<Node *> nodes = tree->getNodes();
+    
+    vector<Node*> bestRoots = getTaxonomyBestRoots(nodes);
     
     // Step 1: we have to choose between the candidate roots, choosing the longer branch
     Node* bestRoot = *bestRoots.begin();
@@ -190,54 +237,65 @@ void Family::doRerooting_Unicity() {
     
     // "rerooting" the tree according to this new outgroup :
     tree->newOutGroup(bestOutgroup);
-    
-    // after reroot, nodes id might have changed, we must recalculate scores
-    doMapping_NodesToUnicityScores();
-    
-}
-
-
-void Family::doRerooting_Taxonomy() {
-    unsigned int initDepthSum, currDepthSum;
-    unsigned int highestDepthSum = 0;
-    Node * bestRoot = 00;
-    vector<Node *> nodes = tree->getNodes();
-    
-    // we’ll try each node as the root, and see taxonomic mapping
-    for(vector<Node *>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++) {
-	if((*currNode)->isLeaf()) continue; // we don’t want to root by a leaf
-	mapNodeOnTaxon(true,**currNode);
-	currDepthSum = 0;
-	for(vector<Taxon*>::iterator currTaxon = mapping_NodesToTaxa.begin(); currTaxon != mapping_NodesToTaxa.end(); currTaxon++)
-	    currDepthSum += (*currTaxon)->getDepth();
-	if(bestRoot == 00 || currDepthSum > highestDepthSum){
-	    // we've found a first or better root candidate
-	    bestRoot = *currNode;
-	    highestDepthSum = currDepthSum;
-	}
-    }
-    
-    tree->rootAt(bestRoot);
     doMapping_NodesToTaxa();
     // DEBUG to see depth sum medification
     // cout << initDepth << "->" << highestDepthSum << endl;
     
 }
 
-map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<float> &scores, Node * node, Node * origin){
+void Family::doRerooting_UnicityTaxonomy(){
+    vector<Node *> nodes = tree->getNodes();
+    
+    // first using unicity criteria
+    vector<Node*> bestRoots = getTaxonomyBestRoots(nodes);
+    
+    // then, on ex-aequos, using taxonomi criteria
+    bestRoots = getTaxonomyBestRoots(bestRoots);
+    
+    // then, keep the longest branch.
+    // Step 1: we have to choose between the candidate roots, choosing the longer branch
+    Node* bestRoot = *bestRoots.begin();
+    double maxBranchSize = bestRoot->getDistanceToFather();
+    for(vector<Node*>::iterator currRoot = bestRoots.begin()+1; currRoot != bestRoots.end(); currRoot++){
+        if((*currRoot)->getDistanceToFather() > maxBranchSize)
+            bestRoot = *currRoot;
+    }
+    
+    // Step 2: rerooting at the best place (testing sons, find the best outgroup)
+    vector<float> currScores;
+    compute_UnicityScoreOnNode(currScores,bestRoot,00);
+    vector<Node *> sons = bestRoot->getNeighbors();
+    Node* bestOutgroup = 00;
+    unsigned int minScore = 0;
+    for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
+	if(bestOutgroup == 00 || currScores.at((*currSon)->getId())<minScore ){
+	    minScore = currScores.at((*currSon)->getId());
+	    bestOutgroup = *currSon;
+	}
+    }
+    
+    // "rerooting" the tree according to this new outgroup :
+    tree->newOutGroup(bestOutgroup);
+}
+
+map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<float> &scores, Node * node, Node * origin, bool virtualRootOnTheBranch){
     unsigned int id = node->getId();
     map<Taxon*, unsigned int> thisNodeCount;
     
     // step 1: filling the species counts from this node
-    
-    vector<Node *> neighbors = node->getNeighbors();
-    for(vector<Node *>::iterator currSon = neighbors.begin(); currSon < neighbors.end(); currSon ++) {
-	if(*currSon == origin) continue;
-	   map<Taxon*,unsigned int> currSonCount = compute_UnicityScoreOnNode(scores,*currSon,node);
+    vector<Node *> neighbors;
+    if(virtualRootOnTheBranch){
+	neighbors.push_back(node);
+	neighbors.push_back(node->getFather());
+    } else
+	neighbors = node->getNeighbors();
+    for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor < neighbors.end(); currNeighbor ++) {
+	if(*currNeighbor == origin) continue;
+	map<Taxon*,unsigned int> currNeighborCount = compute_UnicityScoreOnNode(scores,*currNeighbor,node,false);
 	// adding this new map to the current
-	   for(map<Taxon*,unsigned int>::iterator currCount = currSonCount.begin(); currCount != currSonCount.end(); currCount++){	    
-	       thisNodeCount[currCount->first] += currCount->second;
-	   }
+	for(map<Taxon*,unsigned int>::iterator currCount = currNeighborCount.begin(); currCount != currNeighborCount.end(); currCount++){	    
+	    thisNodeCount[currCount->first] += currCount->second;
+	}
     }
     
     if(neighbors.size() == 1){ // leave case
@@ -252,7 +310,10 @@ map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<float> &scor
 	score += log(float(currCount->second));
     }    
     
-    scores[id] = score;
+    if(virtualRootOnTheBranch)
+	*scores.rbegin() = score;
+    else
+	scores.at(id) = score;
     
     return(thisNodeCount);
 }
@@ -365,7 +426,7 @@ std::string Family::getName(){
     return(name);
 }
 
-Taxon* Family::mapNodeOnTaxon(bool recordResult,bpp::Node & node, bpp::Node* origin,bool recursive, bpp::Node* ignoredNode){
+Taxon* Family::mapNodeOnTaxon(bool virtualRootOnTheBranch, bool recordResult,bpp::Node & node, bpp::Node* origin,bool recursive, bpp::Node* ignoredNode){
     unsigned int currNodeID = node.getId();
     vector<Node*> neighbors = node.getNeighbors();
     if(leaves.find(&node) != leaves.end() || !recursive) // BASE CASE: leaf, or don’t continue if asked
@@ -379,18 +440,20 @@ Taxon* Family::mapNodeOnTaxon(bool recordResult,bpp::Node & node, bpp::Node* ori
     }
     
     set<Taxon*> taxaListOnSons;
- 
+    
+    // Case of ignored node.
     // if the ignored node is in the sons no need to keep the funciton recursive: nothing has changed
     if(ignoredNode!=00 &&  find(neighbors.begin(),neighbors.end(),ignoredNode) != neighbors.end())
 	recursive = false;
     
-    //collecting taxa on sons (neighbors without origin)
+    
+    //collecting taxa on sons (neighbors without the node "origin")
     for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor != neighbors.end(); currNeighbor++){
 	if(*currNeighbor == origin || *currNeighbor == ignoredNode) continue;
-	taxaListOnSons.insert(mapNodeOnTaxon(recordResult,**currNeighbor,&node,recursive,ignoredNode));
+	taxaListOnSons.insert(mapNodeOnTaxon(false,recordResult,**currNeighbor,&node,recursive,ignoredNode));
     }
     Taxon* currTaxon = Taxon::findSmallestCommonTaxon(taxaListOnSons);
-    if(recordResult) mapping_NodesToTaxa.at(currNodeID) = currTaxon ;
+    if(recordResult && !virtualRootOnTheBranch) mapping_NodesToTaxa.at(currNodeID) = currTaxon ;
     taxa.insert(currTaxon);
     return(currTaxon);
     
@@ -445,7 +508,7 @@ set<Taxon *> &Family::getSpecies(){
 }
 
 void Family::doMapping_NodesToTaxa(){
-    mapNodeOnTaxon(true,*tree->getRootNode());
+    mapNodeOnTaxon(false,true,*tree->getRootNode());
 }
 
 void Family::doMapping_NodesToTaxonomicShift(){
@@ -601,7 +664,7 @@ unsigned int Family::computeMappingShiftWithoutTheNode(Node* node){
     Node* grandFatherNodeFather = 00;
     if(grandFatherNode->hasFather()) grandFatherNodeFather = grandFatherNode->getFather();
     Taxon* initialGfTaxon = mapping_NodesToTaxa.at(grandFatherNode->getId());
-    Taxon* newTaxon = mapNodeOnTaxon(false,*grandFatherNode,grandFatherNodeFather,true,node);
+    Taxon* newTaxon = mapNodeOnTaxon(false,false,*grandFatherNode,grandFatherNodeFather,true,node);
     
     if(newTaxon == 00 || initialGfTaxon == 00) return 0;
     

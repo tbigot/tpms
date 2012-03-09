@@ -82,8 +82,8 @@ private:
     std::vector<transfer> computed_detectedTransfers;
         
     
-    std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<float> &scores, bpp::Node * node, bpp::Node * orignNode);
-    tpms::Taxon* mapNodeOnTaxon(bool recordResults, bpp::Node& node, bpp::Node* origin=00, bool recursive=true, bpp::Node* ignoredNode=00);
+    std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<float> &scores, bpp::Node * node, bpp::Node * orignNode, bool virtualRootOnTheBranch = false);
+    tpms::Taxon* mapNodeOnTaxon(bool virtualRootOnTheBranch, bool recordResults, bpp::Node& node, bpp::Node* origin=00, bool recursive=true, bpp::Node* ignoredNode=00);
     
     /**
      * @brief gives the difference of taxonomic assignation depth (in the species tree), of a grandfather of a certain node, removing this node
@@ -94,7 +94,8 @@ private:
     unsigned int computeMappingShiftWithoutTheNode(bpp::Node* node);
     
     
-    std::vector<bpp::Node*> getUnicityBestRoots();
+    std::vector<bpp::Node*> getUnicityBestRoots(std::vector<bpp::Node *> nodes);
+    std::vector<bpp::Node*> getTaxonomyBestRoots(std::vector<bpp::Node *> nodes);
 
     
     
