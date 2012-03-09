@@ -42,9 +42,9 @@ void save_to_file(tpms::DataBase& collection, std::string path, annotationsTypes
 
 void print_menu(){
     cout << "\n  +----------------------------\n  |        MENU" << endl;
-    cout << "  |\n  |SCORING\n  |=======\n  |   AU) annotate with unicity scores\n  |   AB) annotate with bipartition scores"<< endl;
+    cout << "  |\n  |SCORING\n  |=======\n  |   CU) compute unicity scores\n  |   CB) compute bipartition scores"<< endl;
     cout << "  |\n  |RE-ROOTING\n  |==========\n  |   RU) reroot with unicity criteria\n  |   RT) reroot with taxonomic criteria\n  |   RC) reroot with the unicity+taxonomy criteria" << endl;
-    cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |    M) help menu\n  |   SU) Save collection with Unicity scores"<< endl;
+    cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |    M) help menu\n  |    S) Save collection\n  |   SU) Save collection with Unicity scores"<< endl;
     cout << "  |    Q) QUIT"<< endl;
     
 }
@@ -118,11 +118,11 @@ int main(int argc, char *argv[]) {
 	
 	command = get_choice();
     
-	if(command == "AU"){
+	if(command == "CU"){
 	    cout << "Scoring: annotate with unicity scores" << endl;
 	    collection.doFamiliesMapping_NodesToUnicityScores();
 	    
-	}else if(command =="AB"){
+	}else if(command =="CB"){
 	    cout << "Scoring: annotate with bipartition scores" << endl;
 	    cout << "not available yet" << endl;
 	}else if(command == "RU"){
@@ -142,9 +142,13 @@ int main(int argc, char *argv[]) {
 	}else if(command == "T"){
 	    print_status(collection);
 	}else if(command == "SU"){
-	    string path = args.getArg("output-dir")+"/ANNOTATEDunicityscores";
-	    cout << "Saving to file" << path << endl;
+	    string path = args.getArg("output-dir")+"/ANNOTATEDunicityscoresCollection";
+	    cout << "Saving to file " << path << " with unicity scores." << endl;
 	    save_to_file(collection,path,UNICITY);
+	} else if(command == "S"){
+	    string path = args.getArg("output-dir")+"/Collection";
+	    cout << "Saving to file " << path << endl;
+	    save_to_file(collection,path,NONE);
 	} else {
 	    cout << "The choice " << command << " is not possible." <<endl;
 	}

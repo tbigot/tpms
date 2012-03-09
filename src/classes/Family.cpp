@@ -514,7 +514,7 @@ void Family::doMapping_NodesToTaxonomicShift(){
     if(mapping_grandFatherWithoutThisNode.empty())
 	mapping_grandFatherWithoutThisNode.resize(tree->getNumberOfNodes());
     for(vector<Node*>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++){
-	if(computeMappingShiftWithoutTheNode(*currNode) > 1)
+	if(computeMappingShiftWithoutTheNode(*currNode) > 0)
 	    computed_nodesInducingPerturbation.insert(*currNode);
 	
     }
