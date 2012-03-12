@@ -198,7 +198,8 @@ vector<Node*> Family::getTaxonomyBestRoots(vector<Node *> nodes){
 	Taxon* thisRoot = mapNodeOnTaxon(true,true,**currNode);
 	currDepthSum = thisRoot->getDepth();
 	for(vector<Taxon*>::iterator currTaxon = mapping_NodesToTaxa.begin(); currTaxon != mapping_NodesToTaxa.end(); currTaxon++)
-	    currDepthSum += (*currTaxon)->getDepth();
+	    if(*currTaxon != 00) // with virtual root, some nodes are not identified, ignoring
+		currDepthSum += (*currTaxon)->getDepth();
 	if(bestRoots.empty() || currDepthSum > highestDepthSum){
 	    // we've found a first or better root candidate
 	    bestRoots.clear();
