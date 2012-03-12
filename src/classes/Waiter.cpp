@@ -18,7 +18,6 @@ Waiter::Waiter(ostream * pOutput,int pTotal, char pIndic):output(pOutput), total
   ioctl(0, TIOCGWINSZ, &w);
 
   cols = w.ws_col;
-  cout << "Interprete : "<< cols << endl;
   
   if(cols > 200 || cols < 10) cols = 48;
   else if(cols >= 15) cols -= 10;
