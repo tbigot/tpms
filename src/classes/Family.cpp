@@ -562,7 +562,7 @@ void Family::compute_detectTransfers(){
 	    // then we need to insert the transfer into transfers
 	    
 	    // only if the bootstrap is enough
-	    if((*node)->getBootstrapValue() >= .90 && (*node)->getFather()->getBootstrapValue() >= .90){
+	    if((*node)->getFather()->getBootstrapValue() >= .90){
 		transfer currTransfer;
 		currTransfer.donnor = mapping_NodesToTaxa.at((*node)->getId());
 		currTransfer.receiver = mapping_grandFatherWithoutThisNode.at((*node)->getId());
