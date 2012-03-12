@@ -88,10 +88,11 @@ namespace tpms{
         void doFamiliesRerooting_UnicityTaxonomy();
 
 	
-	void doFamiliesComputation_detectTransfers(std::ofstream *output);
-	
+	void doFamiliesComputation_detectTransfers(std::ostream * output);
+		
 	std::set<std::string> * getSpecies();
 	tpms::Taxon* nameToTaxon(std::string taxonName);
+	
 	
     };}
     #else

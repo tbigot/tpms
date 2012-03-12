@@ -44,7 +44,7 @@ void print_menu(){
     cout << "\n  +----------------------------\n  |        MENU" << endl;
     cout << "  |\n  |SCORING\n  |=======\n  |   CU) compute unicity scores\n  |   CB) compute bipartition scores"<< endl;
     cout << "  |\n  |RE-ROOTING\n  |==========\n  |   RU) reroot with unicity criteria\n  |   RT) reroot with taxonomic criteria\n  |   RC) reroot with the unicity+taxonomy criteria" << endl;
-    cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |    M) help menu\n  |    S) Save collection\n  |   SU) Save collection with Unicity scores"<< endl;
+    cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |   ID) incongruencies detection\n  |    M) help menu\n  |    S) Save collection\n  |   SU) Save collection with Unicity scores"<< endl;
     cout << "  |    Q) QUIT"<< endl;
     
 }
@@ -134,7 +134,11 @@ int main(int argc, char *argv[]) {
 	}else if(command == "RT"){
 	    cout << "Re-rooting with the taxonomy criteria" << endl;
 	    collection.doFamiliesRerooting_Taxonomy();
-	    
+	}else if(command == "ID"){
+	    cout << "Processing inconguencies detection" << endl;
+	    string path = args.getArg("output-dir")+"/detectedTransfers.txt";
+	    ofstream resultFile(path.c_str());
+	    collection.doFamiliesComputation_detectTransfers(&resultFile);
 	}else if(command == "Q" || command.empty()){
 	    cout << "Bye" << endl;
 	}else if(command == "M"){

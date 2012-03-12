@@ -160,7 +160,7 @@ void DataBase::doFamiliesMapping_NodesToTaxonomicShift(){
     Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToTaxonomicShift,nbThreads);
 }
 
-void DataBase::doFamiliesComputation_detectTransfers(ofstream * output){
+void DataBase::doFamiliesComputation_detectTransfers(ostream * output){
     doFamiliesMapping_LeavesToSpecies();
     cout << "Transfers Detection:" << endl;
     Family::threadedWork_launchJobs(families,&Family::compute_detectTransfers,nbThreads,output);
@@ -322,7 +322,7 @@ set<string> * DataBase::getSpecies(){
     return(&species);
 }
 
-tpms::Taxon* DataBase::nameToTaxon(string taxonName)
+Taxon* DataBase::nameToTaxon(string taxonName)
 {
     boost::to_upper(taxonName);
     map<string,Taxon*>::iterator foundTaxon = taxa.find(taxonName);
@@ -330,7 +330,6 @@ tpms::Taxon* DataBase::nameToTaxon(string taxonName)
     cout << "Unable to find the taxon named " << taxonName << " in the database" << endl;
     return(00);
 }
-
 
 
 }
