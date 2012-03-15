@@ -134,7 +134,6 @@ void Family::doMapping_NodesToUnicityScores() {
 }
 
 
-
 vector<Node*> Family::getUnicityBestRoots(vector<Node *> nodes){
     // aim of this function: trying all branches as roots, and return those which minimize the unicity score sum.
     vector<float> currScores;
@@ -156,11 +155,8 @@ vector<Node*> Family::getUnicityBestRoots(vector<Node *> nodes){
             bestRoots.push_back(*currNode);
         }
     }
-    
     return(bestRoots);
 }
-
-
 
 
 void Family::doRerooting_Unicity() {
@@ -168,25 +164,12 @@ void Family::doRerooting_Unicity() {
     // and re-root the tree according to this branch
     vector<Node *> nodes = tree->getNodes();
     vector<Node*> bestRoots = getUnicityBestRoots(nodes);
-    
-    // we have to choose between the possible roots, choosing the longer branch
-    Node* bestRoot = *bestRoots.begin();
-    double maxBranchSize = bestRoot->getDistanceToFather();
-    for(vector<Node*>::iterator currRoot = bestRoots.begin()+1; currRoot != bestRoots.end(); currRoot++){
-        if((*currRoot)->getDistanceToFather() > maxBranchSize)
-            bestRoot = *currRoot;
-    }
-    
-    // "rerooting" the tree according to this new outgroup :
-    tree->newOutGroup(bestRoot);
-    
-    // after reroot, nodes id might have changed, we must recalculate scores
+    reRootAt(bestRoots);
     doMapping_NodesToUnicityScores();
-    
 }
 
+
 vector<Node*> Family::getTaxonomyBestRoots(vector<Node *> nodes){
-    
     vector<Node*> bestRoots; // returned at the end
     unsigned int initDepthSum, currDepthSum;
     unsigned int highestDepthSum = 0;
@@ -211,51 +194,27 @@ vector<Node*> Family::getTaxonomyBestRoots(vector<Node *> nodes){
     return(bestRoots);
 }
 
+
 void Family::doRerooting_Taxonomy() {
     vector<Node *> nodes = tree->getNodes();
-    
     vector<Node*> bestRoots = getTaxonomyBestRoots(nodes);
-    
-    // Step 1: we have to choose between the candidate roots, choosing the longer branch
-    Node* bestRoot = *bestRoots.begin();
-    double maxBranchSize = bestRoot->getDistanceToFather();
-    for(vector<Node*>::iterator currRoot = bestRoots.begin()+1; currRoot != bestRoots.end(); currRoot++){
-        if((*currRoot)->getDistanceToFather() > maxBranchSize)
-            bestRoot = *currRoot;
-    }
-    
-    // Step 2: rerooting at the best place (testing sons, find the best outgroup)
-    vector<float> currScores;
-    compute_UnicityScoreOnNode(currScores,bestRoot,00);
-    vector<Node *> sons = bestRoot->getNeighbors();
-    Node* bestOutgroup = 00;
-    unsigned int minScore = 0;
-    for(vector<Node *>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
-	if(bestOutgroup == 00 || currScores.at((*currSon)->getId())<minScore ){
-	    minScore = currScores.at((*currSon)->getId());
-	    bestOutgroup = *currSon;
-	}
-    }
-    
-    // "rerooting" the tree according to this new outgroup :
-    tree->newOutGroup(bestOutgroup);
-    doMapping_NodesToTaxa();
-    // DEBUG to see depth sum medification
-    // cout << initDepth << "->" << highestDepthSum << endl;
-    
+    reRootAt(bestRoots);
 }
+
 
 void Family::doRerooting_UnicityTaxonomy(){
     vector<Node *> nodes = tree->getNodes();
-    
     // first using unicity criteria
     vector<Node*> bestRoots = getUnicityBestRoots(nodes);
-    
     // then, on ex-aequos, using taxonomi criteria
     bestRoots = getTaxonomyBestRoots(bestRoots);
-    
-    // then, keep the longest branch.
-    // we have to choose between the possible roots, choosing the longer branch
+    reRootAt(bestRoots);
+}
+
+
+void Family::reRootAt(std::vector<Node*> bestRoots)
+{
+    Node* originalRoot = tree->getRootNode();
     Node* bestRoot = *bestRoots.begin();
     double maxBranchSize = bestRoot->getDistanceToFather();
     for(vector<Node*>::iterator currRoot = bestRoots.begin()+1; currRoot != bestRoots.end(); currRoot++){
@@ -263,10 +222,14 @@ void Family::doRerooting_UnicityTaxonomy(){
             bestRoot = *currRoot;
     }
     
-    
     // "rerooting" the tree according to this new outgroup :
     tree->newOutGroup(bestRoot);
+    //the number of nodes has potentially changed, updating size of the mapping vector:
+    mapping_NodesToTaxa.resize(tree->getNumberOfNodes());
+    
 }
+
+
 
 map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<float> &scores, Node * node, Node * origin, bool virtualRootOnTheBranch){
     unsigned int id = node->getId();
@@ -564,6 +527,7 @@ bool Family::transfersRemaining(){
 
 void Family::compute_detectTransfers(){
     // doing the first mapping:
+    doMapping_NodesToTaxa();
     doMapping_NodesToTaxonomicShift();
     // then, we keep transfers that are not included in another
     //FIXME it would be better to confirm bootstrap are sufficient

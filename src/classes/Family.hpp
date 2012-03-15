@@ -109,6 +109,8 @@ private:
     void deleteFromLeavesToBif(bpp::Node * pnode);
     bpp::Node * removeUniqueSons(bpp::Node* localRoot);
     
+    void reRootAt(std::vector<bpp::Node*> bestRoots);
+    
     
     
 public:
