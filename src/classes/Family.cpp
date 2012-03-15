@@ -24,7 +24,7 @@ using namespace tpms;
 
 
 namespace tpms{
-    Family::Family(stringstream* sIntro, string* sNewick, DataBase* dbp): db(dbp), preamble(sIntro), newick(sNewick), containsUndefinedSequences(false) {
+    Family::Family(stringstream* sIntro, string* sNewick, DataBase* dbp): db(dbp), preamble(sIntro), newick(sNewick), containsUndefinedSequences(false), doneMapping_NodeToTaxa(false) {
 	
     }
     
@@ -186,7 +186,6 @@ void Family::doRerooting_Unicity() {
 }
 
 vector<Node*> Family::getTaxonomyBestRoots(vector<Node *> nodes){
-    if(!doneMapping_NodeToTaxa) doMapping_NodesToTaxa();
     
     vector<Node*> bestRoots; // returned at the end
     unsigned int initDepthSum, currDepthSum;
@@ -195,11 +194,11 @@ vector<Node*> Family::getTaxonomyBestRoots(vector<Node *> nodes){
     // we’ll try each node as the root, and see taxonomic mapping
     for(vector<Node *>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++) {
 	if(!(*currNode)->hasFather()) continue;
-	Taxon* thisRoot = mapNodeOnTaxon(true,true,**currNode);
-	currDepthSum = thisRoot->getDepth();
+	Taxon* thisRootTaxon = mapNodeOnTaxon(true,true,**currNode);
+	currDepthSum = thisRootTaxon->getDepth();
 	for(vector<Taxon*>::iterator currTaxon = mapping_NodesToTaxa.begin(); currTaxon != mapping_NodesToTaxa.end(); currTaxon++)
-	    if(*currTaxon != 00) // with virtual root, some nodes are not identified, ignoring
-		currDepthSum += (*currTaxon)->getDepth();
+	    if(*currTaxon != 00) currDepthSum += (*currTaxon)->getDepth();
+	//removing the depth of the current root (it is twice in mapping_NodesToTaxa)
 	if(bestRoots.empty() || currDepthSum > highestDepthSum){
 	    // we've found a first or better root candidate
 	    bestRoots.clear();
@@ -250,7 +249,7 @@ void Family::doRerooting_UnicityTaxonomy(){
     vector<Node *> nodes = tree->getNodes();
     
     // first using unicity criteria
-    vector<Node*> bestRoots = getTaxonomyBestRoots(nodes);
+    vector<Node*> bestRoots = getUnicityBestRoots(nodes);
     
     // then, on ex-aequos, using taxonomi criteria
     bestRoots = getTaxonomyBestRoots(bestRoots);
@@ -275,19 +274,29 @@ map<Taxon*, unsigned int> Family::compute_UnicityScoreOnNode(vector<float> &scor
     
     // step 1: filling the species counts from this node
     vector<Node *> neighbors;
-    if(virtualRootOnTheBranch){
-	neighbors.push_back(node);
-	neighbors.push_back(node->getFather());
-    } else
-	neighbors = node->getNeighbors();
-    for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor < neighbors.end(); currNeighbor ++) {
-	if(*currNeighbor == origin) continue;
-	map<Taxon*,unsigned int> currNeighborCount = compute_UnicityScoreOnNode(scores,*currNeighbor,node,false);
-	// adding this new map to the current
-	for(map<Taxon*,unsigned int>::iterator currCount = currNeighborCount.begin(); currCount != currNeighborCount.end(); currCount++){	    
-	    thisNodeCount[currCount->first] += currCount->second;
+    neighbors = node->getNeighbors();
+    map<Taxon*,unsigned int> currNeighborCount;
+    if(!virtualRootOnTheBranch)
+	for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor < neighbors.end(); currNeighbor ++) {
+	    if(*currNeighbor == origin) continue;
+	    currNeighborCount = compute_UnicityScoreOnNode(scores,*currNeighbor,node,false);
+	    // adding this new map to the current
+	    for(map<Taxon*,unsigned int>::iterator currCount = currNeighborCount.begin(); currCount != currNeighborCount.end(); currCount++){	    
+		thisNodeCount[currCount->first] += currCount->second;
+	    }
 	}
+    else {
+	currNeighborCount = compute_UnicityScoreOnNode(scores,node,node->getFather(),false);
+	for(map<Taxon*,unsigned int>::iterator currCount = currNeighborCount.begin(); currCount != currNeighborCount.end(); currCount++){	    
+		thisNodeCount[currCount->first] += currCount->second;
+	}
+	currNeighborCount = compute_UnicityScoreOnNode(scores,node->getFather(),node,false);
+	for(map<Taxon*,unsigned int>::iterator currCount = currNeighborCount.begin(); currCount != currNeighborCount.end(); currCount++){	    
+		thisNodeCount[currCount->first] += currCount->second;
+	}
+	     
     }
+  
     
     if(neighbors.size() == 1){ // leave case
 	    thisNodeCount.insert(pair<Taxon*,unsigned int>(mapping_NodesToTaxa.at(id),1));
@@ -419,18 +428,23 @@ std::string Family::getName(){
 
 Taxon* Family::mapNodeOnTaxon(bool virtualRootOnTheBranch, bool recordResult,bpp::Node & node, bpp::Node* origin,bool recursive, bpp::Node* ignoredNode){
     unsigned int currNodeID = node.getId();
-    vector<Node*> neighbors = node.getNeighbors();
-    if(leaves.find(&node) != leaves.end() || !recursive) // BASE CASE: leaf, or don’t continue if asked
-    {
-	return(mapping_NodesToTaxa.at(currNodeID));
-    }
-    // dealing with the case: topological leaf but not a real leaf (removed subtree)
-    if(neighbors.size() == 1){
-	if(recordResult) mapping_NodesToTaxa.at(currNodeID)=00;
-	return 00;
+    vector<Node*> neighbors;
+    neighbors = node.getNeighbors();
+    if(!virtualRootOnTheBranch) {
+	if(leaves.find(&node) != leaves.end() || !recursive) // BASE CASE: leaf, or don’t continue if asked
+	{
+	    return(mapping_NodesToTaxa.at(currNodeID));
+	}
+	// dealing with the case: topological leaf but not a real leaf (removed subtree)
+	if(neighbors.size() == 1){
+	    //DEBUG
+	    //cout << "\ntopological leaf but not a real leaf (removed subtree)" << endl;
+	    if(recordResult) mapping_NodesToTaxa.at(currNodeID)=00;
+	    return 00;
+	}
     }
     
-    set<Taxon*> taxaListOnSons;
+    set<Taxon*> virtualSonsTaxa;
     
     // Case of ignored node.
     // if the ignored node is in the sons no need to keep the funciton recursive: nothing has changed
@@ -439,11 +453,27 @@ Taxon* Family::mapNodeOnTaxon(bool virtualRootOnTheBranch, bool recordResult,bpp
     
     
     //collecting taxa on sons (neighbors without the node "origin")
-    for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor != neighbors.end(); currNeighbor++){
-	if(*currNeighbor == origin || *currNeighbor == ignoredNode) continue;
-	taxaListOnSons.insert(mapNodeOnTaxon(false,recordResult,**currNeighbor,&node,recursive,ignoredNode));
+    
+    if(!virtualRootOnTheBranch)
+	for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor != neighbors.end(); currNeighbor++){
+	    if(*currNeighbor == origin || *currNeighbor == ignoredNode) continue;
+	    virtualSonsTaxa.insert(mapNodeOnTaxon(false,recordResult,**currNeighbor,&node,recursive,ignoredNode));
+	}
+    else {
+	virtualSonsTaxa.insert(mapNodeOnTaxon(false,recordResult,node,node.getFather()));
+	virtualSonsTaxa.insert(mapNodeOnTaxon(false,recordResult,*(node.getFather()),&node));
     }
-    Taxon* currTaxon = Taxon::findSmallestCommonTaxon(taxaListOnSons);
+    //removing null Taxa from list
+    set<Taxon*>::iterator nullFound = virtualSonsTaxa.find(00);
+    if(nullFound != virtualSonsTaxa.end()){
+	virtualSonsTaxa.erase(nullFound);
+	cout << "Null in virtualSons" << flush;
+    }
+    Taxon* currTaxon;
+    if(!virtualSonsTaxa.empty()) currTaxon = Taxon::findLCA(virtualSonsTaxa);
+    else currTaxon = 00;
+ 
+    
     if(recordResult && !virtualRootOnTheBranch) mapping_NodesToTaxa.at(currNodeID) = currTaxon ;
     taxa.insert(currTaxon);
     return(currTaxon);
@@ -504,6 +534,7 @@ void Family::doMapping_NodesToTaxa(){
 }
 
 void Family::doMapping_NodesToTaxonomicShift(){
+    doMapping_NodesToTaxa();
     // initializing the vector
     vector<Node*> nodes = tree->getNodes();
     if(mapping_NodesToTaxonomicShift.empty()) // first using? Initialization
@@ -515,8 +546,9 @@ void Family::doMapping_NodesToTaxonomicShift(){
     if(mapping_grandFatherWithoutThisNode.empty())
 	mapping_grandFatherWithoutThisNode.resize(tree->getNumberOfNodes());
     for(vector<Node*>::iterator currNode = nodes.begin(); currNode != nodes.end(); currNode++){
-	if(computeMappingShiftWithoutTheNode(*currNode) > 0)
+	if(computeMappingShiftWithoutTheNode(*currNode) > 0){
 	    computed_nodesInducingPerturbation.insert(*currNode);
+	}
 	
     }
     
@@ -657,16 +689,19 @@ unsigned int Family::computeMappingShiftWithoutTheNode(Node* node){
     Taxon* initialGfTaxon = mapping_NodesToTaxa.at(grandFatherNode->getId());
     Taxon* newTaxon = mapNodeOnTaxon(false,false,*grandFatherNode,grandFatherNodeFather,true,node);
     
-    if(newTaxon == 00 || initialGfTaxon == 00) return 0;
     
+    
+    if(newTaxon == 00 || initialGfTaxon == 00) return 0;
+    //DEBUG
+    //else cout << newTaxon->getName() << "->" << (mapping_NodesToTaxa[node->getId()])->getName()  << endl;
     mapping_NodesToTaxonomicShift[node->getId()] = Taxon::computeRelativeDepthDifference(initialGfTaxon,newTaxon,&taxa);
     mapping_grandFatherWithoutThisNode[node->getId()] = newTaxon;
     return(mapping_NodesToTaxonomicShift[node->getId()]);
     
     //DEBUG: printing result
-//     unsigned int gain = mapping_NodesToTaxonomicShift[node->getId()];
-//     if(gain > 1)
-// 	cout << newTaxon->getName() << "->" << (mapping_NodesToTaxa[node->getId()])->getName() << " GAIN: " << gain << endl;
+     unsigned int gain = mapping_NodesToTaxonomicShift[node->getId()];
+     if(gain > 1)
+ 	cout << newTaxon->getName() << "->" << (mapping_NodesToTaxa[node->getId()])->getName() << " GAIN: " << gain << endl;
 //     
 }
 

@@ -37,7 +37,7 @@ namespace tpms{
 	    bool containsAllTheseSpecies(std::set<tpms::Taxon*> species);
 	    
 	    void genRelations();
-	    static tpms::Taxon* findSmallestCommonTaxon(std::set<tpms::Taxon*> taxa);
+	    static tpms::Taxon* findLCA(std::set<tpms::Taxon*> taxa);
 	    static unsigned int computeRelativeDepthDifference(tpms::Taxon* ancestor, tpms::Taxon* descendant, std::set<tpms::Taxon*>* taxaList);
 	    
 	    // computes distance between this taxon and "taxon"

@@ -9,13 +9,17 @@ using namespace tpms;
 namespace tpms{
 Taxon::Taxon(string name, Node* nodeInSpTree,DataBase &database): name(name), db(database), nodeInSpTree(nodeInSpTree)
 {
-   
+   if(name.empty()) {
+       ostringstream ssid;
+       ssid << nodeInSpTree->getId();
+       this->name="<unnamed taxon " + ssid.str() + ">";
+   } 
 }
 
 void Taxon::genRelations(){
     genDescendantsList(nodeInSpTree);
     genAncestorsList(00);
-    depth = ancestors.size();
+    depth = ancestors.size()-1;
 }
 
 
@@ -28,27 +32,22 @@ void Taxon::genAncestorsList(Node* localNode)
 	localNode = nodeInSpTree;
     }
     
-    if(localNode->hasName())
-	ancestors.insert(db.nameToTaxon(localNode->getName()));
-    if(localNode->hasFather())
+    ancestors.insert(db.nodeIdToTaxon(localNode->getId())); // base case
+    if(localNode->hasFather()) // recursive case
         genAncestorsList(localNode->getFather());
     
-    if(firstTime){
-	Node* currNode = localNode;
-	do{
-	if(currNode->hasFather() && currNode->getFather()->hasName()){
-	    directAncestor = db.nameToTaxon(currNode->getFather()->getName());
-	    currNode = currNode->getFather();
-	} else
+    if(firstTime){ // initialization of direct ancestor
+	if(localNode->hasFather())
+	    directAncestor = db.nodeIdToTaxon(localNode->getFather()->getId());
+	else
 	    directAncestor = 00;
-	} while (directAncestor != 00 && directAncestor->getName() == name);
     }
 }
 
 void Taxon::genDescendantsList(Node* localNode)
 {
-    if(localNode->hasName())
-	descendants.insert(db.nameToTaxon(localNode->getName()));
+
+    descendants.insert(db.nodeIdToTaxon(localNode->getId()));
 
     vector<Node*> sons = localNode->getSons();
     for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++) {
@@ -103,26 +102,39 @@ bool Taxon::containsAllTheseSpecies(std::set< Taxon* > species)
 {
     bool allSpeciesAreInThisTaxon = true;
     for(std::set<Taxon *>::iterator currSp = species.begin(); allSpeciesAreInThisTaxon && currSp != species.end(); currSp++){
-	allSpeciesAreInThisTaxon &= contains(*currSp);
+	allSpeciesAreInThisTaxon &= (contains(*currSp) || *currSp == 00);
     }
     return(allSpeciesAreInThisTaxon);
 }
 
 
-tpms::Taxon* Taxon::findSmallestCommonTaxon(set<Taxon*> taxa){
-    //starting with the first taxon
-    set<Taxon*>::iterator currTaxonIt = taxa.begin();
-    // to manage unresolved nodes : propagates unresolution to nodes
-    while(*currTaxonIt == 00 && currTaxonIt != taxa.end()) currTaxonIt++;
-    if(*currTaxonIt == 00 || currTaxonIt==taxa.end()) return 00;
+tpms::Taxon* Taxon::findLCA(set<Taxon*> taxa){
+    set<Taxon*>::iterator nullFound = taxa.find(00);
+    if(nullFound != taxa.end())
+	cerr << "Cannot find LCA from null species." << endl;
     
-    Taxon *currTaxon = *currTaxonIt;
+    //starting with the first taxon
+    Taxon *currTaxon = *taxa.begin();
    
     while(currTaxon->hasDirectAncestor() && !currTaxon->containsAllTheseSpecies(taxa)){
 	currTaxon = currTaxon->getDirectAncestor();
     }
     if(currTaxon->containsAllTheseSpecies(taxa)) return(currTaxon);
-    else return(00);
+    else {
+	cout << "Impossible de trouver LCA pour " ;
+	for(set<Taxon*>::iterator currTx = taxa.begin(); currTx != taxa.end(); currTx++){
+	    cout << " " << (*currTx)->getName() << " :\nD= ";
+	    for(set<Taxon*>::iterator currDesc = (*currTx)->getDescendants().begin(); currDesc != (*currTx)->getDescendants().end(); currDesc++){
+		cout << "- " << (*currDesc)->getName(); 
+	    }
+	    cout << "\nA= " ;
+	    for(set<Taxon*>::iterator currDesc = (*currTx)->getAncestors().begin(); currDesc != (*currTx)->getAncestors().end(); currDesc++){
+		cout << "- '" << (*currDesc)->getName() << "' ***"; 
+	    }
+	    cout << endl;
+	}
+	cout << endl;
+	return(00);}
 }
 
 

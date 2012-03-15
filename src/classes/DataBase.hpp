@@ -26,6 +26,7 @@ namespace tpms{
     private:
 	
 	std::map<std::string,tpms::Taxon*> taxa;
+	std::map<unsigned int,tpms::Taxon*> nodeToTaxon;
 	unsigned int nbFamilies;
 	bool reconciled;
 	std::string filename;
@@ -92,6 +93,7 @@ namespace tpms{
 		
 	std::set<std::string> * getSpecies();
 	tpms::Taxon* nameToTaxon(std::string taxonName);
+	tpms::Taxon* nodeIdToTaxon(unsigned int nodeId);
 	
 	
     };}

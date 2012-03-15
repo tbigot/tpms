@@ -274,12 +274,16 @@ void DataBase::loadSpeciesTree(string newickLine)
 	vector<Node *> listeNoeuds = speciesTree->getNodes();
 		
 	for(vector<Node *>::iterator it = listeNoeuds.begin(); it != listeNoeuds.end(); it++) {
-		if((*it)->hasName()) {
-		    taxa.insert(pair<string,Taxon*>((*it)->getName(),new tpms::Taxon((*it)->getName(),(*it),*this)));
-		}
+	    string taxonToCreateName;
+	    if ((*it)->hasName()) taxonToCreateName = (*it)->getName();
+	    Taxon* currTaxon = new tpms::Taxon(taxonToCreateName,(*it),*this);
+	    nodeToTaxon.insert(  pair<unsigned int, Taxon*> ( (*it)->getId(),currTaxon )  );
+	    if(!taxonToCreateName.empty()) {
+		taxa.insert(pair<string,Taxon*>(taxonToCreateName,currTaxon));
+	    }
 	}
 	
-	for(map<string,Taxon*>::iterator ct = taxa.begin(); ct != taxa.end(); ct++){
+	for(map<unsigned int,Taxon*>::iterator ct = nodeToTaxon.begin(); ct != nodeToTaxon.end(); ct++){
 	    ct->second->genRelations();
 	}
 }
@@ -328,6 +332,13 @@ Taxon* DataBase::nameToTaxon(string taxonName)
     map<string,Taxon*>::iterator foundTaxon = taxa.find(taxonName);
     if(foundTaxon != taxa.end()) return(foundTaxon->second);
     cout << "Unable to find the taxon named " << taxonName << " in the database" << endl;
+    return(00);
+}
+
+Taxon* DataBase::nodeIdToTaxon(unsigned int nodeId){
+    map<unsigned int,Taxon*>::iterator foundTaxon = nodeToTaxon.find(nodeId);
+    if(foundTaxon != nodeToTaxon.end()) return(foundTaxon->second);
+    cout << "Unable to find node "  << nodeId << endl;
     return(00);
 }
 
