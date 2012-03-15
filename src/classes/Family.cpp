@@ -428,10 +428,8 @@ Taxon* Family::mapNodeOnTaxon(bool virtualRootOnTheBranch, bool recordResult,bpp
     }
     //removing null Taxa from list
     set<Taxon*>::iterator nullFound = virtualSonsTaxa.find(00);
-    if(nullFound != virtualSonsTaxa.end()){
-	virtualSonsTaxa.erase(nullFound);
-	cout << "Null in virtualSons" << flush;
-    }
+    if(nullFound != virtualSonsTaxa.end()) virtualSonsTaxa.erase(nullFound);
+    
     Taxon* currTaxon;
     if(!virtualSonsTaxa.empty()) currTaxon = Taxon::findLCA(virtualSonsTaxa);
     else currTaxon = 00;
