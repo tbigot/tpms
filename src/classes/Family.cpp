@@ -606,7 +606,7 @@ void Family::atomizeTaxon(std::vector< Taxon* > &resultTaxa, Taxon* ancestor, No
 {
     Taxon* currTaxon = mapping_NodesToTaxa.at(subtree->getId());
     // base case case
-    if(ancestor != currTaxon && ancestor->getAncestors().find(currTaxon) == ancestor->getAncestors().end())
+    if(ancestor != currTaxon && ancestor->getAncestors().find(currTaxon) == ancestor->getAncestors().end() && currTaxon != 00)
 	resultTaxa.push_back(currTaxon);
     else{
 	vector<Node*> sons = subtree->getSons();
