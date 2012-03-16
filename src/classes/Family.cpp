@@ -604,7 +604,7 @@ void Family::atomizeTaxon(std::vector< Taxon* > &resultTaxa, Taxon* ancestor, No
 {
     Taxon* currTaxon = mapping_NodesToTaxa.at(subtree->getId());
     // recursive case
-    if(ancestor != currTaxon && ancestor->getDescendants().find(currTaxon) != ancestor->getDescendants().end()){
+    if(ancestor == currTaxon || ancestor->getDescendants().find(currTaxon) != ancestor->getDescendants().end()){
 	vector<Node*> sons = subtree->getSons();
 	for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++)
 	    atomizeTaxon(resultTaxa, ancestor, *currSon);
