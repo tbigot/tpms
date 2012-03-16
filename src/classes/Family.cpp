@@ -595,6 +595,8 @@ void Family::compute_detectTransfers(){
 	string resultStr;
 	for(vector<Taxon*>::iterator currReceiver = currTransfer->receiver.begin(); currReceiver != currTransfer->receiver.end(); currReceiver++)
 	    resultStr += (*currReceiver)->getName() + ",";
+	if(resultStr.empty())
+	    resultStr = "<undetermined taxon> ";
 	resultStr.at(resultStr.size()-1) = ')';
 	results << resultStr << endl;
 
