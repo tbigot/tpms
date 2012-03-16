@@ -75,10 +75,11 @@ void save_to_file(DataBase& collection, std::string path, annotationsTypes type)
 	patienteur.step();
 	
 	vector<float> scores;
-	if(type == UNICITY)
-	    scores = (*currFamily)->getUnicityScores();
+	if(type == UNICITY){
+	    (*currFamily)->doMapping_NodesToUnicityScores();
+	    scores = (*currFamily)->getUnicityScores();}
 	
-	// labelling the node names
+	// re labelling the node names
 	if(type != NONE){
 	    vector<Node *> nodesList = (*currFamily)->getTree()->getNodes();
 	    for(vector<Node *>::iterator nit = nodesList.begin(); nit != nodesList.end(); nit++){

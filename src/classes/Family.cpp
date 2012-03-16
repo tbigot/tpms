@@ -592,10 +592,12 @@ void Family::compute_detectTransfers(){
     
     for(vector<transfer>::iterator currTransfer = computed_detectedTransfers.begin(); currTransfer != computed_detectedTransfers.end(); currTransfer++){
 	results << name << ',' << currTransfer->perturbationIndex << ',' << currTransfer->donnor->getName() << ",(" ;
-	for(vector<Taxon*>::iterator currReceiver = currTransfer->receiver.begin(); currReceiver != currTransfer->receiver.end(); currReceiver++){
-	    results << (*currReceiver)->getName();
-	results << ")" << endl;
-	}
+	string resultStr;
+	for(vector<Taxon*>::iterator currReceiver = currTransfer->receiver.begin(); currReceiver != currTransfer->receiver.end(); currReceiver++)
+	    resultStr += (*currReceiver)->getName() + ",";
+	resultStr.at(resultStr.size()-1) = ')';
+	results << resultStr << endl;
+
     }
     
 }
@@ -603,13 +605,15 @@ void Family::compute_detectTransfers(){
 void Family::atomizeTaxon(std::vector< Taxon* > &resultTaxa, Taxon* ancestor, Node* subtree)
 {
     Taxon* currTaxon = mapping_NodesToTaxa.at(subtree->getId());
-    // recursive case
-    if(ancestor == currTaxon || ancestor->getDescendants().find(currTaxon) != ancestor->getDescendants().end()){
+    // base case case
+    if(ancestor != currTaxon && currTaxon->getAncestors().find(ancestor) == currTaxon->getAncestors().end())
+	resultTaxa.push_back(currTaxon);
+    else{
 	vector<Node*> sons = subtree->getSons();
 	for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++)
 	    atomizeTaxon(resultTaxa, ancestor, *currSon);
-    } else
-	resultTaxa.push_back(currTaxon);
+    } 
+	
 }
 
 
