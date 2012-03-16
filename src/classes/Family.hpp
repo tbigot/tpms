@@ -27,7 +27,7 @@ class Family {
     
 struct transfer {
 	tpms::Taxon* donnor;
-	tpms::Taxon* receiver;
+	std::vector<tpms::Taxon*> receiver;
 	unsigned int perturbationIndex;
     };
     
@@ -111,7 +111,7 @@ private:
     
     void reRootAt(std::vector<bpp::Node*> bestRoots);
     
-    
+    void atomizeTaxon(std::vector< tpms::Taxon* >& resultTaxa, tpms::Taxon* ancestor, bpp::Node* subtree);
     
 public:
     void initialize();

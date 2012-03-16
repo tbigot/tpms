@@ -558,9 +558,10 @@ void Family::compute_detectTransfers(){
 	    // only if the bootstrap is enough
 	    if(!(*node)->getFather()->hasBootstrapValue() || (*node)->getFather()->getBootstrapValue() >= .90){
 		transfer currTransfer;
-		currTransfer.donnor = mapping_NodesToTaxa.at((*node)->getId());
-		currTransfer.receiver = mapping_grandFatherWithoutThisNode.at((*node)->getId());
+		Taxon* receiverGroup = mapping_NodesToTaxa.at((*node)->getId());
+		currTransfer.donnor = mapping_grandFatherWithoutThisNode.at((*node)->getId());
 		currTransfer.perturbationIndex = mapping_NodesToTaxonomicShift.at((*node)->getId());
+		atomizeTaxon(currTransfer.receiver,currTransfer.donnor,*node);
 		computed_detectedTransfers.push_back(currTransfer);
 	    }
 	    
@@ -590,10 +591,27 @@ void Family::compute_detectTransfers(){
 //     cout << computed_detectedTransfers.size() << " transfers detected. Original number of leaves : " << mne2tax.size() << ". Final number of leaves : " << tree->getNumberOfLeaves() << endl;}
     
     for(vector<transfer>::iterator currTransfer = computed_detectedTransfers.begin(); currTransfer != computed_detectedTransfers.end(); currTransfer++){
-	results << name << ',' << currTransfer->perturbationIndex << ',' << currTransfer->receiver->getName() << ',' << currTransfer->donnor->getName() << endl;
+	results << name << ',' << currTransfer->perturbationIndex << ',' << currTransfer->donnor->getName() << ",(" ;
+	for(vector<Taxon*>::iterator currReceiver = currTransfer->receiver.begin(); currReceiver != currTransfer->receiver.end(); currReceiver++){
+	    results << (*currReceiver)->getName();
+	results << ")" << endl;
+	}
     }
     
 }
+
+void Family::atomizeTaxon(std::vector< Taxon* > &resultTaxa, Taxon* ancestor, Node* subtree)
+{
+    Taxon* currTaxon = mapping_NodesToTaxa.at(subtree->getId());
+    // recursive case
+    if(ancestor != currTaxon && ancestor->getDescendants().find(currTaxon) != ancestor->getDescendants().end()){
+	vector<Node*> sons = subtree->getSons();
+	for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++)
+	    atomizeTaxon(resultTaxa, ancestor, *currSon);
+    } else
+	resultTaxa.push_back(currTaxon);
+}
+
 
 
 void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Family::*function)(), unsigned int nbThreads, ostream *output){
