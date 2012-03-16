@@ -556,7 +556,7 @@ void Family::compute_detectTransfers(){
 	    
 	    // then we need to insert the transfer into transfers
 	    // only if the bootstrap is enough
-	    if(!(*node)->getFather()->hasBootstrapValue() || (*node)->getFather()->getBootstrapValue() >= .90){
+	    if(!(*node)->getFather()->hasBootstrapValue() || (*node)->getFather()->getBootstrapValue() >= 90){
 		transfer currTransfer;
 		Taxon* receiverGroup = mapping_NodesToTaxa.at((*node)->getId());
 		currTransfer.donnor = mapping_grandFatherWithoutThisNode.at((*node)->getId());
