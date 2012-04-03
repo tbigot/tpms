@@ -33,6 +33,8 @@ struct transfer {
     
 private:
     
+    unsigned int highestID;
+    
     bool doneMapping_NodeToTaxa;
     
     std::string name;
@@ -85,16 +87,11 @@ private:
         
     
     std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<float> &scores, bpp::Node * node, bpp::Node * orignNode, bool virtualRootOnTheBranch = false);
-    tpms::Taxon* mapNodeOnTaxon(bool virtualRootOnTheBranch, bool recordResults, bpp::Node& node, bpp::Node* origin=00, bool recursive=true, bpp::Node* ignoredNode=00);
     
-    /**
-     * @brief gives the difference of taxonomic assignation depth (in the species tree), of a grandfather of a certain node, removing this node
-     * 
-     * @param node the node we want to test
-     * @return (init depth - final depth) of the grandfather node without the node given as parameter
-     */
-    unsigned int computeMappingShiftWithoutTheNode(bpp::Node* node);
+    void computeTaxonomicShift(bpp::Node* node, bpp::Node* father, bpp::Node* grandFather, bpp::Node* greatGrandFather, std::vector<tpms::Taxon*>* local_nodeToTaxon, std::vector<tpms::Taxon*>* local_GFmappingWithoutTheNode, std::vector<unsigned int>* local_perturbationsInduced, std::set<bpp::Node*>* local_nodesInducingPerturbations);
     
+    tpms::Taxon* mapNodeOnTaxon(std::vector< tpms::Taxon* >* referenceMapping, std::vector< tpms::Taxon* >* recordResult, bpp::Node* node, bpp::Node* origin = 00, std::set< bpp::Node* >* ignoredNodes = 00, bool recursive = true, bpp::Node* ignoredNode = 00);
+    unsigned int getTaxonomicSum(bpp::Node* node, bpp::Node* father, std::vector<tpms::Taxon*>* local_nodesToTaxa, std::set<bpp::Node*>* nodesToIgnore);
     
     std::vector<bpp::Node*> getUnicityBestRoots(std::vector<bpp::Node *> nodes);
     std::vector<bpp::Node*> getTaxonomyBestRoots(std::vector<bpp::Node *> nodes);
@@ -112,6 +109,8 @@ private:
     void reRootAt(std::vector<bpp::Node*> bestRoots);
     
     void atomizeTaxon(std::vector< tpms::Taxon* >& resultTaxa, tpms::Taxon* ancestor, bpp::Node* subtree);
+    
+    void print_tax_tree(bpp::Node& node, unsigned int depth, bpp::Node* origin, std::vector<tpms::Taxon*>* mapping, std::set<bpp::Node*>* ignoredNodes, bool subtreeIgnored);
     
 public:
     void initialize();

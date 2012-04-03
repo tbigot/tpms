@@ -30,6 +30,7 @@ namespace tpms{
 	static void getNodesOfTheSubtree(std::vector<bpp::Node*> &nodeListToFill,bpp::Node* node);
 	
 	static void destroySubtree(bpp::Node* node);
+	static unsigned int depthOfANode(bpp::Node* node);
     };
 }
 

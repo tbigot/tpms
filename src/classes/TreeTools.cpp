@@ -214,4 +214,11 @@ void TreeTools::destroySubtree(Node* node)
     }
 }
 
+unsigned int TreeTools::depthOfANode(Node* node)
+{
+    if(node->hasFather()) return(1+depthOfANode(node->getFather()));
+    else return(0);
+}
+
+
 } //fin namespace tpms
