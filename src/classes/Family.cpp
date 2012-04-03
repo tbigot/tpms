@@ -669,7 +669,7 @@ void Family::compute_detectTransfers(){
 		Node* currGF = (*node)->getFather(); // we will try GF father and so on making the same test
 		while(!transferAccepted && currGF->hasFather()){
 		    currGF = currGF->getFather();
-		    if(!currGF->getFather()->hasBootstrapValue() || currGF->getFather()->getBootstrapValue() >= 90 && currGF->getFather()->getBootstrapValue() <= 100){
+		    if(!currGF->hasBootstrapValue() || currGF->getBootstrapValue() >= 90 && currGF->getBootstrapValue() <= 100){
 			Taxon* GFbefore = mapping_NodesToTaxa.at(currGF->getId());
 			Taxon* GFafter = mapNodeOnTaxon(&mapping_NodesToTaxa,00,currGF,currGF->getFather(),00,true,*node);
 			perturbationIndex = Taxon::computeRelativeDepthDifference(GFbefore,GFafter,&taxa);
