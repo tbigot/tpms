@@ -758,12 +758,12 @@ void Family::atomizeTaxon(std::vector< Taxon* > &resultTaxa, Taxon* ancestor, No
 
 void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Family::*function)(), unsigned int nbThreads, ostream *output){
     unsigned int nbFamilies = families.size();
-    Waiter progressbar(&cout, nbFamilies, '#');
+    cout << "\nMultithreaded operation. Number of threads: " << nbThreads << ". Lot size : " << blockSize << endl;Waiter progressbar(&cout, nbFamilies, '#');
     boost::mutex progressbarMutex;
     boost::mutex outputMutex;
     boost::thread_group tg;
     unsigned int blockSize = nbFamilies / nbThreads;
-    cout << "Multithreaded operation. Number of threads: " << nbThreads << ". Lot size : " << blockSize << endl;
+    
     for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
 	vector<Family*>::iterator currPartBegin;
 	vector<Family*>::const_iterator currPartEnd;
