@@ -112,6 +112,8 @@ private:
     
     void print_tax_tree(bpp::Node& node, unsigned int depth, bpp::Node* origin, std::vector<tpms::Taxon*>* mapping, std::set<bpp::Node*>* ignoredNodes, bool subtreeIgnored);
     
+    void updateTaxa();
+    
 public:
     void initialize();
     

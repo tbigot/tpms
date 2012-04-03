@@ -297,6 +297,8 @@ void Family::reRootAt(std::vector<Node*> bestRoots)
     tree->newOutGroup(bestRoot);
     //the number of nodes has potentially changed
     highestID = tree->getNumberOfNodes();
+    // the present taxa could have changed: updating
+    updateTaxa();
 }
 
 
@@ -504,7 +506,6 @@ Taxon* Family::mapNodeOnTaxon(std::vector<Taxon*>* referenceMapping, vector<Taxo
  
     
     if(recordResult != 00) recordResult->at(currNodeID) = currTaxon ;
-    taxa.insert(currTaxon);
     return(currTaxon);
     
 }
@@ -563,7 +564,14 @@ set<Taxon *> &Family::getSpecies(){
 
 void Family::doMapping_NodesToTaxa(){
     mapNodeOnTaxon(&mapping_NodesToTaxa,&mapping_NodesToTaxa,tree->getRootNode());
+    updateTaxa();
     doneMapping_NodeToTaxa = true;
+}
+
+void Family::updateTaxa(){
+    taxa.clear();
+    for(vector<Taxon*>::iterator currTax = mapping_NodesToTaxa.begin(); currTax != mapping_NodesToTaxa.end(); currTax++)
+	taxa.insert(*currTax);
 }
 
 
