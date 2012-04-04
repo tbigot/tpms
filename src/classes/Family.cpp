@@ -569,11 +569,9 @@ void Family::doMapping_NodesToTaxa(){
 }
 
 void Family::updateTaxa(){
-    cout << "Before: " << taxa.size() << endl;
     taxa.clear();
     for(vector<Taxon*>::iterator currTax = mapping_NodesToTaxa.begin(); currTax != mapping_NodesToTaxa.end(); currTax++){
 	taxa.insert(*currTax);}
-    cout << "After: " << taxa.size() << endl;
 }
 
 
@@ -667,12 +665,13 @@ void Family::compute_detectTransfers(){
 	    Taxon* donnor = mapping_grandFatherWithoutThisNode.at((*node)->getId());
 	    unsigned int perturbationIndex = mapping_NodesToTaxonomicShift.at((*node)->getId());
 	    
-	    if(!(*node)->getFather()->hasBootstrapValue() || (*node)->getFather()->getBootstrapValue() >= 90 && (*node)->getFather()->getBootstrapValue() <= 100)
+	    if(!(*node)->getFather()->getFather()->hasBootstrapValue() || (*node)->getFather()->getFather()->getBootstrapValue() >= 90 && (*node)->getFather()->getFather()->getBootstrapValue() <= 100){
 		transferAccepted = true;
+	    }
 	    
 	    
 	     // trying to see if a bipartition exists grouping the incongruent group & the "donnor" group
-	    Node* currGF = *node; // we will try GF father and so on making the same test
+	    Node* currGF = (*node)->getFather(); // we will try GF father and so on making the same test
 	    while(!transferAccepted && currGF->hasFather()){
 		currGF = currGF->getFather();
 		if(!currGF->hasBootstrapValue() || currGF->getBootstrapValue() >= 90 && currGF->getBootstrapValue() <= 100){
