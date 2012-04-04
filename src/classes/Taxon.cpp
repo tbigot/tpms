@@ -148,7 +148,7 @@ unsigned int Taxon::computeRelativeDepthDifference(Taxon* ancestor, Taxon* desce
 	return 0;
     if(descendant->hasDirectAncestor()){
 	unsigned int toAdd = 0;
-	if(taxaList->find(descendant) != taxaList->end()) toAdd = 1;
+	if(taxaList->find(descendant->getDirectAncestor()) != taxaList->end()) toAdd = 1;
 	return(toAdd + computeRelativeDepthDifference(ancestor,descendant->getDirectAncestor(), taxaList));
 	
     }

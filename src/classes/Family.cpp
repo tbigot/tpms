@@ -297,8 +297,8 @@ void Family::reRootAt(std::vector<Node*> bestRoots)
     tree->newOutGroup(bestRoot);
     //the number of nodes has potentially changed
     highestID = tree->getNumberOfNodes();
-    // the present taxa could have changed: updating
-    updateTaxa();
+    // the present taxa affectation changed: updating
+    doMapping_NodesToTaxa();
 }
 
 
@@ -569,9 +569,11 @@ void Family::doMapping_NodesToTaxa(){
 }
 
 void Family::updateTaxa(){
+    cout << "Before: " << taxa.size() << endl;
     taxa.clear();
-    for(vector<Taxon*>::iterator currTax = mapping_NodesToTaxa.begin(); currTax != mapping_NodesToTaxa.end(); currTax++)
-	taxa.insert(*currTax);
+    for(vector<Taxon*>::iterator currTax = mapping_NodesToTaxa.begin(); currTax != mapping_NodesToTaxa.end(); currTax++){
+	taxa.insert(*currTax);}
+    cout << "After: " << taxa.size() << endl;
 }
 
 
@@ -605,11 +607,12 @@ void Family::computeTaxonomicShift(Node* node, Node* father, Node* grandFather, 
     {
 	Taxon* initialGfTaxon = local_nodeToTaxon->at(grandFather->getId());
 	Taxon* newTaxon = mapNodeOnTaxon(local_nodeToTaxon,00,grandFather,greatGrandFather,00,true,node);
-	
 	unsigned int currPerturbation = Taxon::computeRelativeDepthDifference(initialGfTaxon,newTaxon,&taxa);
+	// DBG
+	// if(initialGfTaxon != newTaxon) cout << initialGfTaxon->getName() << " . " << newTaxon->getName() << " : " << currPerturbation << endl;
 	local_perturbationsInduced->at(node->getId()) = currPerturbation;
 	local_GFmappingWithoutTheNode->at(node->getId()) = newTaxon;
-	if(currPerturbation != 0) local_nodesInducingPerturbations->insert(node);
+	if(initialGfTaxon != newTaxon) local_nodesInducingPerturbations->insert(node);
     } else{
 	local_perturbationsInduced->at(node->getId()) = 0;
     }
@@ -617,11 +620,13 @@ void Family::computeTaxonomicShift(Node* node, Node* father, Node* grandFather, 
 }
 
 bool Family::transfersRemaining(){
-    bool transfersRemaining = false;
-    for(vector<unsigned int>::iterator currPerturbation = mapping_NodesToTaxonomicShift.begin(); !transfersRemaining && currPerturbation != mapping_NodesToTaxonomicShift.end(); currPerturbation++){
-	transfersRemaining |= (*currPerturbation > 0);
-    }
-    return transfersRemaining;
+//     bool transfersRemaining = false;
+//     for(vector<unsigned int>::iterator currPerturbation = mapping_NodesToTaxonomicShift.begin(); !transfersRemaining && currPerturbation != mapping_NodesToTaxonomicShift.end(); currPerturbation++){
+// 	cout << *currPerturbation << " " << flush;
+// 	transfersRemaining |= (*currPerturbation > 0);
+//     }
+//     cout << (transfersRemaining? "true" : "false") << endl;
+    return(!computed_nodesInducingPerturbation.empty());
 }
 
 void Family::compute_detectTransfers(){
@@ -665,22 +670,23 @@ void Family::compute_detectTransfers(){
 	    if(!(*node)->getFather()->hasBootstrapValue() || (*node)->getFather()->getBootstrapValue() >= 90 && (*node)->getFather()->getBootstrapValue() <= 100)
 		transferAccepted = true;
 	    
-	    if(!transferAccepted && (*node)->getFather()->hasFather()) { // trying to see if a bipartition exists grouping the incongruent group & the "donnor" group
-		Node* currGF = (*node)->getFather(); // we will try GF father and so on making the same test
-		while(!transferAccepted && currGF->hasFather()){
-		    currGF = currGF->getFather();
-		    if(!currGF->hasBootstrapValue() || currGF->getBootstrapValue() >= 90 && currGF->getBootstrapValue() <= 100){
-			Taxon* GFbefore = mapping_NodesToTaxa.at(currGF->getId());
-			Taxon* GFafter = mapNodeOnTaxon(&mapping_NodesToTaxa,00,currGF,currGF->getFather(),00,true,*node);
-			perturbationIndex = Taxon::computeRelativeDepthDifference(GFbefore,GFafter,&taxa);
-			if(perturbationIndex > 0){
-			    donnor = GFafter;
-			    transferAccepted=true;
-			}
-		    }	
-		    
-		}
+	    
+	     // trying to see if a bipartition exists grouping the incongruent group & the "donnor" group
+	    Node* currGF = *node; // we will try GF father and so on making the same test
+	    while(!transferAccepted && currGF->hasFather()){
+		currGF = currGF->getFather();
+		if(!currGF->hasBootstrapValue() || currGF->getBootstrapValue() >= 90 && currGF->getBootstrapValue() <= 100){
+		    Taxon* GFbefore = mapping_NodesToTaxa.at(currGF->getId());
+		    Taxon* GFafter = mapNodeOnTaxon(&mapping_NodesToTaxa,00,currGF,currGF->getFather(),00,true,*node);
+		    perturbationIndex = Taxon::computeRelativeDepthDifference(GFbefore,GFafter,&taxa);
+		    if(perturbationIndex > 0){
+			donnor = GFafter;
+			transferAccepted=true;
+		    }
+		}	
+		
 	    }
+	    
 	    
 	    if(transferAccepted){
 		transfer currTransfer;
@@ -758,12 +764,12 @@ void Family::atomizeTaxon(std::vector< Taxon* > &resultTaxa, Taxon* ancestor, No
 
 void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Family::*function)(), unsigned int nbThreads, ostream *output){
     unsigned int nbFamilies = families.size();
-    cout << "\nMultithreaded operation. Number of threads: " << nbThreads << ". Lot size : " << blockSize << endl;Waiter progressbar(&cout, nbFamilies, '#');
     boost::mutex progressbarMutex;
     boost::mutex outputMutex;
     boost::thread_group tg;
     unsigned int blockSize = nbFamilies / nbThreads;
-    
+    cout << "\nMultithreaded operation. Number of threads: " << nbThreads << ". Lot size : " << blockSize << endl;Waiter progressbar(&cout, nbFamilies, '#');
+
     for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
 	vector<Family*>::iterator currPartBegin;
 	vector<Family*>::const_iterator currPartEnd;
