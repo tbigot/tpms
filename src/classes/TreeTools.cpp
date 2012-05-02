@@ -19,8 +19,8 @@ bpp::TreeTemplate<bpp::Node> * TreeTools::newickToTree(string & in, bool distanc
 }
 
 Node * TreeTools::newickToNode(string & in, unsigned int * jogger, Node * father, unsigned int& nodeId, bool distanceDelimitation){
-	stringstream ssNom;
-	stringstream ssDist;
+	stringstream *ssNom = new stringstream();
+	stringstream *ssDist = new stringstream();
 	double distance;
 	bool sharp = false; // duplication marker for reconciled trees
 	Node * thisNode = 00;
@@ -44,15 +44,15 @@ Node * TreeTools::newickToNode(string & in, unsigned int * jogger, Node * father
 		
 		// on se retrouve ici : soit un groupe qui est fini, soit on était sur une feuille. Dans tous les cas, c'est le nom du nœud créé dans cette itération qu'on va chercher
 		
-		ssDist.clear();
-		ssDist.str("");
-		ssNom.clear();
-		ssNom.str("");
+		ssDist->clear();
+		ssDist->str("");
+		ssNom->clear();
+		ssNom->str("");
 				
 		// le nom n'est pas terminé tant qu'on ne tombe pas sur deux points
 		// ou alors si /!DistanceDelimitation/, tout autre signe de fin de champ
 		while(in.at(*jogger) != ':' && (distanceDelimitation || in.at(*jogger) != ',' && in.at(*jogger) != ')' && in.at(*jogger) != ';')){
-			ssNom << in.at(*jogger);
+			*ssNom << in.at(*jogger);
 			(*jogger)++;
 		}
 		
@@ -61,25 +61,27 @@ Node * TreeTools::newickToNode(string & in, unsigned int * jogger, Node * father
 		    // on est sur deux points, donc on avance d'un caractere
 		    (*jogger)++;
 		    while(in.at(*jogger) != ',' && in.at(*jogger) != ')' && in.at(*jogger) != ';'){
-			    ssDist << in.at(*jogger);
+			    *ssDist << in.at(*jogger);
 			    (*jogger)++;
 		    }
 		}
-		if(!ssNom.str().empty()) {
+		if(!ssNom->str().empty()) {
 		    unsigned int bootstrap=0;
-		    thisNode->setName(ssNom.str());
-		    ssNom >> bootstrap;
+		    thisNode->setName(ssNom->str());
+		    *ssNom >> bootstrap;
 		    if(bootstrap != 0) {
 			thisNode->setBranchProperty(bpp::TreeTools::BOOTSTRAP, Number<double>(bootstrap));
 		    }
 		}
 		else if(sharp) thisNode->setName("#");
-		ssDist >> distance;
+		*ssDist >> distance;
 		thisNode->setDistanceToFather(distance);
 		
 		if(in.at(*jogger) == ',') (*jogger)++;
 		
 	}
+	delete(ssNom);
+        delete(ssDist);
 	return(thisNode);
 	
 }
