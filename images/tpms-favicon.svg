@@ -76,71 +76,6 @@
          offset="1"
          style="stop-color:#7f7f7f;stop-opacity:0;" />
     </linearGradient>
-    <filter
-       inkscape:collect="always"
-       id="filter7661"
-       x="-0.22854859"
-       width="1.4570972"
-       y="-0.22854859"
-       height="1.4570972"
-       color-interpolation-filters="sRGB">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="3.128939"
-         id="feGaussianBlur7663" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter7665"
-       x="-0.12006888"
-       width="1.2401378"
-       y="-0.25567526"
-       height="1.5113505"
-       color-interpolation-filters="sRGB">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="3.128939"
-         id="feGaussianBlur7667" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter7669"
-       x="-0.22854859"
-       width="1.4570972"
-       y="-0.22854859"
-       height="1.4570972"
-       color-interpolation-filters="sRGB">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="3.128939"
-         id="feGaussianBlur7671" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter7673"
-       x="-0.22854859"
-       width="1.4570972"
-       y="-0.22854859"
-       height="1.4570972"
-       color-interpolation-filters="sRGB">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="3.128939"
-         id="feGaussianBlur7675" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter7677"
-       x="-0.11870685"
-       width="1.2374136"
-       y="-0.2237248"
-       height="1.4474496"
-       color-interpolation-filters="sRGB">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="3.128939"
-         id="feGaussianBlur7679" />
-    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -150,7 +85,7 @@
      inkscape:pageopacity="0.4627451"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
-     inkscape:cx="37.665737"
+     inkscape:cx="36.817635"
      inkscape:cy="64.387054"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -210,7 +145,7 @@
        inkscape:connection-start="#path6250" />
     <path
        transform="translate(-99.406413,-26.273622)"
-       d="m 237.14285,505.93362 c 0,9.07325 -7.35532,16.42858 -16.42857,16.42858 -9.07325,0 -16.42857,-7.35533 -16.42857,-16.42858 0,-9.07325 7.35532,-16.42857 16.42857,-16.42857 9.07325,0 16.42857,7.35532 16.42857,16.42857 z"
+       d="m 237.14285,505.93362 a 16.428572,16.428572 0 1 1 -32.85714,0 16.428572,16.428572 0 1 1 32.85714,0 z"
        sodipodi:ry="16.428572"
        sodipodi:rx="16.428572"
        sodipodi:cy="505.93362"
@@ -219,17 +154,17 @@
        style="fill:none;stroke:#2dff2d;stroke-width:12;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker-start:none"
        sodipodi:type="arc" />
     <path
-       d="m 237.14285,505.93362 c 0,9.07325 -7.35532,16.42858 -16.42857,16.42858 -9.07325,0 -16.42857,-7.35533 -16.42857,-16.42858 0,-9.07325 7.35532,-16.42857 16.42857,-16.42857 9.07325,0 16.42857,7.35532 16.42857,16.42857 z"
+       d="m 237.14285,505.93362 a 16.428572,16.428572 0 1 1 -32.85714,0 16.428572,16.428572 0 1 1 32.85714,0 z"
        sodipodi:ry="16.428572"
        sodipodi:rx="16.428572"
        sodipodi:cy="505.93362"
        sodipodi:cx="220.71428"
        id="path6252"
-       style="fill:#ffffff;stroke:#2dff2d;stroke-width:12;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;fill-opacity:1"
+       style="fill:#2dff2d;fill-opacity:1;stroke:#2dff2d;stroke-width:12;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        sodipodi:type="arc"
        transform="translate(-38.610533,13.067518)" />
     <path
-       d="m 237.14285,505.93362 c 0,9.07325 -7.35532,16.42858 -16.42857,16.42858 -9.07325,0 -16.42857,-7.35533 -16.42857,-16.42858 0,-9.07325 7.35532,-16.42857 16.42857,-16.42857 9.07325,0 16.42857,7.35532 16.42857,16.42857 z"
+       d="m 237.14285,505.93362 a 16.428572,16.428572 0 1 1 -32.85714,0 16.428572,16.428572 0 1 1 32.85714,0 z"
        sodipodi:ry="16.428572"
        sodipodi:rx="16.428572"
        sodipodi:cy="505.93362"

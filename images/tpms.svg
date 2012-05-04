@@ -15,10 +15,10 @@
    id="svg5464"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   inkscape:export-filename="/home/tmgo/Développement/Phylogénie/tpms-git/images/tpms-small.png"
-   inkscape:export-xdpi="31.152258"
-   inkscape:export-ydpi="31.152258"
-   sodipodi:docname="tpms-text.svg">
+   inkscape:export-filename="/home/tmgo/Développement/Phylogénie/tpms-git/images/tpms-huge.png"
+   inkscape:export-xdpi="311.51999"
+   inkscape:export-ydpi="311.51999"
+   sodipodi:docname="tpms.svg">
   <defs
      id="defs5466">
     <linearGradient
@@ -150,8 +150,8 @@
      inkscape:pageopacity="0.4627451"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
-     inkscape:cx="39.270271"
-     inkscape:cy="74.488579"
+     inkscape:cx="39.27027"
+     inkscape:cy="74.488602"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
