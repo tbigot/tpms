@@ -59,6 +59,7 @@ namespace fs = boost::filesystem;
 
 int main(int argc, char *argv[]) {
     try{
+        cout << "      __                                 \n     /\\ \\__                              \n     \\ \\ ,_\\  _____    ___ ___     ____  \n      \\ \\ \\/ /\\ '__`\\/' __` __`\\  /',__\\ \n       \\ \\ \\_\\ \\ \\L\\ \\\\ \\/\\ \\/\\ \\/\\__, `\\\n        \\ \\__\\\\ \\ ,__/ \\_\\ \\_\\ \\_\\/\\____/\n         \\/__/ \\ \\ \\/ \\/_/\\/_/\\/_/\\/___/ \n                \\ \\_\\                    \n                 \\/_/    W E L C O M E                \n" << endl;
     CmdLineArgs args(argc, argv,"",cerr);
     // args.print(cout);
     
