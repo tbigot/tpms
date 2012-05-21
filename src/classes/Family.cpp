@@ -310,7 +310,8 @@ void Family::doRerooting_Taxonomy() {
 
 
 void Family::doRerooting_UnicityTaxonomy(){
-    tree->unroot();
+    if(tree->isRooted)
+        tree->unroot();
     vector<Node *> nodes = tree->getNodes();
        
     // first using unicity criteria
