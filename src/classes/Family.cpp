@@ -603,6 +603,7 @@ set<Taxon *> &Family::getSpecies(){
 
 
 void Family::doMapping_NodesToTaxa(){
+    mapping_NodesToTaxa.resize(highestID);
     mapNodeOnTaxon(&mapping_NodesToTaxa,&mapping_NodesToTaxa,tree->getRootNode());
     updateTaxa();
     doneMapping_NodeToTaxa = true;
