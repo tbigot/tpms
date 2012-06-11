@@ -60,7 +60,7 @@ using namespace tpms;
 
 
 namespace tpms{
-Pattern::Pattern(TreeTemplate<Node> &tree, DataBase &db): db(db), tree(tree){
+Pattern::Pattern(TreeTemplate<Node> &tree, DataBase &db): db(db), tree(tree), ok(true) {
     
     extractConstraints();
     cout << "\n -- Constraints visual representation:" << endl;
@@ -94,8 +94,18 @@ void Pattern::extractConstraints(){
 	(constraints.at((*unNoeud)->getId()))->setConstraints(db,initName,nodeType);
 	
     }
+    
+    // now checking constraints
+    for(vector<NodeConstraints*>::iterator cc = constraints.begin(); ok && cc != constraints.end(); cc++){
+        if(*cc != 00)
+            ok &= (*cc)->isOk();
+    }
 }
 
+
+bool Pattern::isOk(){
+    return(ok);
+}
 
 
 unsigned int Pattern::search(std::vector< Family* >& families, vector< pair< Family*, CandidateNode* > >& result){

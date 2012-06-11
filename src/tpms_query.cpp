@@ -111,6 +111,10 @@ int main(int argc, char *argv[]) {
 			
 			for(vector<TreeTemplate<Node> * >::iterator currpt = trees.begin(); currpt != trees.end(); currpt++){
 			    Pattern tp(**currpt,dbTest);
+                            if (!tp.isOk()){
+                                cout << "Your pattern contains invalid species / taxa, please unable to perform this search."<< endl;
+                                break;
+                            }
 			    cout << "\nPerforming tree pattern matching search in the collection, please wait" << endl;
 			    tp.search(dbTest.getFamilies(),familles);
 			}

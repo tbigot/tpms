@@ -62,6 +62,8 @@ class NodeConstraints{
 	
 	std::string constraintsOnNodeString;
 	std::string subtreeConstraintsString;
+        
+        bool ok;
 	
 	/**
 	 * @brief True means the target node must be direct son of the node matching to his pattern father node.
@@ -77,6 +79,7 @@ class NodeConstraints{
 	bool speciesRestrictions;
 	
     public:
+        bool isOk();
 	NodeConstraints(DataBase & pRefDB);
 	void setConstraints(DataBase &pRefDB, std::string constraintString, NodeType type);
 	bool allowsAsSon(Family& family, bpp::Node* node);

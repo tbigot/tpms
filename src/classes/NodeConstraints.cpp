@@ -55,7 +55,7 @@ using namespace tpms;
 
 namespace tpms{
 
-NodeConstraints::NodeConstraints(DataBase &pRefDB): refDB(pRefDB) {
+NodeConstraints::NodeConstraints(DataBase &pRefDB): refDB(pRefDB), ok(true) {
     nature = ANY;
     speciesRestrictionsAsSon = false;
     speciesRestrictions = false;
@@ -152,7 +152,8 @@ void NodeConstraints::addTaxon(set<Taxon*>& spset,string taxon)
     // trying to find the taxon in the db
     Taxon* foundTaxon = refDB.nameToTaxon(taxon);
     if (foundTaxon == 00){
-	cout << "The taxon " << taxon << " in your pattern does not seem to appear in the species tree of your collection" << endl;
+	cout << "The taxon “" << taxon << "” in your pattern does not seem to exist in the species tree of your collection." << endl;
+        ok = false;
 	return;
     }
     set<Taxon*> spList = foundTaxon->getDescendants();
@@ -165,6 +166,10 @@ void NodeConstraints::addTaxon(set<Taxon*>& spset,string taxon)
 // 	cout << (*ct)->getName() << ' ';
 //     }
 //     cout << endl;
+}
+
+bool NodeConstraints::isOk(){
+    return(ok);
 }
 
 void NodeConstraints::deleteTaxon(set<Taxon*>& spset,string taxon){

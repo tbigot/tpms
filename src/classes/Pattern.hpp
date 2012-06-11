@@ -56,6 +56,12 @@ namespace tpms{
 class Pattern {
     
 private:
+    
+    /**
+     * @brief Are all the node constraints Ok?
+     **/
+    bool ok;
+    
     /**
      * @brief The database associated to this pattern.
      **/
@@ -113,6 +119,8 @@ private:
     
 public:
     
+    bool isOk();
+        
     Pattern(bpp::TreeTemplate< bpp::Node >& tree, DataBase& pRefDB);
     ~Pattern();
     
