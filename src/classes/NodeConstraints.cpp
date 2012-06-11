@@ -117,7 +117,7 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
 
 void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataBase &pRefDB){
     if(spstr.empty()) return;
-    cout << "Building species list with this string : " << spstr << endl;
+    //cout << "Building species list with this string : " << spstr << endl;
     
     // if authorized species start with a minus (or a ! - compat reasons), implicit +ALL before
 	if(spstr.at(0) == '!')
@@ -128,7 +128,7 @@ void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataB
 	if(spstr.find('+')== string::npos && spstr.find('-')== string::npos)
 	    spstr = '+' + spstr;
     
-	cout << "    this string will be used : " << spstr << endl;
+	// cout << "    this string will be used : " << spstr << endl;
     
     // fonction récursive qui analyse la liste des espèces à autoriser.
     // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
@@ -142,7 +142,6 @@ void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataB
 	    addTaxon(spset,spstr.substr(1,cmpt-1));
 	else
             deleteTaxon(spset,spstr.substr(1,cmpt-1));
-        cout << "il reste " << spstr.substr(cmpt) <<endl;
 	if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt),pRefDB);
     }
 }
