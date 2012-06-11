@@ -107,19 +107,20 @@ int main(int argc, char *argv[]) {
 			if(trees.size() > 1)
 			    cout << "Finaly, " << trees.size() << " patterns have been generated." << endl;
 			
-			
+			bool isOk = true;
 			
 			for(vector<TreeTemplate<Node> * >::iterator currpt = trees.begin(); currpt != trees.end(); currpt++){
 			    Pattern tp(**currpt,dbTest);
                             if (!tp.isOk()){
                                 cout << "Your pattern contains invalid species / taxa, please unable to perform this search."<< endl;
+                                isOk = false;
                                 break;
                             }
 			    cout << "\nPerforming tree pattern matching search in the collection, please wait" << endl;
 			    tp.search(dbTest.getFamilies(),familles);
 			}
 			
-			
+			if(isOk){
 			unsigned int trouve = 0;
 			// DÉPOUILLAGE DES RÉSULTATS
 			cout << "\n   Writing results to the file " << args.getArg("output-dir")+"/"+fileName << endl;
@@ -162,6 +163,7 @@ int main(int argc, char *argv[]) {
 			ooo.close();
 			cout << "SELECTED: " << familles.size() << " / " << dbTest.getNbFamilies() << " families in the collection." << endl;
 			cout << trouve << " patterns found." << endl;
+                        } 
 			
 		}catch (bpp::NodeNotFoundException e) {
 			cout << "Node not found: \n" << e.what() << endl;
