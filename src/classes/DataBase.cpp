@@ -55,6 +55,8 @@
 #include "Waiter.hpp"
 #include "Family.hpp"
 #include "Taxon.hpp"
+#include "Pattern.hpp"
+
 
 #include <Bpp/Phyl/Tree.h>
 

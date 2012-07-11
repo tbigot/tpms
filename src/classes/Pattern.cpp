@@ -345,6 +345,11 @@ NodeConstraints* Pattern::constraintsOf(Node* node){
     return(constraints.at(node->getId()));
 }
 
+bool Pattern::patternMatchInit(Family &family, CandidateNode * initCnode){
+    return(patternMatch(family, family.getTree()->getRootNode(),tree.getRootNode(), initCnode));
+}
+
+
 bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, CandidateNode * fatherCandidate) {
     // Dufayard et al, 2005
     // Bigot et al, in prep.

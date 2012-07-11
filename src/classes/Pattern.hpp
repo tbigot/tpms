@@ -36,6 +36,8 @@
    knowledge of the CeCILL license and that you accept its terms.
  */
 
+#ifndef TPMS_PATTERN
+#define TPMS_PATTERN
 
 #include <fstream>
 #include <string>
@@ -119,6 +121,9 @@ private:
     
 public:
     
+    bool patternMatchInit(Family& family, tpms::CandidateNode* initCnode);
+
+    
     bool isOk();
         
     Pattern(bpp::TreeTemplate< bpp::Node >& tree, DataBase& pRefDB);
@@ -134,3 +139,10 @@ public:
     std::vector<int> xferGapDetect(std::map<int,Family *> families, std::set<std::string>);
 };
 }
+
+#else
+namespace tpms{
+
+class Pattern;
+}
+#endif

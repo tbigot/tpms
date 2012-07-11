@@ -49,18 +49,21 @@
 #include <Bpp/Phyl/Tree.h>
 #include <Bpp/Phyl/TreeTemplate.h>
 
+namespace tpms{
+    
+    enum NodeNature {ANY, DUPLICATION, SPECIATION};
+    enum NodeType {NODE,LEAF};
+}
 
 //inclusions personnelles
 #include "DataBase.hpp"
 #include "Taxon.hpp"
 #include "Waiter.hpp"
+#include "CandidateNode.hpp"
+#include "Pattern.hpp"
 
 
 namespace tpms{
-    
-    enum NodeNature {ANY, DUPLICATION, SPECIATION};
-    enum NodeType {NODE,LEAF};
-
 class Family {
     
 struct transfer {
@@ -217,7 +220,9 @@ public:
     static void threadWork_initialize(Waiter *waiter, boost::mutex *waiterMutex, std::vector<tpms::Family*>::iterator &familiesBegin, std::vector<tpms::Family*>::iterator &familiesEnd);
     
     static void threadedWork_launchJobs(std::vector<Family *> families, void (Family::*function)(), unsigned int nbThreads, std::ostream *output = 00);
+    static void threadedWork_patternMatching(std::vector<Family *> & families, tpms::Pattern * pattern, std::vector<std::pair<tpms::Family*, tpms::CandidateNode*> > * matchingFamilies, unsigned int nbThreads);
     static void threadedWork_oneThread(void(Family::*function)(),Waiter *progressbar, boost::mutex *progressbarMutex, std::ostream *output, boost::mutex *outputMutex , std::vector<tpms::Family*>::iterator &currPartBegin, std::vector<tpms::Family*>::const_iterator &currPartEnd);
+    static void threadedWork_onePMThread(tpms::Pattern * pattern,std::vector<std::pair<tpms::Family *, tpms::CandidateNode*> > * resultVector,Waiter *progressbar, boost::mutex *progressbarMutex, boost::mutex *outputMutex , std::vector<tpms::Family*>::iterator &currPartBegin, std::vector<tpms::Family*>::const_iterator &currPartEnd);
     
     std::ostringstream &threadedWork_getResults();
     

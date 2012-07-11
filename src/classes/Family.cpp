@@ -55,6 +55,8 @@
 #include "TreeTools.hpp"
 #include "Taxon.hpp"
 #include "DataBase.hpp"
+#include "CandidateNode.hpp"
+#include "Pattern.hpp"
 
 
 using namespace std;
@@ -822,6 +824,27 @@ void Family::threadedWork_launchJobs(std::vector<Family *> families, void (Famil
     progressbar.drawFinal();
 }
 
+
+void Family::threadedWork_patternMatching(std::vector<Family *> & families, Pattern * pattern, vector<pair<Family*, CandidateNode*> > * matchingFamilies, unsigned int nbThreads){
+    unsigned int nbFamilies = families.size();
+    boost::mutex progressbarMutex;
+    boost::mutex outputMutex;
+    boost::thread_group tg;
+    unsigned int blockSize = nbFamilies / nbThreads;
+    cout << "\nMultithreaded operation. Number of threads: " << nbThreads << ". Lot size : " << blockSize << endl;Waiter progressbar(&cout, nbFamilies, '#');
+
+    for(unsigned int currThreadIndex = 0; currThreadIndex < nbThreads; currThreadIndex++){
+        vector<Family*>::iterator currPartBegin;
+        vector<Family*>::const_iterator currPartEnd;
+        currPartBegin = families.begin() + (blockSize*currThreadIndex);
+        if(currThreadIndex+1 != nbThreads) currPartEnd = families.begin() + (blockSize*(currThreadIndex+1)); else currPartEnd = families.end();
+           boost::thread *currThread = new boost::thread(Family::threadedWork_onePMThread,pattern,matchingFamilies,&progressbar,&progressbarMutex,&outputMutex,currPartBegin,currPartEnd);
+        tg.add_thread(currThread);
+    }
+    tg.join_all();
+    progressbar.drawFinal();
+}
+
 void Family::threadedWork_oneThread(void(Family::*function)(),Waiter *progressbar, boost::mutex *progressbarMutex, ostream *output, boost::mutex *outputMutex , std::vector<tpms::Family*>::iterator &currPartBegin, std::vector<tpms::Family*>::const_iterator &currPartEnd){
     unsigned int waiterUpdate = 0;
     for(vector<Family*>::iterator currFamily = currPartBegin; currFamily != currPartEnd; currFamily++){
@@ -843,6 +866,32 @@ void Family::threadedWork_oneThread(void(Family::*function)(),Waiter *progressba
     }
 }
 
+void Family::threadedWork_onePMThread(Pattern * pattern, vector<pair<Family *, CandidateNode*> > *matchingFamilies, Waiter *progressbar, boost::mutex *progressbarMutex, boost::mutex *outputMutex , std::vector<tpms::Family*>::iterator &currPartBegin, std::vector<tpms::Family*>::const_iterator &currPartEnd){
+    unsigned int waiterUpdate = 0;
+    
+    for(vector<Family*>::iterator currFamily = currPartBegin; currFamily != currPartEnd; currFamily++){
+        if(!(*currFamily)->getContainsUndefinedSequences()){
+            vector<pair<Family *, CandidateNode*> > resultVector;
+            CandidateNode * candRoot = new CandidateNode();
+            if(pattern->patternMatchInit(**currFamily,candRoot)){
+                resultVector.push_back(pair<Family *, CandidateNode*>(*currFamily,candRoot));
+            }
+            else
+                delete(candRoot);
+  
+            outputMutex->lock();
+            matchingFamilies->insert(matchingFamilies->begin(),resultVector.begin(),resultVector.end());
+            outputMutex->unlock();
+        }
+        waiterUpdate++;
+        if(waiterUpdate == 50){
+            waiterUpdate = 0;
+            progressbarMutex->lock();
+            progressbar->step(50);
+            progressbarMutex->unlock();
+        }
+    }
+}
 
 bool Family::getContainsUndefinedSequences(){
     return(containsUndefinedSequences);

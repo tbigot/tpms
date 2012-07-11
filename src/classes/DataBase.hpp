@@ -103,7 +103,7 @@ namespace tpms{
 	//constructeur à partir d'un fichier
 	DataBase(std::string path, unsigned int nbThreads = 1);
 	bpp::TreeTemplate<bpp::Node> * getSpeciesTree();
-	std::vector<Family *> & getFamilies();
+	std::vector<tpms::Family *> & getFamilies();
 	unsigned int getNbFamilies();
 	std::string getParentTaxon(std::string pTaxon, unsigned int level);
 	
