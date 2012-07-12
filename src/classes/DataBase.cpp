@@ -44,7 +44,7 @@
 #include <vector>
 
 
-#define BOOST_FILESYSTEM_VERSION 2
+//#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string.hpp>
@@ -80,10 +80,10 @@ DataBase::DataBase(string path, unsigned int nbThreads): mappingDone_NodesToTaxa
 	}
 	
 	// using filesystem 3:
-	// filename = dbFile.filename().string();
+	filename = dbFile.filename().string();
 	
-	// but for compatibility, we use filesystem 2:
-	filename = dbFile.filename();
+	// filesystem 2 is not available anymore in boost:
+	// filename = dbFile.filename();
 	
     
     // ouverture du fichier
