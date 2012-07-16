@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
                             
                             Family::threadedWork_patternMatching(dbTest.getFamilies(),&tp,&familles,nbThreads);
                             
-			    tp.search(dbTest.getFamilies(),familles);
+			    //tp.search(dbTest.getFamilies(),familles);
 			}
 			
 			if(isOk){
