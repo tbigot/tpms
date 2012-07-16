@@ -239,6 +239,9 @@ string NodeConstraints::getStr()
 	case SPECIATION: result = "<SPE>"; break;
 	case ANY: result = "<ANY>"; break;
     }
+    if(direct){
+        result += " -DIRECT- ";
+    }
     ostringstream minBootstrapSs;
     minBootstrapSs << minBootstrap;
     result += "{"+ subtreeConstraintsString +"} " + constraintsOnNodeString + " :" + minBootstrapSs.str();
