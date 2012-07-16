@@ -135,7 +135,6 @@ Taxon* NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, Dat
             
             
         if(spstr.at(0)=='+' && spstr.find('+',1) == string::npos && spstr.find('-',1) == string::npos) {
-            cout << "\nplop"<< endl;
             justTaxon = refDB.nameToTaxon(spstr.substr(1));
         }
         // fonction récursive qui analyse la liste des espèces à autoriser.
@@ -217,7 +216,7 @@ bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
         if(asosIsJustTaxon != 00) {
             cout << "\n" << asosIsJustTaxon->getName() << " is just a taxon." << endl;
             return(asosIsJustTaxon->contains(family.getTaxonOfNode(node)));
-        }
+        } else cout << "Is not just a taxon." << endl;
 	// 1st step: getting all the species on the gene tree subtree
 	set<Taxon*> & speciesList = family.getTaxaOnThisSubtree(node);
 	// seeing, for each species of the taxaList
