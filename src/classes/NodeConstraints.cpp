@@ -206,13 +206,13 @@ bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
     if(speciesRestrictionsAsSon) // we allow only if the subtree contains only allowed species from father
     {
 	// 1st step: getting all the species on the gene tree subtree
-	vector<Taxon*> & speciesList = family.getTaxaOnThisSubtree(node);
+	set<Taxon*> & speciesList = family.getTaxaOnThisSubtree(node);
 	// seeing, for each species of the taxaList
 	bool allSpAreAllowed = true;
-	for(vector<Taxon*>::iterator currSp = speciesList.begin(); currSp != speciesList.end(); currSp++){
-	    allSpAreAllowed &= allowedSpeciesOnSubtree.find(*currSp) != allowedSpeciesOnSubtree.end();
-	}
-	return(allSpAreAllowed);
+// 	for(vector<Taxon*>::iterator currSp = speciesList.begin(); currSp != speciesList.end(); currSp++){
+// 	    allSpAreAllowed &= allowedSpeciesOnSubtree.find(*currSp) != allowedSpeciesOnSubtree.end();
+// 	}
+	return(includes(allowedSpeciesOnSubtree.begin(),allowedSpeciesOnSubtree.end(),speciesList.begin(),speciesList.end()));
     }
     return(true);
 }
