@@ -118,6 +118,7 @@ int main(int argc, char *argv[]) {
                             }
 			    cout << "\nPerforming tree pattern matching search in the collection, please wait" << endl;
                             
+                            dbTest.doFamiliesMapping_NodesToTaxa();
                             
                             Family::threadedWork_patternMatching(dbTest.getFamilies(),&tp,&familles,nbThreads);
                             

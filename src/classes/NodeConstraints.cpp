@@ -116,9 +116,9 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
 }
 
 
-bool NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataBase &pRefDB){
-    bool isJustATaxon = false;
-    if(spstr.empty()) return isJustATaxon;
+Taxon* NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataBase &pRefDB){
+    Taxon* justTaxon = 00;
+    if(spstr.empty()) return justTaxon;
     //cout << "Building species list with this string : " << spstr << endl;
     
     // if authorized species start with a minus (or a ! - compat reasons), implicit +ALL before
@@ -135,8 +135,7 @@ bool NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataB
     // fonction récursive qui analyse la liste des espèces à autoriser.
     // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
         if(spstr.at(0)=='+' && spstr.find('+',1) == string::npos) {
-            isJustATaxon = true;
-            asosTaxon = refDB.nameToTaxon(spstr.substr(1));
+            justTaxon = refDB.nameToTaxon(spstr.substr(1));
         }
     if(spstr.size() != 0){
 	bool toAdd;
@@ -150,7 +149,7 @@ bool NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataB
             deleteTaxon(spset,spstr.substr(1,cmpt-1));
 	if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt),pRefDB);
     }
-    return isJustATaxon;
+    return justTaxon;
 }
 
 void NodeConstraints::addTaxon(set<Taxon*>& spset,string taxon)
@@ -211,7 +210,10 @@ bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
 {
     if(speciesRestrictionsAsSon) // we allow only if the subtree contains only allowed species from father
     {
-        if(asosIsJustTaxon) return(asosTaxon->contains(family.getTaxonOfNode(node)));
+        if(asosIsJustTaxon != 00) {
+            cout << "\n" << asosIsJustTaxon->getName() << " is just a taxon." << endl;
+            return(asosIsJustTaxon->contains(family.getTaxonOfNode(node)));
+        }
 	// 1st step: getting all the species on the gene tree subtree
 	set<Taxon*> & speciesList = family.getTaxaOnThisSubtree(node);
 	// seeing, for each species of the taxaList
