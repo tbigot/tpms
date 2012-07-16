@@ -107,7 +107,7 @@ private:
     std::vector<unsigned int> mapping_NodesToTaxonomicShift;
     
     
-    std::vector<std::vector<tpms::Taxon*> > cacheMapping_SubtreesToTaxalist;
+    std::vector<std::set<tpms::Taxon*> > cacheMapping_SubtreesToTaxalist;
     
      /**
      * @brief contains, after each step of doMapping_NodesToTaxonomicShift, the taxonomic affectation of a grandfather node of a node
@@ -205,7 +205,7 @@ public:
     
     void addSequencesNames(bpp::Node* currNode);
     
-    std::vector<tpms::Taxon*> & getTaxaOnThisSubtree(bpp::Node * node);
+    std::set<tpms::Taxon*> & getTaxaOnThisSubtree(bpp::Node * node);
     
     std::set<tpms::Taxon *> &getSpecies();
     

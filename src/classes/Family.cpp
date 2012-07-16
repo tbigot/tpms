@@ -588,16 +588,16 @@ NodeNature Family::getNatureOf(Node* node)
 }
 
 
-std::vector<Taxon*> & Family::getTaxaOnThisSubtree(Node* node)
+std::set<Taxon*> & Family::getTaxaOnThisSubtree(Node* node)
 {
     if(cacheMapping_SubtreesToTaxalist.at(node->getId()).empty()){
         vector<Node *> sons = node->getSons();
         for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
-            vector<Taxon*> listOnCurrSon = getTaxaOnThisSubtree(*currSon);
-            cacheMapping_SubtreesToTaxalist.at(node->getId()).insert(cacheMapping_SubtreesToTaxalist.at(node->getId()).begin(),listOnCurrSon.begin(),listOnCurrSon.end());
+            set<Taxon*> listOnCurrSon = getTaxaOnThisSubtree(*currSon);
+            cacheMapping_SubtreesToTaxalist.at(node->getId()).insert(listOnCurrSon.begin(),listOnCurrSon.end());
         }
         if(sons.size() == 0) // leave case, return the species of this leave
-            cacheMapping_SubtreesToTaxalist.at(node->getId()).push_back(mapping_NodesToTaxa.at(node->getId()));
+            cacheMapping_SubtreesToTaxalist.at(node->getId()).insert(mapping_NodesToTaxa.at(node->getId()));
     }
     return(cacheMapping_SubtreesToTaxalist.at(node->getId()));
 }
