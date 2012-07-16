@@ -602,6 +602,10 @@ std::set<Taxon*> & Family::getTaxaOnThisSubtree(Node* node)
     return(cacheMapping_SubtreesToTaxalist.at(node->getId()));
 }
 
+unsigned int Family::getMaxDepthOfSubtree(Node* node){
+    return(mapping_NodesToMaxDepths.at(node->getId()));
+}
+
 void tpms::Family::clearCache()
 {
     cacheMapping_SubtreesToTaxalist.resize(0);
@@ -622,6 +626,11 @@ void Family::doMapping_NodesToTaxa(){
     mapNodeOnTaxon(&mapping_NodesToTaxa,&mapping_NodesToTaxa,tree->getRootNode());
     updateTaxa();
     doneMapping_NodeToTaxa = true;
+}
+
+void Family::doMapping_NodesToMaxDepth(){
+    mapping_NodesToMaxDepths.resize(highestID);
+    mapNodeToMaxDepth(tree->getRootNode());
 }
 
 void Family::updateTaxa(){
@@ -646,6 +655,19 @@ void Family::doMapping_NodesToTaxonomicShift(){
     computeTaxonomicShift(tree->getRootNode(), 00, 00, 00, &mapping_NodesToTaxa, &mapping_grandFatherWithoutThisNode, &mapping_NodesToTaxonomicShift, &computed_nodesInducingPerturbation);
 }
 
+
+unsigned int Family::mapNodeToMaxDepth(Node* node){
+    unsigned int maxDepth = 0;
+    if(!node->isLeaf()){
+        vector<Node*> sons = node->getSons();
+        for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
+            unsigned int currMaxDepth = mapNodeToMaxDepth(*currSon);
+            if(currMaxDepth > maxDepth) maxDepth = currMaxDepth;
+        }
+    }
+    mapping_NodesToMaxDepths.at(node->getId()) = maxDepth;
+    return(maxDepth);
+}
 
 void Family::computeTaxonomicShift(Node* node, Node* father, Node* grandFather, Node* greatGrandFather, vector<Taxon*>* local_nodeToTaxon, vector<Taxon*>* local_GFmappingWithoutTheNode, vector<unsigned int>* local_perturbationsInduced, set<Node*>* local_nodesInducingPerturbations){
     

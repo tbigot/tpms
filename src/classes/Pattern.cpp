@@ -65,11 +65,28 @@ Pattern::Pattern(TreeTemplate<Node> &tree, DataBase &db): db(db), tree(tree), ok
     extractConstraints();
     cout << "\n -- Constraints visual representation:" << endl;
     toString(tree.getRootNode(),0,std::cout);
+    mapping_NodesToMaxDepths.resize(tree.getNumberOfNodes());
+    mapNodeToMaxDepth(tree.getRootNode());
 }
 
 Pattern::~Pattern(){
     for(vector<NodeConstraints *>::iterator cc=constraints.begin(); cc != constraints.end(); cc++)
 	delete(*cc);
+}
+
+
+unsigned int Pattern::mapNodeToMaxDepth(Node* node)
+{
+    unsigned int maxDepth = 0;
+    if(!node->isLeaf()){
+        vector<Node*> sons = node->getSons();
+        for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
+            unsigned int currMaxDepth = mapNodeToMaxDepth(*currSon);
+            if(currMaxDepth > maxDepth) maxDepth = currMaxDepth;
+        }
+    }
+    mapping_NodesToMaxDepths.at(node->getId()) = maxDepth;
+    return(maxDepth);
 }
 
 
@@ -371,6 +388,11 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 	return(patternMatch(family,target->getSon(0),pattern,fatherCandidate)
 	|| patternMatch(family,target->getSon(1),pattern,fatherCandidate));
     } else {
+        // first, checking if the rest of the tree is big enough to contain the pattern
+        if(family.getMaxDepthOfSubtree(target) < mapping_NodesToMaxDepths.at(pattern->getId()))
+            return(false);
+        
+        
 	// here, the pattern node can accept the target node
 	Node * tson1 = target->getSon(0);
 	Node * tson2 = target->getSon(1);

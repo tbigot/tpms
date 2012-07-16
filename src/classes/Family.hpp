@@ -105,6 +105,7 @@ private:
     std::vector<float> mapping_NodesToUnicityScores;
     std::vector<Taxon *> mapping_NodesToTaxa;
     std::vector<unsigned int> mapping_NodesToTaxonomicShift;
+    std::vector<unsigned int> mapping_NodesToMaxDepths;
     
     
     std::vector<std::set<tpms::Taxon*> > cacheMapping_SubtreesToTaxalist;
@@ -158,6 +159,8 @@ private:
     
     void updateTaxa();
     
+    unsigned int mapNodeToMaxDepth(bpp::Node*);
+    
 public:
     void initialize();
     
@@ -175,6 +178,7 @@ public:
     void doMapping_NodesToNatures();
     void doMapping_NodesToTaxa();
     void doMapping_NodesToTaxonomicShift();
+    void doMapping_NodesToMaxDepth();
     
     void doRerooting_Unicity();
     void doRerooting_Taxonomy();
@@ -184,6 +188,8 @@ public:
     
     
     tpms::Taxon* getTaxonOfNode(bpp::Node * node);
+    unsigned int getMaxDepthOfSubtree(bpp::Node * node);
+
     NodeNature getNatureOfNode(bpp::Node * node);
     
     bool containsSpecie(tpms::Taxon* taxon);

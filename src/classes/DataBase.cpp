@@ -136,6 +136,16 @@ std::string DataBase::getStatus(std::string preText){
     return(out.str());
 }
 
+void DataBase::doFamiliesMapping_NodesToMaxDepth() {
+    // multithreading version
+    if(!mappingDone_NodesToMaxDepth){
+        cout << "Mapping nodes to max depth:" << endl;
+        Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToMaxDepth,nbThreads);
+    }
+    mappingDone_NodesToMaxDepth=true;
+}
+
+
 void DataBase::doFamiliesMapping_LeavesToSpecies() {
     // multithreading version
     if(!mappingDone_LeavesToSpecies){

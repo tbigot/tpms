@@ -119,7 +119,11 @@ private:
     NodeConstraints* constraintsOf(bpp::Node* node);
     bool isTreeBinary();
     
+    std::vector<unsigned int> mapping_NodesToMaxDepths;
+    
 public:
+    
+    unsigned int mapNodeToMaxDepth(bpp::Node*);
     
     bool patternMatchInit(Family& family, tpms::CandidateNode* initCnode);
 

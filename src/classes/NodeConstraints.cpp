@@ -214,10 +214,8 @@ bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
 {
     if(speciesRestrictionsAsSon) // we allow only if the subtree contains only allowed species from father
     {
-        if(asosIsJustTaxon != 00) {
-            cout << "\n" << asosIsJustTaxon->getName() << " is just a taxon." << endl;
+        if(asosIsJustTaxon != 00)
             return(asosIsJustTaxon->contains(family.getTaxonOfNode(node)));
-        } else cout << "\nIs not just a taxon." << endl;
 	// 1st step: getting all the species on the gene tree subtree
 	set<Taxon*> & speciesList = family.getTaxaOnThisSubtree(node);
 	// seeing, for each species of the taxaList

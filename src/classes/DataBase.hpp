@@ -86,6 +86,7 @@ namespace tpms{
 	bool mappingDone_LeavesToSpecies;
 	bool mappingDone_NodesToTaxa;
 	bool mappingDone_NodesToUnicityScores;
+        bool mappingDone_NodesToMaxDepth;
 	
 	
 	
@@ -119,6 +120,7 @@ namespace tpms{
 	
 	void doFamiliesMapping_LeavesToSpecies();
 	void doFamiliesMapping_NodesToTaxa();
+        void doFamiliesMapping_NodesToMaxDepth();
 	void doFamiliesMapping_NodesToUnicityScores();
 	void doFamiliesMapping_NodesToTaxonomicShift();
         
