@@ -217,6 +217,10 @@ bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
     return(true);
 }
 
+bool NodeConstraints::isDirect(){
+    return(direct);
+}
+
 std::set< Taxon* >& NodeConstraints::getAllowedSpecies()
 {
     return(allowedSpeciesOnNode);

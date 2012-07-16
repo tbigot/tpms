@@ -398,7 +398,9 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 		    
 	    // if we haven't returned yet, it means the current target node is not matching to a pattern node
 	    // we have to try the pattern node in the sons
-	    return(patternMatch(family,tson1, pattern, fatherCandidate) || patternMatch(family,tson2, pattern, fatherCandidate) );
+                //Only if the direct link is not required
+                // DIRECT LINK MANAGED HERE
+	    return( (  !constraintsOf(tson1)->isDirect()  && patternMatch(family,tson1, pattern, fatherCandidate)) ||(     !constraintsOf(tson2)->isDirect()   && patternMatch(family,tson2, pattern, fatherCandidate)) );
 	
 	} else return(false);
 		

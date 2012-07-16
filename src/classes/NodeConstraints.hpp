@@ -87,6 +87,7 @@ class NodeConstraints{
 	std::set<tpms::Taxon*>& getAllowedSpecies();
 	bool isLeaf();
 	std::string getStr();
+        bool isDirect();
 	
 	
     
