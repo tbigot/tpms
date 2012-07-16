@@ -60,6 +60,7 @@ NodeConstraints::NodeConstraints(DataBase &pRefDB): refDB(pRefDB), ok(true) {
     speciesRestrictionsAsSon = false;
     speciesRestrictions = false;
     type = NODE;
+    direct = false;
 }
 
 void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString, NodeType type){    
