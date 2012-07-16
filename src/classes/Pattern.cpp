@@ -400,7 +400,7 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 	    // we have to try the pattern node in the sons
                 //Only if the direct link is not required
                 // DIRECT LINK MANAGED HERE
-	    return( (  !constraintsOf(tson1)->isDirect()  && patternMatch(family,tson1, pattern, fatherCandidate)) ||(     !constraintsOf(tson2)->isDirect()   && patternMatch(family,tson2, pattern, fatherCandidate)) );
+	    return( !constraintsOf(pattern)->isDirect() && (patternMatch(family,tson1, pattern, fatherCandidate) || patternMatch(family,tson2, pattern, fatherCandidate)));
 	
 	} else return(false);
 		
