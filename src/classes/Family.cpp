@@ -449,7 +449,7 @@ bool Family::containsSpecie(Taxon* taxon) {
 }
 
 
-Taxon* Family::getSpeciesOfNode(Node* node){
+Taxon* Family::getTaxonOfNode(Node* node){
     return(mapping_NodesToTaxa.at(node->getId()));
 }
 

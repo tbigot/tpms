@@ -74,7 +74,7 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
     getline(initSString,paramsString,'/');
     
     getline(initSString,subtreeConstraintsString,'/');
-    buildAllowedSpecies(allowedSpeciesOnSubtree,subtreeConstraintsString,pRefDB);
+    asosIsJustTaxon = buildAllowedSpecies(allowedSpeciesOnSubtree,subtreeConstraintsString,pRefDB);
     
     getline(initSString,constraintsOnNodeString,'/');
     buildAllowedSpecies(allowedSpeciesOnNode,constraintsOnNodeString,pRefDB);
@@ -116,8 +116,9 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
 }
 
 
-void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataBase &pRefDB){
-    if(spstr.empty()) return;
+bool NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataBase &pRefDB){
+    bool isJustATaxon = false;
+    if(spstr.empty()) return isJustATaxon;
     //cout << "Building species list with this string : " << spstr << endl;
     
     // if authorized species start with a minus (or a ! - compat reasons), implicit +ALL before
@@ -133,6 +134,10 @@ void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataB
     
     // fonction récursive qui analyse la liste des espèces à autoriser.
     // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
+        if(spstr.at(0)=='+' && spstr.find('+',1) == string::npos) {
+            isJustATaxon = true;
+            asosTaxon = refDB.nameToTaxon(spstr.substr(1));
+        }
     if(spstr.size() != 0){
 	bool toAdd;
 	if(spstr.at(0) == '+') toAdd = true; else toAdd = false; //FIXME: il faudrait gérer les erreurs
@@ -145,6 +150,7 @@ void NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataB
             deleteTaxon(spset,spstr.substr(1,cmpt-1));
 	if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt),pRefDB);
     }
+    return isJustATaxon;
 }
 
 void NodeConstraints::addTaxon(set<Taxon*>& spset,string taxon)
@@ -191,7 +197,7 @@ void NodeConstraints::deleteTaxon(set<Taxon*>& spset,string taxon){
 bool NodeConstraints::allows(Family& family, bpp::Node* node)
 {
     if(type == LEAF){
-	Taxon* nodeSpecies = family.getSpeciesOfNode(node);
+	Taxon* nodeSpecies = family.getTaxonOfNode(node);
 	return(allowedSpeciesOnNode.find(nodeSpecies)!= allowedSpeciesOnNode.end());
     } else {
 	// a node is accepted if the nature matches & sufficient bootstrap
@@ -205,6 +211,7 @@ bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
 {
     if(speciesRestrictionsAsSon) // we allow only if the subtree contains only allowed species from father
     {
+        if(asosIsJustTaxon) return(asosTaxon->contains(family.getTaxonOfNode(node)));
 	// 1st step: getting all the species on the gene tree subtree
 	set<Taxon*> & speciesList = family.getTaxaOnThisSubtree(node);
 	// seeing, for each species of the taxaList

@@ -183,7 +183,7 @@ public:
     void compute_detectTransfers();
     
     
-    tpms::Taxon* getSpeciesOfNode(bpp::Node * node);
+    tpms::Taxon* getTaxonOfNode(bpp::Node * node);
     NodeNature getNatureOfNode(bpp::Node * node);
     
     bool containsSpecie(tpms::Taxon* taxon);

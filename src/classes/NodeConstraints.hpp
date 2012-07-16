@@ -55,6 +55,8 @@ class NodeConstraints{
 	DataBase &refDB;
 	NodeNature nature;
 	std::set<tpms::Taxon*> allowedSpeciesOnSubtree;
+        bool asosIsJustTaxon;
+        tpms::Taxon* asosTaxon;
 	std::set<tpms::Taxon*> allowedSpeciesOnNode;
 	
 	NodeType type;
@@ -70,7 +72,7 @@ class NodeConstraints{
 	 **/
 	bool direct;
 	
-	void buildAllowedSpecies(std::set<tpms::Taxon*>& spset,std::string spstr, DataBase &pRefDB);
+	bool buildAllowedSpecies(std::set<tpms::Taxon*>& spset,std::string spstr, DataBase &pRefDB);
 	
 	void addTaxon(std::set<tpms::Taxon*>& spset,std::string);
 	void deleteTaxon(std::set<tpms::Taxon*>& spset,std::string);
