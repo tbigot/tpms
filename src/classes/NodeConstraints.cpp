@@ -127,16 +127,20 @@ Taxon* NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, Dat
 	if(spstr.at(0) == '-' && spset.empty())
 	    spstr = "+" + pRefDB.getSpeciesTree()->getRootNode()->getName() + spstr;
 	// case of single species
-	if(spstr.find('+')== string::npos && spstr.find('-')== string::npos)
+	if(spstr.at(0) != '+' && spstr.at(0) != '-')
 	    spstr = '+' + spstr;
     
 	// cout << "    this string will be used : " << spstr << endl;
     
-    // fonction récursive qui analyse la liste des espèces à autoriser.
-    // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
-        if(spstr.at(0)=='+' && spstr.find('+',1) == string::npos) {
+            
+            
+        if(spstr.at(0)=='+' && spstr.find('+',1) == string::npos && spstr.find('-',1) == string::npos) {
+            cout << "\nplop"<< endl;
             justTaxon = refDB.nameToTaxon(spstr.substr(1));
         }
+        // fonction récursive qui analyse la liste des espèces à autoriser.
+        // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
+
     if(spstr.size() != 0){
 	bool toAdd;
 	if(spstr.at(0) == '+') toAdd = true; else toAdd = false; //FIXME: il faudrait gérer les erreurs
