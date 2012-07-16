@@ -346,7 +346,10 @@ NodeConstraints* Pattern::constraintsOf(Node* node){
 }
 
 bool Pattern::patternMatchInit(Family &family, CandidateNode * initCnode){
-    return(patternMatch(family, family.getTree()->getRootNode(),tree.getRootNode(), initCnode));
+    family.initCache();
+    bool result = patternMatch(family, family.getTree()->getRootNode(),tree.getRootNode(), initCnode);
+    family.clearCache();
+    return(result);
 }
 
 

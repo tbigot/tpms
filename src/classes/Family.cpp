@@ -588,14 +588,27 @@ NodeNature Family::getNatureOf(Node* node)
 }
 
 
-void Family::getTaxaOnThisSubtree(Node* node, std::vector< Taxon* >& speciesList)
+std::vector<Taxon*> & Family::getTaxaOnThisSubtree(Node* node)
 {
-    vector<Node *> sons = node->getSons();
-    for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
-	getTaxaOnThisSubtree(*currSon,speciesList);
+    if(cacheMapping_SubtreesToTaxalist.at(node->getId()).empty()){
+        vector<Node *> sons = node->getSons();
+        for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
+            vector<Taxon*> listOnCurrSon = getTaxaOnThisSubtree(*currSon);
+            cacheMapping_SubtreesToTaxalist.at(node->getId()).insert(cacheMapping_SubtreesToTaxalist.at(node->getId()).begin(),listOnCurrSon.begin(),listOnCurrSon.end());
+        }
+        if(sons.size() == 0) // leave case, return the species of this leave
+            cacheMapping_SubtreesToTaxalist.at(node->getId()).push_back(mapping_NodesToTaxa.at(node->getId()));
     }
-    if(sons.size() == 0) // leave case, return the species of this leave
-	speciesList.push_back(mapping_NodesToTaxa.at(node->getId()));
+    return(cacheMapping_SubtreesToTaxalist.at(node->getId()));
+}
+
+void tpms::Family::clearCache()
+{
+    cacheMapping_SubtreesToTaxalist.resize(0);
+}
+
+void tpms::Family::initCache(){
+    cacheMapping_SubtreesToTaxalist.resize(highestID);
 }
 
 
