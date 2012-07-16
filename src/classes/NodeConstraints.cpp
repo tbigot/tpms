@@ -78,6 +78,7 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
     
     getline(initSString,constraintsOnNodeString,'/');
     buildAllowedSpecies(allowedSpeciesOnNode,constraintsOnNodeString,pRefDB);
+    if(!allowedSpeciesOnSubtree.empty()) speciesRestrictionsAsSon = true;
   
 
 
