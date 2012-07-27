@@ -149,7 +149,7 @@ void DataBase::doFamiliesMapping_NodesToMaxDepth() {
 void DataBase::doFamiliesMapping_LeavesToSpecies() {
     // multithreading version
     if(!mappingDone_LeavesToSpecies){
-	cout << "Mapping leaves to species:" << endl;
+	cout << "\n\nMapping leaves to species:" << endl;
 	Family::threadedWork_launchJobs(families,&Family::doMapping_LeavesToSpecies,nbThreads);
     }
     mappingDone_LeavesToSpecies=true;
@@ -160,7 +160,7 @@ void DataBase::doFamiliesMapping_NodesToTaxa() {
     // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
     doFamiliesMapping_LeavesToSpecies();
     if(!mappingDone_NodesToTaxa){
-	cout << "Mapping nodes to Taxa:" << endl;
+	cout << "\n\nMapping nodes to Taxa:" << endl;
 	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToTaxa,nbThreads);
 	mappingDone_NodesToTaxa = true;
     }
