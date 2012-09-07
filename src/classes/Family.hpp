@@ -68,7 +68,9 @@ class Family {
     
 struct transfer {
 	tpms::Taxon* donnor;
-	std::vector<tpms::Taxon*> receiver;
+        std::vector<std::string> donnorLeaves;
+	std::vector<tpms::Taxon*> acceptors;
+        std::vector<std::vector<std::string> > acceptorsLeaves;
 	unsigned int perturbationIndex;
     };
     
@@ -153,7 +155,7 @@ private:
     
     void reRootAt(std::vector<bpp::Node*> bestRoots);
     
-    void atomizeTaxon(std::vector< tpms::Taxon* >& resultTaxa, tpms::Taxon* ancestor, bpp::Node* subtree);
+    void atomizeTaxon(std::vector< tpms::Taxon* >& acceptors, std::vector< std::vector<std::string> >& acceptorsLeaves, tpms::Taxon* acceptor, bpp::Node* subtree);
     
     void print_tax_tree(bpp::Node& node, unsigned int depth, bpp::Node* origin, std::vector<tpms::Taxon*>* mapping, std::set<bpp::Node*>* ignoredNodes, bool subtreeIgnored);
     

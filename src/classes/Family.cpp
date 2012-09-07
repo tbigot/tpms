@@ -741,6 +741,8 @@ void Family::compute_detectTransfers(){
 	    bool transferAccepted = false;
 	    
 	    Taxon* donnor = mapping_grandFatherWithoutThisNode.at((*node)->getId());
+            vector<string> donnorLeavesNames;
+            vector<Node*> donnorLeaves;
 	    unsigned int perturbationIndex = mapping_NodesToTaxonomicShift.at((*node)->getId());
 	    
 	    if(!(*node)->getFather()->getFather()->hasBootstrapValue() || (*node)->getFather()->getFather()->getBootstrapValue() >= 90 && (*node)->getFather()->getFather()->getBootstrapValue() <= 100){
@@ -755,7 +757,7 @@ void Family::compute_detectTransfers(){
 		if(!currGF->hasBootstrapValue() || currGF->getBootstrapValue() >= 90 && currGF->getBootstrapValue() <= 100){
 		    Taxon* GFbefore = mapping_NodesToTaxa.at(currGF->getId());
 		    Taxon* GFafter = mapNodeOnTaxon(&mapping_NodesToTaxa,00,currGF,currGF->getFather(),00,true,*node);
-		    perturbationIndex = Taxon::computeRelativeDepthDifference(GFbefore,GFafter,&taxa);
+		    perturbationIndex = tpms::Taxon::computeRelativeDepthDifference(GFbefore,GFafter,&taxa);
 		    if(perturbationIndex > 0){
 			donnor = GFafter;
 			transferAccepted=true;
@@ -765,13 +767,26 @@ void Family::compute_detectTransfers(){
 	    }
 	    
 	    
+	    // TRANSFER ACCEPTED -> TRANSFER RECORDED
+	    
 	    if(transferAccepted){
 		transfer currTransfer;
 		currTransfer.donnor = donnor;
 		currTransfer.perturbationIndex = perturbationIndex;
-		atomizeTaxon(currTransfer.receiver,currTransfer.donnor,*node);
+		atomizeTaxon(currTransfer.acceptors,currTransfer.acceptorsLeaves,currTransfer.donnor,*node);
+                
+                // the donnor leaves are the leaves under the Grand-Father, ignoring the node *node which is the root of the acceptor group
+                tpms::TreeTools::getNodesOfTheSubtree(donnorLeaves,currGF,true,*node);
+                // getting names of the leaves
+                for(vector<Node*>::iterator currDonnorLeave = donnorLeaves.begin(); currDonnorLeave != donnorLeaves.end(); currDonnorLeave++)
+                    if((*currDonnorLeave)->isLeaf())
+                        donnorLeavesNames.push_back((*currDonnorLeave)->getName());
+                currTransfer.donnorLeaves = donnorLeavesNames;
+                
 		computed_detectedTransfers.push_back(currTransfer);
 	    }
+	    
+	    // ANYWAY, THIS IS AN INCONGRUENCY, WE DELETE THE SUBTREE
 	    
 	    // then, we prune the subtree
 	    Node* P = (*node)->getFather();
@@ -809,30 +824,63 @@ void Family::compute_detectTransfers(){
 //     cout << name << " : ";
 //     cout << computed_detectedTransfers.size() << " transfers detected. Original number of leaves : " << mne2tax.size() << ". Final number of leaves : " << tree->getNumberOfLeaves() << endl;}
     
+    // NO TRANSFER REMAINING: WRITING ALL THE TRANSFERS TO THE RESULT STRING
+    
     for(vector<transfer>::iterator currTransfer = computed_detectedTransfers.begin(); currTransfer != computed_detectedTransfers.end(); currTransfer++){
 	results << name << ',' << currTransfer->perturbationIndex << ',' << currTransfer->donnor->getName() << ",(" ;
 	string resultStr;
-	for(vector<Taxon*>::iterator currReceiver = currTransfer->receiver.begin(); currReceiver != currTransfer->receiver.end(); currReceiver++)
+	for(vector<Taxon*>::iterator currReceiver = currTransfer->acceptors.begin(); currReceiver != currTransfer->acceptors.end(); currReceiver++)
 	    resultStr += (*currReceiver)->getName() + ",";
 	if(resultStr.empty())
 	    resultStr = "<undetermined taxon> ";
 	resultStr.at(resultStr.size()-1) = ')';
 	results << resultStr << endl;
-
+        
+        // now giving details
+        // donnor leaves
+        results << "; donnor:";
+        char separator = ' ';
+        for(vector<string>::iterator currDonnorLeave = currTransfer->donnorLeaves.begin(); currDonnorLeave != currTransfer->donnorLeaves.end(); currDonnorLeave++){
+            results << separator << *currDonnorLeave;
+            separator = ',';
+        }
+        results << endl;
+        
+        // acceptor(s) leaves
+        // for each acceptor
+        for(vector< vector<string> >::iterator currAcceptor = currTransfer->acceptorsLeaves.begin(); currAcceptor != currTransfer->acceptorsLeaves.end(); currAcceptor++){
+            results << "; acceptor:";
+            separator = ' ';
+            for(vector<string>::iterator currAcceptorLeave = currAcceptor->begin(); currAcceptorLeave != currAcceptor->end(); currAcceptorLeave++){
+                results << separator << *currAcceptorLeave;
+                separator = ',';
+            }
+            results << endl;
+        }
     }
     
 }
 
-void Family::atomizeTaxon(std::vector< Taxon* > &resultTaxa, Taxon* ancestor, Node* subtree)
+void Family::atomizeTaxon(std::vector< Taxon* > &acceptors, vector<vector<string> > &acceptorsLeaves, Taxon* acceptor, Node* subtree)
 {
+
     Taxon* currTaxon = mapping_NodesToTaxa.at(subtree->getId());
     // base case case
-    if(ancestor != currTaxon && ancestor->getAncestors().find(currTaxon) == ancestor->getAncestors().end() && currTaxon != 00)
-	resultTaxa.push_back(currTaxon);
-    else{
+    if(acceptor != currTaxon && acceptor->getAncestors().find(currTaxon) == acceptor->getAncestors().end() && currTaxon != 00){
+        // base case: here currTaxon is not included in ancestor’s ancestors
+        vector<Node*> currAcceptorNodes;
+        tpms::TreeTools::getNodesOfTheSubtree(currAcceptorNodes, subtree, true);
+        vector<string> currAcceptorLeavesNames;
+        for(vector<Node*>::iterator currN = currAcceptorNodes.begin(); currN != currAcceptorNodes.end(); currN++){
+            if((*currN)->hasName())
+                currAcceptorLeavesNames.push_back((*currN)->getName());
+        }
+	acceptors.push_back(currTaxon);
+        acceptorsLeaves.push_back(currAcceptorLeavesNames);
+    }else{
 	vector<Node*> sons = subtree->getSons();
 	for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++)
-	    atomizeTaxon(resultTaxa, ancestor, *currSon);
+	    atomizeTaxon(acceptors,acceptorsLeaves, acceptor, *currSon);
     } 
 	
 }
