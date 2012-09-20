@@ -402,13 +402,14 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 	// we need to check if the target node is accepted (nature) by the pattern
 	
 	if(constraintsOf(pattern)->allows(family,target)){
+            bool thisNodeMatches = false;
 	
 	    CandidateNode * candidate = new CandidateNode(fatherCandidate, target, pattern);
 	    
 	    if(constraintsOf(pson1)->allowsAsSon(family,tson1) && constraintsOf(pson2)->allowsAsSon(family,tson2)
 		&& patternMatch(family,tson1, pson1, candidate) && patternMatch(family,tson2, pson2, candidate) ) {
-		candidate->confirm(); 
-	    return(true);
+                    candidate->confirm(); 
+                    thisNodeMatches = true;
 		} else delete(candidate);
 		
 		
@@ -418,15 +419,15 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 	    if(constraintsOf(pson1)->allowsAsSon(family,tson2) && constraintsOf(pson2)->allowsAsSon(family,tson1)
 		&& patternMatch(family,tson2, pson1, candidate) && patternMatch(family,tson1, pson2, candidate) ){
 		candidate->confirm();
-	    return(true);
+                thisNodeMatches = true;
 		} else delete(candidate);
 		    
 	    // if we haven't returned yet, it means the current target node is not matching to a pattern node
 	    // we have to try the pattern node in the sons
                 //Only if the direct link is not required
                 // DIRECT LINK MANAGED HERE
-	    return( !constraintsOf(pattern)->isDirect() && (patternMatch(family,tson1, pattern, fatherCandidate) || patternMatch(family,tson2, pattern, fatherCandidate)));
-	
+	    thisNodeMatches |= ( !constraintsOf(pattern)->isDirect() && (patternMatch(family,tson1, pattern, fatherCandidate) || patternMatch(family,tson2, pattern, fatherCandidate)));
+            return(thisNodeMatches);
 	} else return(false);
 		
     }

@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
 			cout << "Node not found: \n" << e.what() << endl;
 		}
 		
-		cout << "\n\n\nquery name> " << flush;
+		cout << "\n\n\nFILENAME> " << flush;
 		getline(cin,fileName);
 	}
     }catch(string missingArguments){
