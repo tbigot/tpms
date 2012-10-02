@@ -260,14 +260,14 @@ vector<Node*> Family::getTaxonomyBestRoots(vector<Node *> nodes){
 	
 	
 	// DEBUG Display info
-	//cout << "\n\nTOTAL= " << currDepthSum << ". Nodes inducing perturbations: " << localMapping_nodesInducingPerturbations.size() << endl;
+	cout << "\n\nTOTAL= " << currDepthSum << ". Nodes inducing perturbations: " << localMapping_nodesInducingPerturbations.size() << endl;
 	//cout << "Br len :" << (*currPotentialRoot)->getDistanceToFather() <<  endl;
 	
 	    
 	
 	//DEBUG Print the tree
-	//   print_tax_tree(*(*currPotentialRoot)->getFather(),0,*currPotentialRoot,&localMapping_NodesToTaxa,&localMapping_nodesInducingPerturbations,false);
-	//   print_tax_tree(**currPotentialRoot,0,(*currPotentialRoot)->getFather(),&localMapping_NodesToTaxa,&localMapping_nodesInducingPerturbations,false);
+	  print_tax_tree(*(*currPotentialRoot)->getFather(),0,*currPotentialRoot,&localMapping_NodesToTaxa,&localMapping_nodesInducingPerturbations,false);
+	  print_tax_tree(**currPotentialRoot,0,(*currPotentialRoot)->getFather(),&localMapping_NodesToTaxa,&localMapping_nodesInducingPerturbations,false);
 	    
 	//removing the depth of the current root if rooted (it is twice in mapping_NodesToTaxa)
 	//if(tree->isRooted())
@@ -772,6 +772,7 @@ void Family::compute_detectTransfers(){
 	    if(transferAccepted){
 		transfer currTransfer;
 		currTransfer.donnor = donnor;
+                currTransfer.bootstrap = currGF->getBootstrapValue();
 		currTransfer.perturbationIndex = perturbationIndex;
 		atomizeTaxon(currTransfer.acceptors,currTransfer.acceptorsLeaves,currTransfer.donnor,*node);
                 
@@ -859,7 +860,7 @@ void Family::compute_detectTransfers(){
             results << endl;
             
             results << "; acceptor-taxonomy-" << currAcceptor << ": " << currTransfer->acceptors.at(currAcceptor)->getTaxonomy() << endl;
-            
+            results << "; bootstrap: " << currTransfer->bootstrap << endl;
         }
         
         results << ";" << endl;
