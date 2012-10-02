@@ -63,6 +63,7 @@ namespace tpms{
 	public:
 	    Taxon(std::string name,bpp::Node *nodeInSpTree, DataBase &database);
 	    std::string getName();
+            std::string getTaxonomy();
 	    
 	    bool contains(Taxon *);
 	    bool belongsTo(Taxon *);

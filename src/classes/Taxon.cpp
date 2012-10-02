@@ -98,6 +98,16 @@ string Taxon::getName()
     return(name);
 }
 
+string Taxon::getTaxonomy(){
+    ostringstream result;
+    bool sep=false;
+    for(set<Taxon*>::reverse_iterator currAncestor = ancestors.rbegin(); currAncestor != ancestors.rend(); currAncestor++){
+        result << (sep? "/": "") << (*currAncestor)->getName();
+        sep=true;
+    }
+    return(result.str());
+}
+
 std::set< Taxon* >& Taxon::getAncestors()
 {
     // cout << name << " has " << ancestors.size() << " ancestors." << endl;

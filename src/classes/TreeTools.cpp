@@ -238,11 +238,12 @@ double TreeTools::getDistanceBetweenTwoNodes(Node* ancestor, Node* descendant)
 
 void TreeTools::getNodesOfTheSubtree(vector<Node*> &nodeListToFill,Node* node, bool leavesOnly, Node* ignoreSubtree)
 {
+    if(node == ignoreSubtree)
+        return;
+    if(!leavesOnly || node->isLeaf())
+            nodeListToFill.push_back(node);
     vector<Node*> sons = node->getSons();
     for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++){
-        if(*currSon == ignoreSubtree) continue;
-        if(!leavesOnly || (*currSon)->isLeaf())
-            nodeListToFill.push_back(*currSon);
 	getNodesOfTheSubtree(nodeListToFill,*currSon, leavesOnly, ignoreSubtree);
     }
 }

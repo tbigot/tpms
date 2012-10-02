@@ -721,7 +721,7 @@ void Family::compute_detectTransfers(){
 	    bool transferFoundInDescendants = false;
 	    vector<Node*> descendants;
 	    tpms::TreeTools::getNodesOfTheSubtree(descendants,*node);
-	    for(vector<Node*>::iterator currDescendant = descendants.begin(); !transferFoundInDescendants && currDescendant != descendants.end(); currDescendant++){
+	    for(vector<Node*>::iterator currDescendant = descendants.begin()+1; !transferFoundInDescendants && currDescendant != descendants.end(); currDescendant++){
 		transferFoundInDescendants |= computed_nodesInducingPerturbation.find(*currDescendant) != computed_nodesInducingPerturbation.end();
 	    }
 	    if(transferFoundInDescendants) continue;
@@ -799,7 +799,6 @@ void Family::compute_detectTransfers(){
 		    taxa.erase(taxonToDelete);
 		delete *currNode;
 	    }
-	    delete *node;
 	    if(P->getNumberOfSons() == 1){
 		Node* R = *(P->getSons().begin());
 		Node* A = P->getFather();
@@ -838,7 +837,7 @@ void Family::compute_detectTransfers(){
         
         // now giving details
         // donnor leaves
-        results << "; donnor:";
+        results << "; donnor-leaves:";
         char separator = ' ';
         for(vector<string>::iterator currDonnorLeave = currTransfer->donnorLeaves.begin(); currDonnorLeave != currTransfer->donnorLeaves.end(); currDonnorLeave++){
             results << separator << *currDonnorLeave;
@@ -846,17 +845,24 @@ void Family::compute_detectTransfers(){
         }
         results << endl;
         
+        results << "; donnor-taxonomy: " + currTransfer->donnor->getTaxonomy() << endl;
+        
         // acceptor(s) leaves
         // for each acceptor
-        for(vector< vector<string> >::iterator currAcceptor = currTransfer->acceptorsLeaves.begin(); currAcceptor != currTransfer->acceptorsLeaves.end(); currAcceptor++){
-            results << "; acceptor:";
+        for(unsigned int currAcceptor = 0; currAcceptor != currTransfer->acceptorsLeaves.size(); currAcceptor++){
+            results << "; acceptor-leaves-" << currAcceptor << ":";
             separator = ' ';
-            for(vector<string>::iterator currAcceptorLeave = currAcceptor->begin(); currAcceptorLeave != currAcceptor->end(); currAcceptorLeave++){
+            for(vector<string>::iterator currAcceptorLeave = currTransfer->acceptorsLeaves.at(currAcceptor).begin(); currAcceptorLeave != currTransfer->acceptorsLeaves.at(currAcceptor).end(); currAcceptorLeave++){
                 results << separator << *currAcceptorLeave;
                 separator = ',';
             }
             results << endl;
+            
+            results << "; acceptor-taxonomy-" << currAcceptor << ": " << currTransfer->acceptors.at(currAcceptor)->getTaxonomy() << endl;
+            
         }
+        
+        results << ";" << endl;
     }
     
 }

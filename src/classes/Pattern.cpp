@@ -394,6 +394,7 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
         
         
 	// here, the pattern node can accept the target node
+        // so we shortcut the pattern in left&right; same for the target tree.
 	Node * tson1 = target->getSon(0);
 	Node * tson2 = target->getSon(1);
 	Node * pson1 = pattern->getSon(0);
@@ -402,6 +403,8 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 	// we need to check if the target node is accepted (nature) by the pattern
 	
 	if(constraintsOf(pattern)->allows(family,target)){
+            // all the tests have to be done: we are not only wondering if the family matches, but
+            // what are all the matching patterns.
             bool thisNodeMatches = false;
 	
 	    CandidateNode * candidate = new CandidateNode(fatherCandidate, target, pattern);
