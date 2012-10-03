@@ -259,16 +259,16 @@ vector<Node*> Family::getTaxonomyBestRoots(vector<Node *> nodes){
 	// putting Taxa into 
 	
 	
-	// DEBUG Display info
-	cout << "\n\nTOTAL= " << currDepthSum << ". Nodes inducing perturbations: " << localMapping_nodesInducingPerturbations.size() << endl;
-	//cout << "Br len :" << (*currPotentialRoot)->getDistanceToFather() <<  endl;
-	
-	    
-	
-	//DEBUG Print the tree
-	  print_tax_tree(*(*currPotentialRoot)->getFather(),0,*currPotentialRoot,&localMapping_NodesToTaxa,&localMapping_nodesInducingPerturbations,false);
-	  print_tax_tree(**currPotentialRoot,0,(*currPotentialRoot)->getFather(),&localMapping_NodesToTaxa,&localMapping_nodesInducingPerturbations,false);
-	    
+// 	// DEBUG Display info
+// 	cout << "\n\nTOTAL= " << currDepthSum << ". Nodes inducing perturbations: " << localMapping_nodesInducingPerturbations.size() << endl;
+// 	//cout << "Br len :" << (*currPotentialRoot)->getDistanceToFather() <<  endl;
+// 	
+// 	    
+// 	
+// 	//DEBUG Print the tree
+// 	  print_tax_tree(*(*currPotentialRoot)->getFather(),0,*currPotentialRoot,&localMapping_NodesToTaxa,&localMapping_nodesInducingPerturbations,false);
+// 	  print_tax_tree(**currPotentialRoot,0,(*currPotentialRoot)->getFather(),&localMapping_NodesToTaxa,&localMapping_nodesInducingPerturbations,false);
+// 	    
 	//removing the depth of the current root if rooted (it is twice in mapping_NodesToTaxa)
 	//if(tree->isRooted())
 	//    currDepthSum -= localMapping_NodesToTaxa.at(tree->getRootId())->getDepth();
@@ -745,15 +745,16 @@ void Family::compute_detectTransfers(){
             vector<Node*> donnorLeaves;
 	    unsigned int perturbationIndex = mapping_NodesToTaxonomicShift.at((*node)->getId());
 	    
+            double bsOfAcceptedGF = 0;
 	    if(!(*node)->getFather()->getFather()->hasBootstrapValue() || (*node)->getFather()->getFather()->getBootstrapValue() >= 90 && (*node)->getFather()->getFather()->getBootstrapValue() <= 100){
 		transferAccepted = true;
+                bsOfAcceptedGF = (*node)->getFather()->getFather()->hasBootstrapValue()? (*node)->getFather()->getFather()->getBootstrapValue(): 0;
 	    }
 	    
 	    
 	     // trying to see if a bipartition exists grouping the incongruent group & the "donnor" group
 	    Node* currGF = (*node)->getFather(); // we will try GF father and so on making the same test
-	    while(!transferAccepted && currGF->hasFather()){
-		currGF = currGF->getFather();
+	    while(currGF->hasFather() && (currGF = currGF->getFather()) && !transferAccepted){
 		if(!currGF->hasBootstrapValue() || currGF->getBootstrapValue() >= 90 && currGF->getBootstrapValue() <= 100){
 		    Taxon* GFbefore = mapping_NodesToTaxa.at(currGF->getId());
 		    Taxon* GFafter = mapNodeOnTaxon(&mapping_NodesToTaxa,00,currGF,currGF->getFather(),00,true,*node);
@@ -761,6 +762,7 @@ void Family::compute_detectTransfers(){
 		    if(perturbationIndex > 0){
 			donnor = GFafter;
 			transferAccepted=true;
+                        bsOfAcceptedGF = currGF->hasBootstrapValue()? currGF->getBootstrapValue(): 0;
 		    }
 		}	
 		
@@ -772,8 +774,8 @@ void Family::compute_detectTransfers(){
 	    if(transferAccepted){
 		transfer currTransfer;
 		currTransfer.donnor = donnor;
-                currTransfer.bootstrap = currGF->getBootstrapValue();
 		currTransfer.perturbationIndex = perturbationIndex;
+                currTransfer.bootstrap = bsOfAcceptedGF;
 		atomizeTaxon(currTransfer.acceptors,currTransfer.acceptorsLeaves,currTransfer.donnor,*node);
                 
                 // the donnor leaves are the leaves under the Grand-Father, ignoring the node *node which is the root of the acceptor group
