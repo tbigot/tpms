@@ -753,16 +753,16 @@ void Family::compute_detectTransfers(){
 	    
 	    
 	     // trying to see if a bipartition exists grouping the incongruent group & the "donnor" group
-	    Node* currGF = (*node); // we will try GF father and so on making the same test
-	    while(currGF->hasFather() && (currGF = currGF->getFather()) && !transferAccepted){
-		if(!currGF->hasBootstrapValue() || currGF->getBootstrapValue() >= 80 && currGF->getBootstrapValue() <= 100){
-		    Taxon* GFbefore = mapping_NodesToTaxa.at(currGF->getFather()->getId());
-		    Taxon* GFafter = mapNodeOnTaxon(&mapping_NodesToTaxa,00,currGF->getFather(),currGF->getFather()->getFather(),00,true,*node);
+	    Node* ancestorToTest = (*node); // we will try GF father and so on making the same test
+	    while(ancestorToTest->hasFather() && (ancestorToTest = ancestorToTest->getFather()) && ancestorToTest->hasFather() && !transferAccepted){
+		if(!ancestorToTest->hasBootstrapValue() || ancestorToTest->getBootstrapValue() >= 80 && ancestorToTest->getBootstrapValue() <= 100){
+		    Taxon* GFbefore = mapping_NodesToTaxa.at(ancestorToTest->getFather()->getId());
+		    Taxon* GFafter = mapNodeOnTaxon(&mapping_NodesToTaxa,00,ancestorToTest->getFather(),(ancestorToTest->getFather()->hasFather()?  ancestorToTest->getFather()->getFather():00),00,true,*node);
 		    perturbationIndex = tpms::Taxon::computeRelativeDepthDifference(GFbefore,GFafter,&taxa);
 		    if(perturbationIndex > 0){
 			donnor = GFafter;
 			transferAccepted=true;
-                        bsOfAcceptedGF = currGF->hasBootstrapValue()? currGF->getBootstrapValue(): 0;
+                        bsOfAcceptedGF = ancestorToTest->hasBootstrapValue()? ancestorToTest->getBootstrapValue(): 0;
 		    }
 		}	
 		
@@ -779,7 +779,7 @@ void Family::compute_detectTransfers(){
 		atomizeTaxon(currTransfer.acceptors,currTransfer.acceptorsLeaves,currTransfer.donnor,*node);
                 
                 // the donnor leaves are the leaves under the Grand-Father, ignoring the node *node which is the root of the acceptor group
-                tpms::TreeTools::getNodesOfTheSubtree(donnorLeaves,currGF->getFather(),true,*node);
+                tpms::TreeTools::getNodesOfTheSubtree(donnorLeaves,ancestorToTest->getFather(),true,*node);
                 // getting names of the leaves
                 for(vector<Node*>::iterator currDonnorLeave = donnorLeaves.begin(); currDonnorLeave != donnorLeaves.end(); currDonnorLeave++)
                     if((*currDonnorLeave)->isLeaf())
