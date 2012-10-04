@@ -782,7 +782,7 @@ namespace tpms{
                     atomizeTaxon(currTransfer.acceptors,currTransfer.acceptorsLeaves,currTransfer.donnor,*perturbator);
                     
                     // the donnor leaves are the leaves under the Grand-Father, ignoring the node *node which is the root of the acceptor group
-                    tpms::TreeTools::getNodesOfTheSubtree(donnorLeaves,incongruencyRoot,true,*perturbator);
+                    tpms::TreeTools::getNodesOfTheSubtree(donnorLeaves,nodeGroupingIncongruentTaxa,true,*perturbator);
                     // getting names of the leaves
                     for(vector<Node*>::iterator currDonnorLeave = donnorLeaves.begin(); currDonnorLeave != donnorLeaves.end(); currDonnorLeave++)
                         if((*currDonnorLeave)->isLeaf())
@@ -843,7 +843,7 @@ namespace tpms{
         
         // now giving details
         // donnor leaves
-        results << "; donnor-leaves:";
+        results << "; brother-leaves:";
         char separator = ' ';
         for(vector<string>::iterator currDonnorLeave = currTransfer->donnorLeaves.begin(); currDonnorLeave != currTransfer->donnorLeaves.end(); currDonnorLeave++){
             results << separator << *currDonnorLeave;
