@@ -143,8 +143,8 @@ private:
     
     std::vector<bpp::Node*> getUnicityBestRoots(std::vector<bpp::Node *> nodes);
     std::vector<bpp::Node*> getTaxonomyBestRoots(std::vector<bpp::Node *> nodes);
-
-    
+    std::vector<bpp::Node*> getLessTransfersBestRoots(std::vector<bpp::Node *> nodes);
+  
     
     void writeRefTreeToFile(std::string path);
     void writeSpTreeToFile(std::string path);
@@ -163,6 +163,9 @@ private:
     void updateTaxa();
     
     unsigned int mapNodeToMaxDepth(bpp::Node*);
+    
+    unsigned int compute_detectTransfers(bool writeResults);
+
     
 public:
     void initialize();
@@ -184,6 +187,7 @@ public:
     void doMapping_NodesToMaxDepth();
     
     void doRerooting_Unicity();
+    void doRerooting_LessTransfers();
     void doRerooting_Taxonomy();
     void doRerooting_UnicityTaxonomy();
 

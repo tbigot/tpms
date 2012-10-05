@@ -49,6 +49,7 @@
 
 #include <Bpp/Phyl/Tree.h>
 #include <Bpp/Phyl/Io/Newick.h>
+#include <boost/iterator/iterator_concepts.hpp>
 
 #include "Family.hpp"
 #include "Waiter.hpp"
@@ -148,7 +149,9 @@ namespace tpms{
     
     void Family::doMapping_LeavesToSpecies(){
         vector<Node *> leaves = tree->getLeaves();
+        this->leaves.clear();
         this->leaves.insert(leaves.begin(),leaves.end());
+        mapping_NodesToTaxa.clear();
         mapping_NodesToTaxa.resize(tree->getNumberOfNodes(),00);
         for(vector<Node *>::iterator leave = leaves.begin(); leave != leaves.end(); leave++){
             std::map<string,Taxon*>::iterator found = mne2tax.find((*leave)->getName());
@@ -176,6 +179,52 @@ namespace tpms{
         compute_UnicityScoreOnNode(mapping_NodesToUnicityScores,tree->getRootNode(),00); // 00 because no origin, we are at the real root
     }
     
+    
+    void Family::doRerooting_LessTransfers(){
+        vector<Node*> bestOGs = getLessTransfersBestRoots(tree->getNodes());
+        reRootAt(bestOGs);
+        compute_detectTransfers(true);
+    }
+    
+    
+    vector<Node*> Family::getLessTransfersBestRoots(vector<Node *> nodes){
+        unsigned int lessTransfers;
+        vector<Node*> bestOutgroups;
+        vector<unsigned int> bestOutgroupsID;
+        if(tree->isRooted())
+            tree->unroot();
+        
+        vector<unsigned int> nodesID;
+        for(vector<Node*>::iterator currN = nodes.begin(); currN != nodes.end(); currN++)
+            nodesID.push_back((*currN)->getId());
+        
+        TreeTemplate<Node> * savedTree = tree->clone();
+        
+        for(vector<unsigned int>::iterator currOG = nodesID.begin(); currOG != nodesID.end(); currOG++){
+            tree->newOutGroup(tree->getNode(*currOG));
+            highestID = tree->getNumberOfNodes();
+            doMapping_NodesToTaxa();
+            unsigned int currNbOfTransfers = compute_detectTransfers(false);
+            if(bestOutgroupsID.empty() || currNbOfTransfers < lessTransfers){
+                bestOutgroupsID.clear();
+                bestOutgroupsID.push_back(*currOG);
+                lessTransfers = currNbOfTransfers;
+            } else if(currNbOfTransfers == lessTransfers) {
+                bestOutgroupsID.push_back(*currOG);
+            }
+            delete(tree);
+            tree = savedTree->clone();
+            doMapping_LeavesToSpecies();
+        }
+        delete savedTree;
+        for(vector<unsigned int>::iterator cID = bestOutgroupsID.begin(); cID != bestOutgroupsID.end(); cID++)
+            bestOutgroups.push_back(tree->getNode(*cID));
+        
+        if(lessTransfers != 0)
+            cout <<name << " : " <<  lessTransfers << endl;
+        
+        return(bestOutgroups);
+    }
     
     vector<Node*> Family::getUnicityBestRoots(vector<Node *> nodes){
         // aim of this function: trying all branches as roots, and return those which minimize the unicity score sum.
@@ -698,9 +747,17 @@ namespace tpms{
             return(!computed_nodesInducingPerturbation.empty());
     }
     
+    
     void Family::compute_detectTransfers(){
+        compute_detectTransfers(true);
+    }
+    
+    unsigned int Family::compute_detectTransfers(bool writeResults){
+        computed_detectedTransfers.clear();
+        unsigned int foundTransfers = 0;
         // doing the first mapping:
         doMapping_NodesToTaxonomicShift();
+        
         // then, we keep transfers that are not included in another
         //FIXME it would be better to confirm bootstrap are sufficient
         //for each potential transfer, (1) does this node include no transfer, (2) if yes, transfer confirmed
@@ -743,6 +800,8 @@ namespace tpms{
                 
                 Node* nodeGroupingIncongruentTaxa = (*perturbator)->getFather();
                 Node* incongruencyRoot = nodeGroupingIncongruentTaxa->getFather();
+                if(incongruencyRoot == 00){
+                    continue;}
                 
                 // here we now the peturbator node brings a perturbation, we have to test the bootstrap
                 if(nodeGroupingIncongruentTaxa->hasBootstrapValue() && nodeGroupingIncongruentTaxa->getBootstrapValue() >= 90 && nodeGroupingIncongruentTaxa->getBootstrapValue() <=100)
@@ -775,6 +834,7 @@ namespace tpms{
                 // TRANSFER ACCEPTED -> TRANSFER RECORDED
                 
                 if(transferAccepted){
+                    foundTransfers++;
                     transfer currTransfer;
                     currTransfer.donnor = donnor;
                     currTransfer.perturbationIndex = perturbationIndex;
@@ -830,47 +890,49 @@ namespace tpms{
             //     cout << computed_detectedTransfers.size() << " transfers detected. Original number of leaves : " << mne2tax.size() << ". Final number of leaves : " << tree->getNumberOfLeaves() << endl;}
             
             // NO TRANSFER REMAINING: WRITING ALL THE TRANSFERS TO THE RESULT STRING
+            if(writeResults){
+                        for(vector<transfer>::iterator currTransfer = computed_detectedTransfers.begin(); currTransfer != computed_detectedTransfers.end(); currTransfer++){
+                            results << name << ',' << currTransfer->perturbationIndex << ',' << currTransfer->donnor->getName() << ",(" ;
+                            string resultStr;
+                            for(vector<Taxon*>::iterator currReceiver = currTransfer->acceptors.begin(); currReceiver != currTransfer->acceptors.end(); currReceiver++)
+                                resultStr += (*currReceiver)->getName() + ",";
+                            if(resultStr.empty())
+                                resultStr = "<undetermined taxon> ";
+                            resultStr.at(resultStr.size()-1) = ')';
+                    results << resultStr << endl;
+                    
+                    // now giving details
+                    // donnor leaves
+                    results << "; brother-leaves:";
+                    char separator = ' ';
+                    for(vector<string>::iterator currDonnorLeave = currTransfer->donnorLeaves.begin(); currDonnorLeave != currTransfer->donnorLeaves.end(); currDonnorLeave++){
+                        results << separator << *currDonnorLeave;
+                        separator = ',';
+                    }
+                    results << endl;
+                    
+                    results << "; donnor-taxonomy: " + currTransfer->donnor->getTaxonomy() << endl;
+                    
+                    // acceptor(s) leaves
+                    // for each acceptor
+                    for(unsigned int currAcceptor = 0; currAcceptor != currTransfer->acceptorsLeaves.size(); currAcceptor++){
+                        results << "; acceptor-leaves-" << currAcceptor << ":";
+                        separator = ' ';
+                    for(vector<string>::iterator currAcceptorLeave = currTransfer->acceptorsLeaves.at(currAcceptor).begin(); currAcceptorLeave != currTransfer->acceptorsLeaves.at(currAcceptor).end(); currAcceptorLeave++){
+                        results << separator << *currAcceptorLeave;
+                        separator = ',';
+                    }
+                    results << endl;
+                    
+                    results << "; acceptor-taxonomy-" << currAcceptor << ": " << currTransfer->acceptors.at(currAcceptor)->getTaxonomy() << endl;
+                    results << "; bootstrap: " << currTransfer->bootstrap << endl;
+                    }
+                    
+                    results << ";" << endl;
+                        }
+                        } 
             
-            for(vector<transfer>::iterator currTransfer = computed_detectedTransfers.begin(); currTransfer != computed_detectedTransfers.end(); currTransfer++){
-                results << name << ',' << currTransfer->perturbationIndex << ',' << currTransfer->donnor->getName() << ",(" ;
-                string resultStr;
-                for(vector<Taxon*>::iterator currReceiver = currTransfer->acceptors.begin(); currReceiver != currTransfer->acceptors.end(); currReceiver++)
-                    resultStr += (*currReceiver)->getName() + ",";
-                if(resultStr.empty())
-                    resultStr = "<undetermined taxon> ";
-                resultStr.at(resultStr.size()-1) = ')';
-        results << resultStr << endl;
-        
-        // now giving details
-        // donnor leaves
-        results << "; brother-leaves:";
-        char separator = ' ';
-        for(vector<string>::iterator currDonnorLeave = currTransfer->donnorLeaves.begin(); currDonnorLeave != currTransfer->donnorLeaves.end(); currDonnorLeave++){
-            results << separator << *currDonnorLeave;
-            separator = ',';
-        }
-        results << endl;
-        
-        results << "; donnor-taxonomy: " + currTransfer->donnor->getTaxonomy() << endl;
-        
-        // acceptor(s) leaves
-        // for each acceptor
-        for(unsigned int currAcceptor = 0; currAcceptor != currTransfer->acceptorsLeaves.size(); currAcceptor++){
-            results << "; acceptor-leaves-" << currAcceptor << ":";
-            separator = ' ';
-        for(vector<string>::iterator currAcceptorLeave = currTransfer->acceptorsLeaves.at(currAcceptor).begin(); currAcceptorLeave != currTransfer->acceptorsLeaves.at(currAcceptor).end(); currAcceptorLeave++){
-            results << separator << *currAcceptorLeave;
-            separator = ',';
-        }
-        results << endl;
-        
-        results << "; acceptor-taxonomy-" << currAcceptor << ": " << currTransfer->acceptors.at(currAcceptor)->getTaxonomy() << endl;
-        results << "; bootstrap: " << currTransfer->bootstrap << endl;
-        }
-        
-        results << ";" << endl;
-            }
-            
+        return(foundTransfers);
     }
     
     void Family::atomizeTaxon(std::vector< Taxon* > &acceptors, vector<vector<string> > &acceptorsLeaves, Taxon* acceptor, Node* subtree)

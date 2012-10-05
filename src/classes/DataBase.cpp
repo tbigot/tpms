@@ -197,6 +197,13 @@ void DataBase::doFamiliesRerooting_Unicity() {
 }
 
 
+void DataBase::doFamiliesRerooting_LessTransfers(ostream * output) {
+    doFamiliesMapping_LeavesToSpecies();
+    cout << "Re-rooting families trying to minimize the number of transfers:" << endl;
+    Family::threadedWork_launchJobs(families,&Family::doRerooting_LessTransfers,nbThreads,output);
+}
+
+
 void DataBase::doFamiliesMapping_NodesToUnicityScores() {
     doFamiliesMapping_LeavesToSpecies();
     cout << "UnicityScores computing:" << endl;

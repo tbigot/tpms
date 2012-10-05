@@ -82,7 +82,7 @@ void save_to_file(tpms::DataBase& collection, std::string path, annotationsTypes
 void print_menu(){
     cout << "\n  +----------------------------\n  |        MENU" << endl;
     cout << "  |\n  |SCORING\n  |=======\n  |   CU) compute unicity scores\n  |   CB) compute bipartition scores"<< endl;
-    cout << "  |\n  |ROOTING\n  |==========\n  |   RU) root with unicity criteria\n  |   RT) root with taxonomic criteria\n  |   RC) root with the unicity+taxonomy criteria" << endl;
+    cout << "  |\n  |ROOTING\n  |==========\n  |   RU) root with unicity criteria\n  |   RT) root with taxonomic criteria\n  |   RC) root with the unicity+taxonomy criteria\n  |   RXD) root with the minimum of transfers criteria & detect transfers" << endl;
     cout << "  |\n  |MISC\n  |====\n  |    T) collection status\n  |   XD) LGT detection\n  |    M) help menu\n  |    S) Save collection\n  |   SU) Save collection with Unicity scores"<< endl;
     cout << "  |    Q) QUIT"<< endl;
     
@@ -181,6 +181,11 @@ int main(int argc, char *argv[]) {
 	    string path = args.getArg("output-dir")+"/detectedTransfers.txt";
 	    ofstream resultFile(path.c_str());
 	    collection.doFamiliesComputation_detectTransfers(&resultFile);
+    }else if(command == "RXD"){
+        cout << "Rooting to get less transfers & detect transfers" << endl;
+        string path = args.getArg("output-dir")+"/detectedTransfers.txt";
+        ofstream resultFile(path.c_str());
+        collection.doFamiliesRerooting_LessTransfers(&resultFile);
 	}else if(command == "Q" || command.empty()){
 	    cout << "Bye" << endl;
 	}else if(command == "M"){
