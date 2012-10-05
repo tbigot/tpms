@@ -745,7 +745,7 @@ namespace tpms{
                 Node* incongruencyRoot = nodeGroupingIncongruentTaxa->getFather();
                 
                 // here we now the peturbator node brings a perturbation, we have to test the bootstrap
-                if(nodeGroupingIncongruentTaxa->hasBootstrapValue() && nodeGroupingIncongruentTaxa->getBootstrapValue() >= 80 && nodeGroupingIncongruentTaxa->getBootstrapValue() <=100)
+                if(nodeGroupingIncongruentTaxa->hasBootstrapValue() && nodeGroupingIncongruentTaxa->getBootstrapValue() >= 90 && nodeGroupingIncongruentTaxa->getBootstrapValue() <=100)
                     transferAccepted = true;
                 
                 // if it’s not the case, we can go deeper in the tree to see if there is a sufficient bootstrap and the incongruency is still there
@@ -764,7 +764,7 @@ namespace tpms{
                         break; // because there is no incongruency anymore
                     
                     // 2nd step: checking bootstrap
-                    if(nodeGroupingIncongruentTaxa->hasBootstrapValue() && nodeGroupingIncongruentTaxa->getBootstrapValue() >= 80 && nodeGroupingIncongruentTaxa->getBootstrapValue() <=100)
+                    if(nodeGroupingIncongruentTaxa->hasBootstrapValue() && nodeGroupingIncongruentTaxa->getBootstrapValue() >= 90 && nodeGroupingIncongruentTaxa->getBootstrapValue() <=100)
                         transferAccepted = true;
                     
                 }
