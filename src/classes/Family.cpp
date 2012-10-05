@@ -183,7 +183,6 @@ namespace tpms{
     void Family::doRerooting_LessTransfers(){
         vector<Node*> bestOGs = getLessTransfersBestRoots(tree->getNodes());
         reRootAt(bestOGs);
-        compute_detectTransfers(true);
     }
     
     
@@ -220,8 +219,8 @@ namespace tpms{
         for(vector<unsigned int>::iterator cID = bestOutgroupsID.begin(); cID != bestOutgroupsID.end(); cID++)
             bestOutgroups.push_back(tree->getNode(*cID));
         
-        if(lessTransfers != 0)
-            cout <<name << " : " <<  lessTransfers << endl;
+//         if(lessTransfers != 0)
+//             cout <<name << " : " <<  lessTransfers << endl;
         
         return(bestOutgroups);
     }
