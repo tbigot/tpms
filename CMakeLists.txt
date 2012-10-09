@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(tpms)
 
-add_definitions(-std=gnu++11)
+add_definitions(-std=gnu++0x)
 
 set(EXECUTABLE_OUTPUT_PATH build/${CMAKE_BUILD_TYPE})
 
