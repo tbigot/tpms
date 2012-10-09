@@ -78,6 +78,7 @@ namespace tpms{
 	    void genRelations();
 	    static tpms::Taxon* findLCA(std::set<tpms::Taxon*> taxa);
 	    static unsigned int computeRelativeDepthDifference(tpms::Taxon* ancestor, tpms::Taxon* descendant, std::set<tpms::Taxon*>* taxaList);
+        unsigned int getRelativeDepth(std::set<Taxon*> &taxaList);
 	    
 	    // computes distance between this taxon and "taxon"
 	    // positive distance = "taxon" is an ancestor of this taxon

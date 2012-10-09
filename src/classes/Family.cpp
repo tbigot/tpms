@@ -181,46 +181,65 @@ namespace tpms{
     
     
     void Family::doRerooting_LessTransfers(){
-        vector<Node*> bestOGs = getLessTransfersBestRoots(tree->getNodes());
-        reRootAt(bestOGs);
-    }
-    
-    
-    vector<Node*> Family::getLessTransfersBestRoots(vector<Node *> nodes){
-        unsigned int lessTransfers;
-        vector<Node*> bestOutgroups;
-        vector<unsigned int> bestOutgroupsID;
         if(tree->isRooted())
             tree->unroot();
         
-        vector<unsigned int> nodesID;
-        for(vector<Node*>::iterator currN = nodes.begin(); currN != nodes.end(); currN++)
-            nodesID.push_back((*currN)->getId());
+        // pass 1: best taxonomy
+        vector<Node*> bestTaxoRoots = getTaxonomyBestRoots(tree->getNodes());
+        
+        vector<unsigned int> bestOGs = getLessTransfersBestRoots(tpms::TreeTools::toNodesIDs(bestTaxoRoots));
+        reRootAt(bestOGs);
+    }
+    
+    void Family::doRerooting_Daubin(){
+        if(tree->isRooted())
+            tree->unroot();
+        vector<unsigned int> nodesIDofTheTree;
+        vector<Node*> nodesOfTheTree = tree->getNodes();
+        
+        for(auto currNode: nodesOfTheTree)
+            nodesIDofTheTree.push_back(currNode->getId());
+        
+        vector<unsigned int> bestOGs = getDaubinCriteriaBestRoots(nodesIDofTheTree);
+        reRootAt(bestOGs);
+    }
+    
+    void Family::reRootAt(vector<unsigned int> bestOGs){
+        vector<Node*> nodes;
+        for(vector<unsigned int>::iterator currNodeID = bestOGs.begin(); currNodeID != bestOGs.end(); currNodeID++){
+            nodes.push_back(tree->getNode(*currNodeID));
+        }
+        reRootAt(nodes);
+    }
+    
+    
+    vector<unsigned int> Family::getLessTransfersBestRoots(vector<unsigned int> nodes){
+        double bestGainPerTransfer;
+        vector<unsigned int> bestOutgroups;
+        
         
         TreeTemplate<Node> * savedTree = tree->clone();
         
-        for(vector<unsigned int>::iterator currOG = nodesID.begin(); currOG != nodesID.end(); currOG++){
+        for(vector<unsigned int>::iterator currOG = nodes.begin(); currOG != nodes.end(); currOG++){
             tree->newOutGroup(tree->getNode(*currOG));
             highestID = tree->getNumberOfNodes();
             doMapping_NodesToTaxa();
-            unsigned int currNbOfTransfers = compute_detectTransfers(false);
-            if(bestOutgroupsID.empty() || currNbOfTransfers < lessTransfers){
-                bestOutgroupsID.clear();
-                bestOutgroupsID.push_back(*currOG);
-                lessTransfers = currNbOfTransfers;
-            } else if(currNbOfTransfers == lessTransfers) {
-                bestOutgroupsID.push_back(*currOG);
+            unsigned int gainSum = 0;
+            unsigned int currNbOfTransfers = compute_detectTransfers(false,gainSum);
+            double gainPerTransfer = double(gainSum) / double(currNbOfTransfers);
+            
+            if(bestOutgroups.empty() || gainPerTransfer > bestGainPerTransfer){
+                bestOutgroups.clear();
+                bestOutgroups.push_back(*currOG);
+                bestGainPerTransfer = gainPerTransfer;
+            } else if(gainPerTransfer == bestGainPerTransfer) {
+                bestOutgroups.push_back(*currOG);
             }
             delete(tree);
             tree = savedTree->clone();
             doMapping_LeavesToSpecies();
         }
         delete savedTree;
-        for(vector<unsigned int>::iterator cID = bestOutgroupsID.begin(); cID != bestOutgroupsID.end(); cID++)
-            bestOutgroups.push_back(tree->getNode(*cID));
-        
-//         if(lessTransfers != 0)
-//             cout <<name << " : " <<  lessTransfers << endl;
         
         return(bestOutgroups);
     }
@@ -544,12 +563,22 @@ namespace tpms{
         return(name);
     }
     
+    unsigned int Family::getTaxonomicSum(std::vector<Taxon*> &taxa){
+        unsigned int sum = 0;
+        for(std::vector<Taxon*>::iterator taxon = taxa.begin(); taxon != taxa.end(); taxon++){
+            if (*taxon == 00)
+                continue;
+            sum += (*taxon)->getRelativeDepth(this->taxa);
+        }
+        return sum;
+    }
+    
     Taxon* Family::mapNodeOnTaxon(std::vector<Taxon*>* referenceMapping, vector<Taxon*>* recordResult,bpp::Node* node, bpp::Node* origin,set<Node*>* ignoredNodes,bool recursive, Node* ignoredNode){
         unsigned int currNodeID = node->getId();
         vector<Node*> neighbors;
         neighbors = node->getNeighbors();
         if(leaves.find(node) != leaves.end()) // BASE CASE: leaf
-            return(mapping_NodesToTaxa.at(currNodeID));
+            return(referenceMapping->at(currNodeID));
         
         if(!recursive) // other base case: not recursive
             return(referenceMapping->at(currNodeID));
@@ -747,11 +776,50 @@ namespace tpms{
     }
     
     
-    void Family::compute_detectTransfers(){
-        compute_detectTransfers(true);
+    vector<unsigned int> Family::getDaubinCriteriaBestRoots(vector<unsigned int> nodes){
+        double bestGain = 0;
+        vector<unsigned int> bestOutgroups;
+        cout << "Trying on " << nodes.size() << " roots"<<endl;
+        
+        
+        for(vector<unsigned int>::iterator currRoot = nodes.begin(); currRoot != nodes.end(); currRoot++){
+            tree->newOutGroup(*currRoot);
+            highestID = tree->getNumberOfNodes();
+            doMapping_NodesToTaxa();
+            doMapping_NodesToTaxonomicShift();
+            double gainSum = 0;
+            for(set<Node*>::iterator currPerturbator = computed_nodesInducingPerturbation.begin(); currPerturbator != computed_nodesInducingPerturbation.end(); currPerturbator++){
+                vector<Taxon*> local_nodesToTaxa_perturbatorSubtree(highestID,00);
+                vector<Taxon*> local_nodesToTaxa_treeWithoutPetrurbator(highestID,00);
+                mapNodeOnTaxon(&mapping_NodesToTaxa,&local_nodesToTaxa_perturbatorSubtree,*currPerturbator,(*currPerturbator)->getFather(),00,true);
+                mapNodeOnTaxon(&mapping_NodesToTaxa,&local_nodesToTaxa_treeWithoutPetrurbator,tree->getRootNode(),00,00,true,*currPerturbator);
+                unsigned int taxaSumWithoutPerturbator = getTaxonomicSum(local_nodesToTaxa_treeWithoutPetrurbator);
+                unsigned int taxaSumWithPerturbator = getTaxonomicSum(mapping_NodesToTaxa);
+                unsigned int taxaSumOfPerturbator = getTaxonomicSum(local_nodesToTaxa_perturbatorSubtree);
+                gainSum += (taxaSumWithPerturbator - taxaSumOfPerturbator) - taxaSumWithoutPerturbator;
+                
+            }
+            
+            gainSum /= double(computed_nodesInducingPerturbation.size());
+            
+            if (gainSum > bestGain){
+                bestGain = gainSum;
+                bestOutgroups.clear();
+                bestOutgroups.push_back(*currRoot);
+            }else if (gainSum == bestGain)
+                bestOutgroups.push_back(*currRoot);
+            cout<<gainSum << endl;
+        }
+        return(bestOutgroups);
     }
     
-    unsigned int Family::compute_detectTransfers(bool writeResults){
+    
+    void Family::compute_detectTransfers(){
+        unsigned int gainSumFake; // will no be used
+        compute_detectTransfers(true,gainSumFake);
+    }
+    
+    unsigned int Family::compute_detectTransfers(bool writeResults, unsigned int &gainSum){
         computed_detectedTransfers.clear();
         unsigned int foundTransfers = 0;
         // doing the first mapping:
@@ -833,6 +901,17 @@ namespace tpms{
                 // TRANSFER ACCEPTED -> TRANSFER RECORDED
                 
                 if(transferAccepted){
+                    
+                    // quantifying the gain
+                    vector<Taxon*> local_nodesToTaxa_perturbatorSubtree(highestID,00);
+                    vector<Taxon*> local_nodesToTaxa_treeWithoutPetrurbator(highestID,00);
+                    mapNodeOnTaxon(&mapping_NodesToTaxa,&local_nodesToTaxa_perturbatorSubtree,*perturbator,(*perturbator)->getFather(),00,true);
+                    mapNodeOnTaxon(&mapping_NodesToTaxa,&local_nodesToTaxa_treeWithoutPetrurbator,tree->getRootNode(),00,00,true,*perturbator);
+                    unsigned int taxaSumWithoutPerturbator = getTaxonomicSum(local_nodesToTaxa_treeWithoutPetrurbator);
+                    unsigned int taxaSumWithPerturbator = getTaxonomicSum(mapping_NodesToTaxa);
+                    unsigned int taxaSumOfPerturbator = getTaxonomicSum(local_nodesToTaxa_perturbatorSubtree);
+                    gainSum += (taxaSumWithPerturbator - taxaSumOfPerturbator) - taxaSumWithoutPerturbator;
+                    
                     foundTransfers++;
                     transfer currTransfer;
                     currTransfer.donnor = donnor;

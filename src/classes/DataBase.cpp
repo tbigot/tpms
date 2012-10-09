@@ -189,6 +189,14 @@ void DataBase::doFamiliesRerooting_UnicityTaxonomy() {
 
 }
 
+void DataBase::doFamiliesRerooting_Daubin() {
+    // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
+    doFamiliesMapping_LeavesToSpecies();
+    cout << "Re-rooting families trees using Daubin’s criteria:" << endl;
+    Family::threadedWork_launchJobs(families,&Family::doRerooting_Daubin,nbThreads);
+
+}
+
 void DataBase::doFamiliesRerooting_Unicity() {
     doFamiliesMapping_LeavesToSpecies();
     cout << "Re-rooting families trees with the unicity criteria:" << endl;

@@ -152,6 +152,21 @@ bool TreeTools::isAtLeastBinaryTree(Node * node){
     return(false);
 }
 
+std::vector<unsigned int> TreeTools::toNodesIDs(std::vector<bpp::Node*> &nodes){
+    vector<unsigned int> IDs;
+    for(auto node:nodes)
+        IDs.push_back(node->getId());
+    return IDs;
+}
+
+std::vector<Node*> TreeTools::toNodes(bpp::TreeTemplate<Node> &tree, std::vector<unsigned int> &IDs){ 
+    vector<Node*> nodes;
+    for(auto ID:IDs)
+        nodes.push_back(tree.getNode(ID));
+    return nodes;
+}
+
+
 string TreeTools::nodeToNewick(Node* node)
 {
     ostringstream result;

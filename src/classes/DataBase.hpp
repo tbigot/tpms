@@ -128,6 +128,7 @@ namespace tpms{
         void doFamiliesRerooting_Taxonomy();
         void doFamiliesRerooting_UnicityTaxonomy();
         void doFamiliesRerooting_LessTransfers(std::ostream * output);
+        void doFamiliesRerooting_Daubin();
 
 	
 	void doFamiliesComputation_detectTransfers(std::ostream * output);

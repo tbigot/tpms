@@ -187,7 +187,16 @@ tpms::Taxon* Taxon::findLCA(set<Taxon*> taxa){
 
 
 unsigned int Taxon::getDepth(){
-   return(depth);    
+   return(depth);
+}
+
+unsigned int Taxon::getRelativeDepth(std::set<Taxon*> &taxaList){
+    //base case
+    if(!this->hasDirectAncestor()){
+        return 0;
+    } else {
+        return ( (taxaList.find(this) == taxaList.end()? 0 : 1) + this->getDirectAncestor()->getRelativeDepth(taxaList)  );
+    }
 }
 
 unsigned int Taxon::computeRelativeDepthDifference(Taxon* ancestor, Taxon* descendant, set<Taxon*>* taxaList)

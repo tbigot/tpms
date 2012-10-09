@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(tpms)
 
+add_definitions(-std=c++11)
+
 set(EXECUTABLE_OUTPUT_PATH build/${CMAKE_BUILD_TYPE})
 
 IF(NOT BPP_LIBRARY)

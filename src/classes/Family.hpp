@@ -96,6 +96,8 @@ private:
      */
     std::ostringstream results;
     
+    unsigned int getTaxonomicSum(std::vector<Taxon*> &taxa);
+    
     
     bool containsUndefinedSequences;
     
@@ -143,7 +145,8 @@ private:
     
     std::vector<bpp::Node*> getUnicityBestRoots(std::vector<bpp::Node *> nodes);
     std::vector<bpp::Node*> getTaxonomyBestRoots(std::vector<bpp::Node *> nodes);
-    std::vector<bpp::Node*> getLessTransfersBestRoots(std::vector<bpp::Node *> nodes);
+    std::vector<unsigned int> getLessTransfersBestRoots(std::vector<unsigned int> nodes);
+    std::vector<unsigned int> getDaubinCriteriaBestRoots(std::vector<unsigned int> nodes);
   
     
     void writeRefTreeToFile(std::string path);
@@ -155,7 +158,8 @@ private:
     bpp::Node * removeUniqueSons(bpp::Node* localRoot);
     
     void reRootAt(std::vector<bpp::Node*> bestRoots);
-    
+    void reRootAt(std::vector<unsigned int> bestRoots);
+
     void atomizeTaxon(std::vector< tpms::Taxon* >& acceptors, std::vector< std::vector<std::string> >& acceptorsLeaves, tpms::Taxon* acceptor, bpp::Node* subtree);
     
     void print_tax_tree(bpp::Node& node, unsigned int depth, bpp::Node* origin, std::vector<tpms::Taxon*>* mapping, std::set<bpp::Node*>* ignoredNodes, bool subtreeIgnored);
@@ -164,7 +168,7 @@ private:
     
     unsigned int mapNodeToMaxDepth(bpp::Node*);
     
-    unsigned int compute_detectTransfers(bool writeResults);
+    unsigned int compute_detectTransfers(bool writeResults,unsigned int &gainSum);
 
     
 public:
@@ -190,6 +194,8 @@ public:
     void doRerooting_LessTransfers();
     void doRerooting_Taxonomy();
     void doRerooting_UnicityTaxonomy();
+    void doRerooting_Daubin();
+    
 
     void compute_detectTransfers();
     
