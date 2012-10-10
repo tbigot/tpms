@@ -584,41 +584,41 @@ namespace tpms{
             return(referenceMapping->at(currNodeID));
         
         // dealing with the case: topological leaf but not a real leaf (removed subtree)
-            if(neighbors.size() == 1){
-                //DEBUG
-                cout << "\ntopological leaf but not a real leaf (removed subtree)" << endl;
-                if(recordResult != 00) recordResult->at(currNodeID)=00;
-                return 00;
-            }
+        if(neighbors.size() == 1){
+            //DEBUG
+            cout << "\ntopological leaf but not a real leaf (removed subtree)" << endl;
+            if(recordResult != 00) recordResult->at(currNodeID)=00;
+            return 00;
+        }
             
-            set<Taxon*> virtualSonsTaxa;
+        set<Taxon*> virtualSonsTaxa;
+        
+        // Case of ignored node.
+        // if the ignored node is in the sons no need to keep the funciton recursive: nothing has changed
+        
+        if(ignoredNode!=00 &&  find(neighbors.begin(),neighbors.end(),ignoredNode) != neighbors.end())
+            recursive = false;
+        
+        
+        //collecting taxa on sons (neighbors without the node "origin")
             
-            // Case of ignored node.
-            // if the ignored node is in the sons no need to keep the funciton recursive: nothing has changed
-            
-            if(ignoredNode!=00 &&  find(neighbors.begin(),neighbors.end(),ignoredNode) != neighbors.end())
-                recursive = false;
-            
-            
-            //collecting taxa on sons (neighbors without the node "origin")
-                
-                for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor != neighbors.end(); currNeighbor++){
-                    if(*currNeighbor == origin || *currNeighbor == ignoredNode || (ignoredNodes != 00 && ignoredNodes->find(*currNeighbor) != ignoredNodes->end())) continue;
-                    virtualSonsTaxa.insert(mapNodeOnTaxon(referenceMapping,recordResult,*currNeighbor,node,ignoredNodes,recursive,ignoredNode));
-                }
-                
-                
-                //removing null Taxa from list
-                set<Taxon*>::iterator nullFound = virtualSonsTaxa.find(00);
-                if(nullFound != virtualSonsTaxa.end()) virtualSonsTaxa.erase(nullFound);
-                
-                Taxon* currTaxon;
-                if(!virtualSonsTaxa.empty()) currTaxon = Taxon::findLCA(virtualSonsTaxa);
-                else currTaxon = 00;
-                
-                
-                if(recordResult != 00) recordResult->at(currNodeID) = currTaxon ;
-                return(currTaxon);
+        for(vector<Node *>::iterator currNeighbor = neighbors.begin(); currNeighbor != neighbors.end(); currNeighbor++){
+            if(*currNeighbor == origin || *currNeighbor == ignoredNode || (ignoredNodes != 00 && ignoredNodes->find(*currNeighbor) != ignoredNodes->end())) continue;
+            virtualSonsTaxa.insert(mapNodeOnTaxon(referenceMapping,recordResult,*currNeighbor,node,ignoredNodes,recursive,ignoredNode));
+        }
+        
+        
+        //removing null Taxa from list
+        set<Taxon*>::iterator nullFound = virtualSonsTaxa.find(00);
+        if(nullFound != virtualSonsTaxa.end()) virtualSonsTaxa.erase(nullFound);
+        
+        Taxon* currTaxon;
+        if(!virtualSonsTaxa.empty()) currTaxon = Taxon::findLCA(virtualSonsTaxa);
+        else currTaxon = 00;
+        
+        
+        if(recordResult != 00) recordResult->at(currNodeID) = currTaxon ;
+        return(currTaxon);
                 
     }
     
@@ -753,7 +753,8 @@ namespace tpms{
         {
             Taxon* initialGfTaxon = local_nodeToTaxon->at(grandFather->getId());
             Taxon* newTaxon = mapNodeOnTaxon(local_nodeToTaxon,00,grandFather,greatGrandFather,00,true,node);
-            unsigned int currPerturbation = Taxon::computeRelativeDepthDifference(initialGfTaxon,newTaxon,&taxa);
+            //unsigned int currPerturbation = Taxon::computeRelativeDepthDifference(initialGfTaxon,newTaxon,&taxa);
+            unsigned int currPerturbation =  newTaxon->getDepth() - initialGfTaxon->getDepth();
             // DBG
             // if(initialGfTaxon != newTaxon) cout << initialGfTaxon->getName() << " . " << newTaxon->getName() << " : " << currPerturbation << endl;
             local_perturbationsInduced->at(node->getId()) = currPerturbation;
@@ -856,7 +857,6 @@ namespace tpms{
                 // only if the bootstrap is enough
                 
                 bool transferAccepted = false;
-                
                 Taxon* donnor = mapping_grandFatherWithoutThisNode.at((*perturbator)->getId());
                 vector<string> donnorLeavesNames;
                 vector<Node*> donnorLeaves;
@@ -867,6 +867,8 @@ namespace tpms{
                 
                 Node* nodeGroupingIncongruentTaxa = (*perturbator)->getFather();
                 Node* incongruencyRoot = nodeGroupingIncongruentTaxa->getFather();
+                Taxon* incongruencyRootBeforeRemoval =  mapping_NodesToTaxa.at(incongruencyRoot->getId());
+
                 if(incongruencyRoot == 00){
                     continue;}
                 
@@ -883,15 +885,19 @@ namespace tpms{
                     incongruencyRoot = incongruencyRoot->getFather();
                     
                     // 1st step: is there still an incongruency ? sees the changes of incongruencyRoot affectation
-                    Taxon* incongruencyRootOriginalAffectation = mapping_NodesToTaxa.at(incongruencyRoot->getId());
+                    Taxon* incongruencyRootOriginalAffectation = mapNodeOnTaxon(&mapping_NodesToTaxa,00,incongruencyRoot,(incongruencyRoot->hasFather()?  incongruencyRoot->getFather():00),00,true);
+                    incongruencyRootBeforeRemoval = incongruencyRootOriginalAffectation;
                     Taxon* incongruencyRootNewAffectation = mapNodeOnTaxon(&mapping_NodesToTaxa,00,incongruencyRoot,(incongruencyRoot->hasFather()?  incongruencyRoot->getFather():00),00,true,*perturbator);
-                    perturbationIndex = tpms::Taxon::computeRelativeDepthDifference(incongruencyRootOriginalAffectation,incongruencyRootNewAffectation,&taxa);
+                    donnor = incongruencyRootNewAffectation;
+                    // perturbationIndex = tpms::Taxon::computeRelativeDepthDifference(incongruencyRootOriginalAffectation,incongruencyRootNewAffectation,&taxa);
+                    perturbationIndex =  incongruencyRootNewAffectation->getDepth() - incongruencyRootOriginalAffectation->getDepth();
                     if(perturbationIndex == 0)
                         break; // because there is no incongruency anymore
                     
                     // 2nd step: checking bootstrap
-                    if(nodeGroupingIncongruentTaxa->hasBootstrapValue() && nodeGroupingIncongruentTaxa->getBootstrapValue() >= 90 && nodeGroupingIncongruentTaxa->getBootstrapValue() <=100)
+                    if(nodeGroupingIncongruentTaxa->hasBootstrapValue() && nodeGroupingIncongruentTaxa->getBootstrapValue() >= 90 && nodeGroupingIncongruentTaxa->getBootstrapValue() <=100){
                         transferAccepted = true;
+                    }
                     
                 }
                 
@@ -917,6 +923,7 @@ namespace tpms{
                     currTransfer.donnor = donnor;
                     currTransfer.perturbationIndex = perturbationIndex;
                     currTransfer.bootstrap = supportOfnodeGroupingIncongruentTaxa;
+                    currTransfer.formerAncestorTaxon = incongruencyRootBeforeRemoval;
                     atomizeTaxon(currTransfer.acceptors,currTransfer.acceptorsLeaves,currTransfer.donnor,*perturbator);
                     
                     // the donnor leaves are the leaves under the Grand-Father, ignoring the node *node which is the root of the acceptor group
@@ -1004,6 +1011,7 @@ namespace tpms{
                     
                     results << "; acceptor-taxonomy-" << currAcceptor << ": " << currTransfer->acceptors.at(currAcceptor)->getTaxonomy() << endl;
                     results << "; bootstrap: " << currTransfer->bootstrap << endl;
+                    results << "; former-ancestor-taxon: " << currTransfer->formerAncestorTaxon->getName() << endl;
                     }
                     
                     results << ";" << endl;

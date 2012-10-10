@@ -73,6 +73,7 @@ struct transfer {
         std::vector<std::vector<std::string> > acceptorsLeaves;
 	unsigned int perturbationIndex;
         unsigned int bootstrap;
+        tpms::Taxon* formerAncestorTaxon;
     };
     
 private:
