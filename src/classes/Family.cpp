@@ -963,6 +963,7 @@ namespace tpms{
                 }
                 
             }
+            doMapping_NodesToTaxa();
             doMapping_NodesToTaxonomicShift();
             // 	cout << computed_detectedTransfers.size() << ',' << flush;
         }
