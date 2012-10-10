@@ -832,7 +832,6 @@ namespace tpms{
         // forbiddenNodes contains all the nodes that we know they can’t be transfers, because they include potential transfers
         while(transfersRemaining()){
             set<Node*> forbiddenNodes;
-            doMapping_NodesToTaxonomicShift();
             for(set<Node *>::iterator perturbator = computed_nodesInducingPerturbation.begin(); perturbator != computed_nodesInducingPerturbation.end(); perturbator++){
                 // (1.0) it this node in forbidden nodes (it would mean that a descendant node has been found under this node)
                 if(forbiddenNodes.find(*perturbator) != forbiddenNodes.end()) continue;
@@ -962,6 +961,7 @@ namespace tpms{
                     R->setBranchProperty(bpp::TreeTools::BOOTSTRAP,bpp::Number<double>(newBS));
                     delete(P);
                 }
+                break;
                 
             }
             doMapping_NodesToTaxonomicShift();
