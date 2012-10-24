@@ -124,7 +124,7 @@ namespace tpms{
                 mne2tax.insert(pair<string,Taxon *>(mnemonique.str(),currTaxon ));
                 taxa.insert(currTaxon);
             } else {
-                cout << "o Unable to find this specie in the species tree:" << cleanSpeciesName.str() << endl;
+                cout << "o Unable to find this species in the species tree:" << cleanSpeciesName.str() << endl;
             }
             
             getline(*preamble, currLigne);

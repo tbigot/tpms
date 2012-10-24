@@ -333,6 +333,7 @@ void DataBase::loadSpeciesTree(string newickLine)
 	string snp = sNewickPropre.str();
 	speciesTree = tpms::TreeTools::newickToTree(snp,true);
 	
+    cout << "NODES = " << speciesTree->getNodes().size() << " ; LEAVES = " << speciesTree->getLeaves().size() << endl;
 	
 	//Debug : toutes les espèces :
 	//cout << "\n\n\n### Voici la liste de toutes les espèces de l'abre des espèces :" << endl;	
@@ -342,6 +343,7 @@ void DataBase::loadSpeciesTree(string newickLine)
 	for(vector<Node *>::iterator it = listeNoeuds.begin(); it != listeNoeuds.end(); it++) {
 	    string taxonToCreateName;
 	    if ((*it)->hasName()) taxonToCreateName = (*it)->getName();
+        boost::to_upper(taxonToCreateName);
 	    Taxon* currTaxon = new tpms::Taxon(taxonToCreateName,(*it),*this);
 	    nodeToTaxon.insert(  pair<unsigned int, Taxon*> ( (*it)->getId(),currTaxon )  );
 	    if(!taxonToCreateName.empty()) {

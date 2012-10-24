@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 	// i open files
 	string path(args.getArg("families-trees"));
 	if(!fs::is_directory(path)){
-	    cout << path << " is not a directory. I give up" << endl ;
+	    cout << path << " is not a directory. I give up." << endl ;
 	    return(2);
 	}
 	
