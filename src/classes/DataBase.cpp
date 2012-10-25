@@ -70,7 +70,7 @@ namespace fs = boost::filesystem;
 
 namespace tpms{
 
-DataBase::DataBase(string path, unsigned int nbThreads): mappingDone_NodesToTaxa(false), mappingDone_LeavesToSpecies(false), mappingDone_NodesToUnicityScores(false), nbThreads(nbThreads) {
+DataBase::DataBase(string path, bool expectSynonyms, unsigned int nbThreads): mappingDone_NodesToTaxa(false), mappingDone_LeavesToSpecies(false), mappingDone_NodesToUnicityScores(false), nbThreads(nbThreads), expectSynonyms(expectSynonyms) {
 	
 	// checking this file exists
 	fs::path dbFile(path);
@@ -331,7 +331,7 @@ void DataBase::loadSpeciesTree(string newickLine)
 	}
 	
 	string snp = sNewickPropre.str();
-	speciesTree = tpms::TreeTools::newickToTree(snp,true);
+	speciesTree = tpms::TreeTools::newickToTree(snp,expectSynonyms);
 	
     cout << "NODES = " << speciesTree->getNodes().size() << " ; LEAVES = " << speciesTree->getLeaves().size() << endl;
 	

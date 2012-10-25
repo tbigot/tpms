@@ -62,6 +62,8 @@ namespace tpms{
     class DataBase {
 	
     private:
+        
+        bool expectSynonyms;
 	
 	std::map<std::string,tpms::Taxon*> taxa;
 	std::map<unsigned int,tpms::Taxon*> nodeToTaxon;
@@ -102,7 +104,7 @@ namespace tpms{
 	std::string getStatus(std::string);
 	
 	//constructeur à partir d'un fichier
-	DataBase(std::string path, unsigned int nbThreads = 1);
+	DataBase(std::string path, bool expectSynonyms, unsigned int nbThreads = 1);
 	bpp::TreeTemplate<bpp::Node> * getSpeciesTree();
 	std::vector<tpms::Family *> & getFamilies();
 	unsigned int getNbFamilies();

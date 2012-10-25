@@ -5,7 +5,7 @@ You can find help on the project github wiki :
 INSTALLATION
 https://github.com/tbigot/tpms/wiki/INSTALL
 
-TPMS_MKDB (building collecitons)
+TPMS_MKDB (building collections)
 https://github.com/tbigot/tpms/wiki/tpms_mkdb
 
 TPMS_QUERY (querying a collection)
@@ -14,3 +14,5 @@ https://github.com/tbigot/tpms/wiki/tpms_query
 TPMS_COMPUTATIONS
 https://github.com/tbigot/tpms/wiki/tpms_computations
 
+More generally, please refer to the online wiki:
+https://github.com/tbigot/tpms/wiki/

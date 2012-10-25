@@ -67,7 +67,11 @@ int main(int argc, char *argv[]) {
 	nbThreadsSS >> nbThreads;
 	if(nbThreads < 1) nbThreads = 1;
 	cout << nbThreads << " threads will be used." << endl;
-	DataBase dbTest(args.getArg("collection"),nbThreads);
+     // Do we have to use synonyms?
+    bool expectSynonyms = false;
+    if(args.getArg("synonyms") == "yes")
+        expectSynonyms = true;
+	DataBase dbTest(args.getArg("collection"),expectSynonyms,nbThreads);
 	dbTest.doFamiliesMapping_LeavesToSpecies();
 	
 	

@@ -147,8 +147,13 @@ int main(int argc, char *argv[]) {
     cout << nbThreads << " threads will be used." << endl;
     
     
+    // Do we have to use synonyms?
+    bool expectSynonyms = false;
+    if(args.getArg("synonyms") == "yes")
+        expectSynonyms = true;
+    
     // Opening Collection   
-    DataBase collection(args.getArg("collection"),nbThreads);
+    DataBase collection(args.getArg("collection"),expectSynonyms,nbThreads);
     
     cout << "To perform these operations, I need to associate each sequence with a species." << endl;
     collection.doFamiliesMapping_LeavesToSpecies();
