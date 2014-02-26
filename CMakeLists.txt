@@ -49,19 +49,8 @@ file(
 add_executable(tpms_query src/tpms_query.cpp ${classes})
 target_link_libraries(tpms_query bpp-phyl bpp-core bpp-seq ${Boost_LIBRARIES})
 
-#STATIC
-add_executable(tpms_query_static src/tpms_query.cpp ${classes})
-target_link_libraries(tpms_query_static bpp-phyl bpp-core bpp-seq -static)
-
-# add_executable(tpms_jump src/tpms_jump.cpp ${classes})
-# target_link_libraries(tpms_jump bpp-phyl bpp-utils bpp-numcalc bpp-seq)
-
 add_executable(tpms_mkdb src/tpms_mkdb.cpp ${classes})
 target_link_libraries(tpms_mkdb bpp-phyl bpp-core bpp-seq bpp-raa ${Boost_LIBRARIES})
 
 add_executable(tpms_computations src/tpms_computations.cpp ${classes})
 target_link_libraries(tpms_computations bpp-phyl bpp-core bpp-seq bpp-raa ${Boost_LIBRARIES})
-
-
-#add_executable(tpms_mkdb_static src/tpms_mkdb.cpp ${classes})
-#target_link_libraries(STATIC tpms_mkdb_static bpp-phyl bpp-utils bpp-numcalc bpp-seq bpp-raa ${Boost_LIBRARIES} z)
