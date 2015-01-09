@@ -372,7 +372,7 @@ bool Pattern::patternMatchInit(Family &family, CandidateNode * initCnode){
 
 bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, CandidateNode * fatherCandidate) {
     // Dufayard et al, 2005
-    // Bigot et al, in prep.
+    // Bigot et al,2013.
     
     
     if(isLeaf(target) && isLeaf(pattern)){
