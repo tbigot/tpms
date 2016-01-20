@@ -1,27 +1,41 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 PROJECT(tpms)
 
 add_definitions(-std=gnu++0x)
 
 set(EXECUTABLE_OUTPUT_PATH build/${CMAKE_BUILD_TYPE})
 
-IF(NOT BPP_LIBRARY)
-    FIND_PATH(BPP_INCLUDE_DIR "Bpp/Phyl/TreeTemplate.h")
-    SET(BPP_NAMES bpp-phyl bpp-phyllib bpp-phyldll)
-    FIND_LIBRARY(BPP_LIBRARY NAMES ${BPP_NAMES})
-ENDIF(NOT BPP_LIBRARY)
+#here is a useful function:
+MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
+  #start:
+  FIND_PATH(${lib_name}_INCLUDE_DIR ${include_to_find})
+  IF(${BUILD_STATIC})
+    SET(${lib_name}_NAMES lib${lib_name}.a)
+  ELSE(${BUILD_STATIC})
+    SET(${lib_name}_NAMES ${lib_name} ${lib_name}lib ${lib_name}dll)
+  ENDIF(${BUILD_STATIC})
+  FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES})
 
-IF(BPP_LIBRARY)
-    MESSAGE("-- Library BPP found here:")
-    MESSAGE("   includes : ${BPP_INCLUDE_DIR}")
-    MESSAGE("   libraries: ${BPP_LIBRARY}")
-ELSE(BPP_LIBRARY)
-    MESSAGE(FATAL_ERROR "bpp-phyl required but not found.")
-ENDIF(BPP_LIBRARY)
+  IF(${lib_name}_LIBRARY)
+    MESSAGE("-- Library ${lib_name} ${lib_type} found here:")
+    MESSAGE("   includes : ${${lib_name}_INCLUDE_DIR}")
+    MESSAGE("   library: ${${lib_name}_LIBRARY}")
+  ELSE(${lib_name}_LIBRARY)
+    MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
+  ENDIF(${lib_name}_LIBRARY)
+  
+  #add the dependency:
+  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
+  SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
+ENDMACRO(IMPROVED_FIND_LIBRARY)
+
+IMPROVED_FIND_LIBRARY(BPP_LIBRARIES bpp-phyl Bpp/Phyl/Tree.h)
+IMPROVED_FIND_LIBRARY(BPP_LIBRARIES bpp-seq Bpp/Seq/Alphabet/Alphabet.h)
+IMPROVED_FIND_LIBRARY(BPP_LIBRARIES bpp-core Bpp/Clonable.h)
 
 
-link_directories(${BPP_LIBRARY})
-include_directories(${BPP_INCLUDE_DIR})
+
+link_directories(${BPP_LIBRARIES})
 
 # Autres packages à trouver : -lbpp-utils -lbpp-numcalc -lbpp-seq
 
@@ -34,8 +48,6 @@ include_directories(${BPP_INCLUDE_DIR})
 #SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43.0")
 find_package(Boost COMPONENTS filesystem system thread REQUIRED)
 
-link_directories ( ${Boost_LIBRARY_DIRS} )
-include_directories ( ${Boost_INCLUDE_DIRS} )
 
 
 
