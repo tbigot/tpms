@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
-PROJECT(tpms)
+PROJECT(tpms CXX)
 
 add_definitions(-std=gnu++0x)
-
-set(EXECUTABLE_OUTPUT_PATH build/${CMAKE_BUILD_TYPE})
 
 #here is a useful function:
 MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
@@ -29,15 +27,14 @@ MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
   SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
 ENDMACRO(IMPROVED_FIND_LIBRARY)
 
+IMPROVED_FIND_LIBRARY(BPP_LIBRARIES bpp-raa Bpp/Raa/RAA.h)
 IMPROVED_FIND_LIBRARY(BPP_LIBRARIES bpp-phyl Bpp/Phyl/Tree.h)
 IMPROVED_FIND_LIBRARY(BPP_LIBRARIES bpp-seq Bpp/Seq/Alphabet/Alphabet.h)
 IMPROVED_FIND_LIBRARY(BPP_LIBRARIES bpp-core Bpp/Clonable.h)
 
-
-
 link_directories(${BPP_LIBRARIES})
+message(${BPP_LIBRARIES})
 
-# Autres packages à trouver : -lbpp-utils -lbpp-numcalc -lbpp-seq
 
 #boost
 # search for Boost version 1.40
@@ -46,9 +43,8 @@ link_directories(${BPP_LIBRARIES})
 #system, thread, wave
 
 #SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43.0")
+SET(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
 find_package(Boost COMPONENTS filesystem system thread REQUIRED)
-
-
 
 
 file(
@@ -57,12 +53,14 @@ file(
   src/classes/*
 )
 
-
 add_executable(tpms_query src/tpms_query.cpp ${classes})
-target_link_libraries(tpms_query bpp-phyl bpp-core bpp-seq ${Boost_LIBRARIES})
+target_link_libraries(tpms_query ${BPP_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(tpms_mkdb src/tpms_mkdb.cpp ${classes})
-target_link_libraries(tpms_mkdb bpp-phyl bpp-core bpp-seq bpp-raa ${Boost_LIBRARIES})
+target_link_libraries(tpms_mkdb ${BPP_LIBRARIES} ${Boost_LIBRARIES} -lz)
 
 add_executable(tpms_computations src/tpms_computations.cpp ${classes})
-target_link_libraries(tpms_computations bpp-phyl bpp-core bpp-seq bpp-raa ${Boost_LIBRARIES})
+target_link_libraries(tpms_computations ${BPP_LIBRARIES} ${Boost_LIBRARIES})
+
+install(TARGETS tpms_query tpms_mkdb tpms_computations DESTINATION bin)
+
