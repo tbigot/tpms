@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT(tpms CXX)
 
-add_definitions(-std=gnu++0x)
-
 #here is a useful function:
 MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
   #start:
