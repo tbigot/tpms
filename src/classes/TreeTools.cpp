@@ -154,15 +154,15 @@ bool TreeTools::isAtLeastBinaryTree(Node * node){
 
 std::vector<unsigned int> TreeTools::toNodesIDs(std::vector<bpp::Node*> &nodes){
     vector<unsigned int> IDs;
-    for(auto node:nodes)
-        IDs.push_back(node->getId());
+    for(vector<Node*>::iterator node = nodes.begin(); node != nodes.end(); node++)
+        IDs.push_back((*node)->getId());
     return IDs;
 }
 
 std::vector<Node*> TreeTools::toNodes(bpp::TreeTemplate<Node> &tree, std::vector<unsigned int> &IDs){ 
     vector<Node*> nodes;
-    for(auto ID:IDs)
-        nodes.push_back(tree.getNode(ID));
+    for(std::vector<unsigned int>::iterator ID = IDs.begin(); ID != IDs.end(); ID++)
+        nodes.push_back(tree.getNode(*ID));
     return nodes;
 }
 

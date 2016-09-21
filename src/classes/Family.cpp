@@ -197,8 +197,8 @@ namespace tpms{
         vector<unsigned int> nodesIDofTheTree;
         vector<Node*> nodesOfTheTree = tree->getNodes();
         
-        for(auto currNode: nodesOfTheTree)
-            nodesIDofTheTree.push_back(currNode->getId());
+        for(vector<Node*>::iterator currNode = nodesOfTheTree.begin(); currNode != nodesOfTheTree.end(); currNode++)
+            nodesIDofTheTree.push_back((*currNode)->getId());
         
         vector<unsigned int> bestOGs = getDaubinCriteriaBestRoots(nodesIDofTheTree);
         reRootAt(bestOGs);
