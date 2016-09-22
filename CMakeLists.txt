@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT(tpms CXX)
 
+SET(CMAKE_CXX_FLAGS "-std=c++11")
+
+SET(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -g -Wall -Weffc++ -Wshadow")
+SET(CMAKE_C_FLAGS_DEBUG "-g -Wall -Weffc++ -Wshadow")
+SET(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -O3 -Wall -Weffc++ -Wshadow -DNDEBUG")
+SET(CMAKE_C_FLAGS_RELEASE "-O3 -Wall -Weffc++ -Wshadow -DNDEBUG")
+SET(CMAKE_CXX_FLAGS_DISTRIBUTION "-std=c++11 -O3 -w -DNDEBUG")
+SET(CMAKE_C_FLAGS_DISTRIBUTION "-O3 -w -DNDEBUG")
+
 #here is a useful function:
 MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
   #start:
