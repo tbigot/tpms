@@ -1,3 +1,6 @@
+![tpms logo](/images/tpms-100.png)
+
+
 # TPMS, Tree Pattern Matching Suite
 
 TPMS is a Bioinformatics tool, designed to perform pattern-matching queries in a collection of phylogenetic trees.
