@@ -78,98 +78,98 @@ struct transfer {
     
 private:
     
-    unsigned int highestID;
+    unsigned int highestID_;
     
-    bool doneMapping_NodeToTaxa;
+    bool doneMapping_NodeToTaxa_;
     
-    std::string name;
-    DataBase * db;
-    bpp::TreeTemplate<bpp::Node> * tree;
-    std::map<std::string,tpms::Taxon*> mne2tax;
-    std::set<tpms::Taxon*> taxa;
+    std::string name_;
+    DataBase * db_;
+    bpp::TreeTemplate<bpp::Node> * tree_;
+    std::map<std::string,tpms::Taxon*> mne2tax_;
+    std::set<tpms::Taxon*> taxa_;
     /**
      * @brief contains the list of original leaves of the tree. Even after a subtree deletion, we can know weather a node matches to a sequence (which is associated to a species).
      */
-    std::set<bpp::Node*> leaves;
+    std::set<bpp::Node*> leaves_;
     
     /**
      * @brief during a threaded work, all text results will be stored here
      */
-    std::ostringstream results;
+    std::ostringstream results_;
     
-    unsigned int getTaxonomicSum(std::vector<Taxon*> &taxa);
+    unsigned int getTaxonomicSum_(std::vector<Taxon*> &taxa);
     
     
-    bool containsUndefinedSequences;
+    bool containsUndefinedSequences_;
     
     // before initialization: these objects are deleted after initialization
-    std::stringstream *preamble;
-    std::string *newick;
+    std::stringstream *preamble_;
+    std::string *newick_;
    
     
-    std::vector<tpms::NodeNature> mapping_NodesToNatures;
-    std::vector<float> mapping_NodesToUnicityScores;
-    std::vector<Taxon *> mapping_NodesToTaxa;
-    std::vector<unsigned int> mapping_NodesToTaxonomicShift;
-    std::vector<unsigned int> mapping_NodesToMaxDepths;
+    std::vector<tpms::NodeNature> mapping_NodesToNatures_;
+    std::vector<float> mapping_NodesToUnicityScores_;
+    std::vector<Taxon *> mapping_NodesToTaxa_;
+    std::vector<unsigned int> mapping_NodesToTaxonomicShift_;
+    std::vector<unsigned int> mapping_NodesToMaxDepths_;
     
     
-    std::vector<std::set<tpms::Taxon*> > cacheMapping_SubtreesToTaxalist;
+    std::vector<std::set<tpms::Taxon*> > cacheMapping_SubtreesToTaxalist_;
     
      /**
      * @brief contains, after each step of doMapping_NodesToTaxonomicShift, the taxonomic affectation of a grandfather node of a node
      */
-    std::vector<Taxon*> mapping_grandFatherWithoutThisNode;
+    std::vector<Taxon*> mapping_grandFatherWithoutThisNode_;
     
     /**
      * @brief contains, after each step of doMapping_NodesToTaxonomicShift, the list of nodes with a taxonomic shift > 1
      */
-    std::set<bpp::Node*> computed_nodesInducingPerturbation;
+    std::set<bpp::Node*> computed_nodesInducingPerturbation_;
     
     /**
      * @brief returns true if at least one node of the tree is mapped to a taxonomic perturbation > 1
      */
-    bool transfersRemaining();
+    bool transfersRemaining_();
     
     /**
      * @brief this mapping list is filled by the function doMapping_detectTransfers; It contains the list of each detected transfer
      */
-    std::vector<transfer> computed_detectedTransfers;
+    std::vector<transfer> computed_detectedTransfers_;
         
     
-    std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode(std::vector<float> &scores, bpp::Node * node, bpp::Node * orignNode, bool virtualRootOnTheBranch = false);
+    std::map<tpms::Taxon*, unsigned int> compute_UnicityScoreOnNode_(std::vector<float> &scores, bpp::Node * node, bpp::Node * orignNode, bool virtualRootOnTheBranch = false);
     
-    void computeTaxonomicShift(bpp::Node* node, bpp::Node* father, bpp::Node* grandFather, bpp::Node* greatGrandFather, std::vector<tpms::Taxon*>* local_nodeToTaxon, std::vector<tpms::Taxon*>* local_GFmappingWithoutTheNode, std::vector<unsigned int>* local_perturbationsInduced, std::set<bpp::Node*>* local_nodesInducingPerturbations);
+    void computeTaxonomicShift_(bpp::Node* node, bpp::Node* father, bpp::Node* grandFather, bpp::Node* greatGrandFather, std::vector<tpms::Taxon*>* local_nodeToTaxon, std::vector<tpms::Taxon*>* local_GFmappingWithoutTheNode, std::vector<unsigned int>* local_perturbationsInduced, std::set<bpp::Node*>* local_nodesInducingPerturbations);
     
-    tpms::Taxon* mapNodeOnTaxon(std::vector< tpms::Taxon* >* referenceMapping, std::vector< tpms::Taxon* >* recordResult, bpp::Node* node, bpp::Node* origin = 00, std::set< bpp::Node* >* ignoredNodes = 00, bool recursive = true, bpp::Node* ignoredNode = 00);
-    unsigned int getTaxonomicSum(bpp::Node* node, bpp::Node* father, std::vector<tpms::Taxon*>* local_nodesToTaxa, std::set<bpp::Node*>* nodesToIgnore);
+    tpms::Taxon* mapNodeOnTaxon_(std::vector< tpms::Taxon* >* referenceMapping, std::vector< tpms::Taxon* >* recordResult, bpp::Node* node, bpp::Node* origin = 00, std::set< bpp::Node* >* ignoredNodes = 00, bool recursive = true, bpp::Node* ignoredNode = 00);
+    unsigned int getTaxonomicSum_(bpp::Node* node, bpp::Node* father, std::vector<tpms::Taxon*>* local_nodesToTaxa, std::set<bpp::Node*>* nodesToIgnore);
     
-    std::vector<bpp::Node*> getUnicityBestRoots(std::vector<bpp::Node *> nodes);
-    std::vector<bpp::Node*> getTaxonomyBestRoots(std::vector<bpp::Node *> nodes);
-    std::vector<unsigned int> getLessTransfersBestRoots(std::vector<unsigned int> nodes);
-    std::vector<unsigned int> getDaubinCriteriaBestRoots(std::vector<unsigned int> nodes);
+    std::vector<bpp::Node*> getUnicityBestRoots_(std::vector<bpp::Node *> nodes);
+    std::vector<bpp::Node*> getTaxonomyBestRoots_(std::vector<bpp::Node *> nodes);
+    std::vector<unsigned int> getLessTransfersBestRoots_(std::vector<unsigned int> nodes);
+    std::vector<unsigned int> getDaubinCriteriaBestRoots_(std::vector<unsigned int> nodes);
   
     
-    void writeRefTreeToFile(std::string path);
-    void writeSpTreeToFile(std::string path);
+    void writeRefTreeToFile_(std::string path);
+    void writeSpTreeToFile_(std::string path);
     
     
     // utilities, unrelated to family, have to be moved to TreeTools
-    void deleteFromLeavesToBif(bpp::Node * pnode);
-    bpp::Node * removeUniqueSons(bpp::Node* localRoot);
+    void deleteFromLeavesToBif_(bpp::Node * pnode);
+    bpp::Node * removeUniqueSons_(bpp::Node* localRoot);
     
-    void reRootAt(std::vector<bpp::Node*> bestRoots);
-    void reRootAt(std::vector<unsigned int> bestRoots);
+    void reRootAt_(std::vector<bpp::Node*> bestRoots);
+    void reRootAt_(std::vector<unsigned int> bestRoots);
 
-    void atomizeTaxon(std::vector< tpms::Taxon* >& acceptors, std::vector< std::vector<std::string> >& acceptorsLeaves, tpms::Taxon* acceptor, bpp::Node* subtree);
+    void atomizeTaxon_(std::vector< tpms::Taxon* >& acceptors, std::vector< std::vector<std::string> >& acceptorsLeaves, tpms::Taxon* acceptor, bpp::Node* subtree);
     
-    void print_tax_tree(bpp::Node& node, unsigned int depth, bpp::Node* origin, std::vector<tpms::Taxon*>* mapping, std::set<bpp::Node*>* ignoredNodes, bool subtreeIgnored);
+    void print_tax_tree_(bpp::Node& node, unsigned int depth, bpp::Node* origin, std::vector<tpms::Taxon*>* mapping, std::set<bpp::Node*>* ignoredNodes, bool subtreeIgnored);
     
-    void updateTaxa();
+    void updateTaxa_();
     
-    unsigned int mapNodeToMaxDepth(bpp::Node*);
+    unsigned int mapNodeToMaxDepth_(bpp::Node*);
     
-    unsigned int compute_detectTransfers(bool writeResults,unsigned int &gainSum);
+    unsigned int compute_detectTransfers_(bool writeResults,unsigned int &gainSum);
 
     
 public:

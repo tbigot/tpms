@@ -62,30 +62,30 @@ private:
     /**
      * @brief Are all the node constraints Ok?
      **/
-    bool ok;
+    bool ok_;
     
     /**
      * @brief The database associated to this pattern.
      **/
-    tpms::DataBase &db;
+    tpms::DataBase &db_;
     
     
      /**
      * @brief The pattern tree itself.
      **/
-    bpp::TreeTemplate<bpp::Node> &tree;
+    bpp::TreeTemplate<bpp::Node> &tree_;
     
     /**
      * @brief All species that can be in this pattern.
      **/
-    std::set<tpms::Taxon*> allSpecies;
+    std::set<tpms::Taxon*> allSpecies_;
     
 
     /**
      * @brief Transform the first part of a node name into a constraint node
      *
      **/
-    void extractConstraints();
+    void extractConstraints_();
     
     /** @} */
     
@@ -96,7 +96,7 @@ private:
      *
      **/
     // fonction récursive de recherche de motifs (Pattern Matching)
-    bool patternMatch(Family& family,bpp::Node* target, bpp::Node* pattern, tpms::CandidateNode* fatherCandidate);
+    bool patternMatch_(Family& family,bpp::Node* target, bpp::Node* pattern, tpms::CandidateNode* fatherCandidate);
     
     
         
@@ -105,21 +105,21 @@ private:
      * @{
      *
      **/
-    static bool isLeaf(bpp::Node * pNode);
+    static bool isLeaf_(bpp::Node * pNode);
     
     
     /** @} */
     
-    std::vector<int> getIdWithTaxaList(bpp::TreeTemplate<bpp::Node> * sTree, std::set<std::string> * taxa);
+    std::vector<int> getIdWithTaxaList_(bpp::TreeTemplate<bpp::Node> * sTree, std::set<std::string> * taxa);
     int enumerateTaxon(bpp::Node * localRoot, std::set<std::string> * tsMembers, bool tsComplementary, bpp::Node * impasse, unsigned int * totsize);
     
-    std::vector<NodeConstraints *> constraints;
-    void toString(bpp::Node * noeud, int spc, std::ostream &outputStream);
+    std::vector<NodeConstraints *> constraints_;
+    void toString_(bpp::Node * noeud, int spc, std::ostream &outputStream);
     
-    NodeConstraints* constraintsOf(bpp::Node* node);
-    bool isTreeBinary();
+    NodeConstraints* constraintsOf_(bpp::Node* node);
+    bool isTreeBinary_();
     
-    std::vector<unsigned int> mapping_NodesToMaxDepths;
+    std::vector<unsigned int> mapping_NodesToMaxDepths_;
     
 public:
     

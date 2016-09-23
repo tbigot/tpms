@@ -60,20 +60,20 @@ Query::Query(string queryLine, string defaultsParams) {
 	
 	// cout << ">> "  << ssql.str() << endl;
 	
-	getline(ssql,sourceTaxon,':');
-	std::transform(sourceTaxon.begin(), sourceTaxon.end(), sourceTaxon.begin(), (int(*)(int)) toupper); // on passe en majuscules
-	getline(ssql,targetTaxon,':');
-	std::transform(targetTaxon.begin(), targetTaxon.end(), targetTaxon.begin(), (int(*)(int)) toupper); // on passe en majuscules
+	getline(ssql,sourceTaxon_,':');
+	std::transform(sourceTaxon_.begin(), sourceTaxon_.end(), sourceTaxon_.begin(), (int(*)(int)) toupper); // on passe en majuscules
+	getline(ssql,targetTaxon_,':');
+	std::transform(targetTaxon_.begin(), targetTaxon_.end(), targetTaxon_.begin(), (int(*)(int)) toupper); // on passe en majuscules
 	
 	string monophilyLevelS;
 	getline(ssql,monophilyLevelS,':');
 	istringstream monophilyLevelSS(monophilyLevelS);
-	monophilyLevelSS >> monophilyLevel;
+	monophilyLevelSS >> monophilyLevel_;
 		
 	string verifDepthS;
 	getline(ssql,verifDepthS,':');
 	istringstream verifDepthSS(verifDepthS);
-	verifDepthSS >> verifDepth;
+	verifDepthSS >> verifDepth_;
 
 	string params;
 	getline(ssql,params,':');
@@ -92,8 +92,8 @@ Query::Query(string queryLine, string defaultsParams) {
 		istringstream oneSRss(oneSR);
 		oneBSss >> oneBSi;
 		oneSRss >> oneSRi;
-		bootstraps.push_back(oneBSi);
-		sourceRates.push_back(oneSRi);
+		bootstraps_.push_back(oneBSi);
+		sourceRates_.push_back(oneSRi);
 	}
 	
 	// affichage debug
@@ -110,17 +110,17 @@ Query::Query(string queryLine, string defaultsParams) {
 
 
 
-string Query::getTarget() { return(targetTaxon); }
+string Query::getTarget() { return(targetTaxon_); }
 
-string Query::getSource() { return(sourceTaxon); }
+string Query::getSource() { return(sourceTaxon_); }
 
-vector<unsigned int> Query::getBootstraps() { return(bootstraps); }
+vector<unsigned int> Query::getBootstraps() { return(bootstraps_); }
 
-vector<unsigned int> Query::getSourceRates() { return(sourceRates); }
+vector<unsigned int> Query::getSourceRates() { return(sourceRates_); }
 
-unsigned int Query::getMonophilyLevel() { return(monophilyLevel); }
+unsigned int Query::getMonophilyLevel() { return(monophilyLevel_); }
 
-unsigned int Query::getDepth() { return(verifDepth); }
+unsigned int Query::getDepth() { return(verifDepth_); }
 
 
 }

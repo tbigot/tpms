@@ -56,14 +56,14 @@ class CmdLineArgs {
   
     private:
 	// required arguments list
-	std::set<std::string> reqArgs;
+	std::set<std::string> reqArgs_;
 	// list containing arguments declared by user
-	std::map<std::string, std::string> argsList;
+	std::map<std::string, std::string> argsList_;
 	// path of the binary called (argv[0]);
-	std::string binPath;
+	std::string binPath_;
 	// check that required arguments have all been declared
-	std::vector<std::string> getMissingArgs();
-	void addReqArgs(std::string reqArgs);
+	std::vector<std::string> getMissingArgs_();
+	void addReqArgs_(std::string reqArgs);
     
     
     public:

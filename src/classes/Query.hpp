@@ -52,13 +52,13 @@ namespace tpms{
 class Query {
 	
 	private:
-		std::string sourceTaxon;
-		std::string targetTaxon;
-		unsigned int verifDepth;
-		unsigned int monophilyLevel;
+		std::string sourceTaxon_;
+		std::string targetTaxon_;
+		unsigned int verifDepth_;
+		unsigned int monophilyLevel_;
 		
-		std::vector<unsigned int> bootstraps;
-		std::vector<unsigned int> sourceRates;
+		std::vector<unsigned int> bootstraps_;
+		std::vector<unsigned int> sourceRates_;
 	
 	public:
 		Query(std::string queryLine,std::string defaultsParam);

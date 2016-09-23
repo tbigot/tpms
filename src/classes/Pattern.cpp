@@ -60,17 +60,17 @@ using namespace tpms;
 
 
 namespace tpms{
-Pattern::Pattern(TreeTemplate<Node> &tree, DataBase &db): db(db), tree(tree), ok(true) {
+Pattern::Pattern(TreeTemplate<Node> &tree, DataBase &db): db_(db), tree_(tree), ok_(true) {
     
-    extractConstraints();
+    extractConstraints_();
     cout << "\n -- Constraints visual representation:" << endl;
-    toString(tree.getRootNode(),0,std::cout);
-    mapping_NodesToMaxDepths.resize(tree.getNumberOfNodes());
+    toString_(tree.getRootNode(),0,std::cout);
+    mapping_NodesToMaxDepths_.resize(tree.getNumberOfNodes());
     mapNodeToMaxDepth(tree.getRootNode());
 }
 
 Pattern::~Pattern(){
-    for(vector<NodeConstraints *>::iterator cc=constraints.begin(); cc != constraints.end(); cc++)
+    for(vector<NodeConstraints *>::iterator cc=constraints_.begin(); cc != constraints_.end(); cc++)
 	delete(*cc);
 }
 
@@ -85,22 +85,22 @@ unsigned int Pattern::mapNodeToMaxDepth(Node* node)
             if(currMaxDepth > maxDepth) maxDepth = currMaxDepth;
         }
     }
-    mapping_NodesToMaxDepths.at(node->getId()) = maxDepth;
+    mapping_NodesToMaxDepths_.at(node->getId()) = maxDepth;
     return(maxDepth);
 }
 
 
-void Pattern::extractConstraints(){
+void Pattern::extractConstraints_(){
     // les noms de feuilles peuvent contenir des contraintes entre accolades
     // la contrainte est portée par le nœud fils alors qu'il s'agit d'une contrainte sur la branche menant au nœud fils
     // et ceci pour des raisons de commodité.
     
     // resize et remplissage : ici, on sait ce qu'on fait.
-    constraints.resize(tree.getNumberOfNodes());
-    for(unsigned int i = 0; i!= constraints.size();i++)
-	constraints.at(i) = new NodeConstraints(db);
+    constraints_.resize(tree_.getNumberOfNodes());
+    for(unsigned int i = 0; i!= constraints_.size();i++)
+	constraints_.at(i) = new NodeConstraints(db_);
     
-    vector<Node *> noeuds = tree.getNodes();
+    vector<Node *> noeuds = tree_.getNodes();
     for(vector<Node *>::iterator unNoeud = noeuds.begin(); unNoeud != noeuds.end(); unNoeud++){
 	string initName;
 	if((*unNoeud)->hasName()) initName = (*unNoeud)->getName();
@@ -108,20 +108,20 @@ void Pattern::extractConstraints(){
 	// if a pattern node has a name, it means it has constraints to extract
 	tpms::NodeType nodeType;
 	if((*unNoeud)->getNumberOfSons() == 0) nodeType = tpms::LEAF; else nodeType = tpms::NODE;
-	(constraints.at((*unNoeud)->getId()))->setConstraints(db,initName,nodeType);
+	(constraints_.at((*unNoeud)->getId()))->setConstraints(db_,initName,nodeType);
 	
     }
     
     // now checking constraints
-    for(vector<NodeConstraints*>::iterator cc = constraints.begin(); ok && cc != constraints.end(); cc++){
+    for(vector<NodeConstraints*>::iterator cc = constraints_.begin(); ok_ && cc != constraints_.end(); cc++){
         if(*cc != 00)
-            ok &= (*cc)->isOk();
+            ok_ &= (*cc)->isOk();
     }
 }
 
 
 bool Pattern::isOk(){
-    return(ok);
+    return(ok_);
 }
 
 
@@ -161,7 +161,7 @@ unsigned int Pattern::search(std::vector< Family* >& families, vector< pair< Fam
 	
 	if(tousNoeudsOntEspece) {
 	    CandidateNode * candRoot = new CandidateNode();
-	    if(patternMatch(**theFamily,(*theFamily)->getTree()->getRootNode(),tree.getRootNode(),candRoot)){
+	    if(patternMatch_(**theFamily,(*theFamily)->getTree()->getRootNode(),tree_.getRootNode(),candRoot)){
 		result.push_back(pair<Family *, CandidateNode*>(*theFamily,candRoot));
 		found++;
 	    }
@@ -180,7 +180,7 @@ unsigned int Pattern::search(std::vector< Family* >& families, vector< pair< Fam
 
 
 // extrait de tous les nœuds de l'arbre ceux qui appartiennent à un set de taxons
-std::vector<int> Pattern::getIdWithTaxaList(bpp::TreeTemplate<bpp::Node> * sTree, std::set<string> * taxa) {
+std::vector<int> Pattern::getIdWithTaxaList_(bpp::TreeTemplate<bpp::Node> * sTree, std::set<string> * taxa) {
     // trouve tous les IDs des noeuds qui appartiennent à la liste taxons
     vector<int> retour;
     Node * currNode;
@@ -194,7 +194,7 @@ std::vector<int> Pattern::getIdWithTaxaList(bpp::TreeTemplate<bpp::Node> * sTree
     return(retour);
 }
 
-bool Pattern::isLeaf(Node * pNode) { return(pNode->getNumberOfSons() == 0); }
+bool Pattern::isLeaf_(Node * pNode) { return(pNode->getNumberOfSons() == 0); }
 
 
 // bool Pattern::nodeOnlyContainsTheseTaxa(Node * localRoot, set<string> & taxonMembers, bool invert){
@@ -224,7 +224,7 @@ int Pattern::enumerateTaxon(Node * localRoot, set<string> * tsMembers, bool tsCo
     
     // - cas de base : feuille.
     // Soit elle n'appartient pas à tsMembers, soit c'est le nœud targetNode, sinon false.
-    if(isLeaf(localRoot)){ // cas de base numéro 1: une feuille
+    if(isLeaf_(localRoot)){ // cas de base numéro 1: une feuille
 	*totsize = 1;
 	if(tsComplementary){
 	    if(tsMembers->find(localRoot->getName()) == tsMembers->end()) return(1); else return(0);
@@ -342,54 +342,54 @@ vector<int> xferGapDetect(map<int,Family *> & families, set<string> startTaxa){
 }
 
 void Pattern::toString(ostream &outputStream){
-    toString(tree.getRootNode(),0,outputStream);
+    toString_(tree_.getRootNode(),0,outputStream);
 }
 
-void Pattern::toString(Node * noeud, int cpt, ostream &outputStream){
+void Pattern::toString_(Node * noeud, int cpt, ostream &outputStream){
     for(unsigned int i=0; i<cpt; i++) cout << " ";
 	outputStream << noeud->getId();
-	outputStream << constraintsOf(noeud)->getStr();
+	outputStream << constraintsOf_(noeud)->getStr();
 	outputStream << endl;
-	for(unsigned int i=0; i< noeud->getNumberOfSons(); i++) toString(noeud->getSon(i),cpt+1,outputStream);
+	for(unsigned int i=0; i< noeud->getNumberOfSons(); i++) toString_(noeud->getSon(i),cpt+1,outputStream);
 }
 
-bool Pattern::isTreeBinary(){
-    return(tpms::TreeTools::isBinaryTree(tree.getRootNode()));
+bool Pattern::isTreeBinary_(){
+    return(tpms::TreeTools::isBinaryTree(tree_.getRootNode()));
 }
 
 
-NodeConstraints* Pattern::constraintsOf(Node* node){
-    return(constraints.at(node->getId()));
+NodeConstraints* Pattern::constraintsOf_(Node* node){
+    return(constraints_.at(node->getId()));
 }
 
 bool Pattern::patternMatchInit(Family &family, CandidateNode * initCnode){
     family.initCache();
-    bool result = patternMatch(family, family.getTree()->getRootNode(),tree.getRootNode(), initCnode);
+    bool result = patternMatch_(family, family.getTree()->getRootNode(),tree_.getRootNode(), initCnode);
     family.clearCache();
     return(result);
 }
 
 
-bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, CandidateNode * fatherCandidate) {
+bool Pattern::patternMatch_(Family& family,Node * target, Node * pattern, CandidateNode * fatherCandidate) {
     // Dufayard et al, 2005
     // Bigot et al,2013.
     
     
-    if(isLeaf(target) && isLeaf(pattern)){
-	if(constraintsOf(pattern)->allows(family,target))
+    if(isLeaf_(target) && isLeaf_(pattern)){
+	if(constraintsOf_(pattern)->allows(family,target))
 	{
 	    CandidateNode * currCandidate = new CandidateNode(fatherCandidate,target,pattern);
 	    currCandidate->confirm();
 	    return(true);
 	} else return(false);
-    } else if(isLeaf(target) && !isLeaf(pattern)) {
+    } else if(isLeaf_(target) && !isLeaf_(pattern)) {
 	return(false);
-    } else if(!isLeaf(target) && isLeaf(pattern)) {
-	return(patternMatch(family,target->getSon(0),pattern,fatherCandidate)
-	|| patternMatch(family,target->getSon(1),pattern,fatherCandidate));
+    } else if(!isLeaf_(target) && isLeaf_(pattern)) {
+	return(patternMatch_(family,target->getSon(0),pattern,fatherCandidate)
+	|| patternMatch_(family,target->getSon(1),pattern,fatherCandidate));
     } else {
         // first, checking if the rest of the tree is big enough to contain the pattern
-        if(family.getMaxDepthOfSubtree(target) < mapping_NodesToMaxDepths.at(pattern->getId()))
+        if(family.getMaxDepthOfSubtree(target) < mapping_NodesToMaxDepths_.at(pattern->getId()))
             return(false);
         
         
@@ -402,15 +402,15 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 	
 	// we need to check if the target node is accepted (nature) by the pattern
 	
-	if(constraintsOf(pattern)->allows(family,target)){
+	if(constraintsOf_(pattern)->allows(family,target)){
             // all the tests have to be done: we are not only wondering if the family matches, but
             // what are all the matching patterns.
             bool thisNodeMatches = false;
 	
 	    CandidateNode * candidate = new CandidateNode(fatherCandidate, target, pattern);
 	    
-	    if(constraintsOf(pson1)->allowsAsSon(family,tson1) && constraintsOf(pson2)->allowsAsSon(family,tson2)
-		&& patternMatch(family,tson1, pson1, candidate) && patternMatch(family,tson2, pson2, candidate) ) {
+	    if(constraintsOf_(pson1)->allowsAsSon(family,tson1) && constraintsOf_(pson2)->allowsAsSon(family,tson2)
+		&& patternMatch_(family,tson1, pson1, candidate) && patternMatch_(family,tson2, pson2, candidate) ) {
                     candidate->confirm(); 
                     thisNodeMatches = true;
 		} else delete(candidate);
@@ -419,8 +419,8 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 		
 	    candidate = new CandidateNode(fatherCandidate, target, pattern);
 		
-	    if(constraintsOf(pson1)->allowsAsSon(family,tson2) && constraintsOf(pson2)->allowsAsSon(family,tson1)
-		&& patternMatch(family,tson2, pson1, candidate) && patternMatch(family,tson1, pson2, candidate) ){
+	    if(constraintsOf_(pson1)->allowsAsSon(family,tson2) && constraintsOf_(pson2)->allowsAsSon(family,tson1)
+		&& patternMatch_(family,tson2, pson1, candidate) && patternMatch_(family,tson1, pson2, candidate) ){
 		candidate->confirm();
                 thisNodeMatches = true;
 		} else delete(candidate);
@@ -429,7 +429,7 @@ bool Pattern::patternMatch(Family& family,Node * target, Node * pattern, Candida
 	    // we have to try the pattern node in the sons
                 //Only if the direct link is not required
                 // DIRECT LINK MANAGED HERE
-	    thisNodeMatches |= ( !constraintsOf(pattern)->isDirect() && (patternMatch(family,tson1, pattern, fatherCandidate) || patternMatch(family,tson2, pattern, fatherCandidate)));
+	    thisNodeMatches |= ( !constraintsOf_(pattern)->isDirect() && (patternMatch_(family,tson1, pattern, fatherCandidate) || patternMatch_(family,tson2, pattern, fatherCandidate)));
             return(thisNodeMatches);
 	} else return(false);
 		

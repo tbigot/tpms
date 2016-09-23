@@ -45,63 +45,63 @@ using namespace tpms;
 
 
 namespace tpms{
-Taxon::Taxon(string name, Node* nodeInSpTree,DataBase &database): name(name), db(database), nodeInSpTree(nodeInSpTree)
+Taxon::Taxon(string name, Node* nodeInSpTree,DataBase &database): name_(name), db_(database), nodeInSpTree_(nodeInSpTree)
 {
    if(name.empty()) {
        ostringstream ssid;
        ssid << nodeInSpTree->getId();
-       this->name="<unnamed taxon " + ssid.str() + ">";
+       this->name_="<unnamed taxon " + ssid.str() + ">";
    } 
 }
 
 void Taxon::genRelations(){
-    genDescendantsList(nodeInSpTree);
-    genAncestorsList(00);
-    depth = ancestors.size()-1;
+    genDescendantsList_(nodeInSpTree_);
+    genAncestorsList_(00);
+    depth = ancestors_.size()-1;
 }
 
 
-void Taxon::genAncestorsList(Node* localNode)
+void Taxon::genAncestorsList_(Node* localNode)
 {
     bool firstTime = false;
     
     if(localNode == 00){
 	firstTime = true;
-	localNode = nodeInSpTree;
+	localNode = nodeInSpTree_;
     }
     
-    ancestors.insert(db.nodeIdToTaxon(localNode->getId())); // base case
+    ancestors_.insert(db_.nodeIdToTaxon(localNode->getId())); // base case
     if(localNode->hasFather()) // recursive case
-        genAncestorsList(localNode->getFather());
+        genAncestorsList_(localNode->getFather());
     
     if(firstTime){ // initialization of direct ancestor
 	if(localNode->hasFather())
-	    directAncestor = db.nodeIdToTaxon(localNode->getFather()->getId());
+	    directAncestor_ = db_.nodeIdToTaxon(localNode->getFather()->getId());
 	else
-	    directAncestor = 00;
+	    directAncestor_ = 00;
     }
 }
 
-void Taxon::genDescendantsList(Node* localNode)
+void Taxon::genDescendantsList_(Node* localNode)
 {
 
-    descendants.insert(db.nodeIdToTaxon(localNode->getId()));
+    descendants_.insert(db_.nodeIdToTaxon(localNode->getId()));
 
     vector<Node*> sons = localNode->getSons();
     for(vector<Node*>::iterator currSon = sons.begin(); currSon != sons.end(); currSon++) {
-	genDescendantsList(*currSon);
+	genDescendantsList_(*currSon);
     }
 }
 
 string Taxon::getName()
 {
-    return(name);
+    return(name_);
 }
 
 string Taxon::getTaxonomy(){
     ostringstream result;
     bool sep=false;
-    for(set<Taxon*>::reverse_iterator currAncestor = ancestors.rbegin(); currAncestor != ancestors.rend(); currAncestor++){
+    for(set<Taxon*>::reverse_iterator currAncestor = ancestors_.rbegin(); currAncestor != ancestors_.rend(); currAncestor++){
         result << (sep? "/": "") << (*currAncestor)->getName();
         sep=true;
     }
@@ -111,39 +111,39 @@ string Taxon::getTaxonomy(){
 std::set< Taxon* >& Taxon::getAncestors()
 {
     // cout << name << " has " << ancestors.size() << " ancestors." << endl;
-    return(ancestors);
+    return(ancestors_);
 }
 
 std::set< Taxon* >& Taxon::getDescendants()
 {
     // cout << name << " has " << descendants.size() << " descendants:" << endl;
-    return(descendants);
+    return(descendants_);
 }
 
 
 
 bool Taxon::belongsTo(Taxon* ancestor)
 {
-    return(ancestors.find(ancestor)!=ancestors.end());
+    return(ancestors_.find(ancestor)!=ancestors_.end());
 }
 
 bool Taxon::contains(Taxon* descendant)
 {
-    return(descendants.find(descendant)!=descendants.end());
+    return(descendants_.find(descendant)!=descendants_.end());
 }
 
 bool Taxon::hasAncestor()
 {
-    return(!ancestors.empty());
+    return(!ancestors_.empty());
 }
 
 Taxon* Taxon::getDirectAncestor()
 {
-    return(directAncestor);
+    return(directAncestor_);
 }
 
 bool Taxon::hasDirectAncestor(){
-    return(directAncestor != 00);
+    return(directAncestor_ != 00);
 }
 
 bool Taxon::containsAllTheseSpecies(std::set< Taxon* > species)

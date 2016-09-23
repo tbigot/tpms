@@ -47,19 +47,19 @@ class Waiter {
   
   private:
     enum FrameType { percent, undefined };
-    FrameType type;
+    FrameType type_;
     
-    std::ostream * output;
-    int total;
-    int done;
-    char indic;
-    unsigned int displayStep;
-    void writeFrame();
-    int direction;
-    void drawProgressBar();
-    bool finished;
-    float realstep;
-    unsigned int cols;
+    std::ostream * output_;
+    int total_;
+    int done_;
+    char indic_;
+    unsigned int displayStep_;
+    void writeFrame_();
+    int direction_;
+    void drawProgressBar_();
+    bool finished_;
+    float realstep_;
+    unsigned int cols_;
     
     
   public:

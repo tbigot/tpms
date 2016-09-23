@@ -3,10 +3,10 @@ PROJECT(tpms CXX)
 
 SET(CMAKE_CXX_FLAGS "-std=c++11")
 
-SET(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -g -Wall -Weffc++ -Wshadow")
-SET(CMAKE_C_FLAGS_DEBUG "-g -Wall -Weffc++ -Wshadow")
-SET(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -O3 -Wall -Weffc++ -Wshadow -DNDEBUG")
-SET(CMAKE_C_FLAGS_RELEASE "-O3 -Wall -Weffc++ -Wshadow -DNDEBUG")
+SET(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -g -Wall -Wshadow")
+SET(CMAKE_C_FLAGS_DEBUG "-g -Wall -Wshadow")
+SET(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -O3 -Wall -Wshadow -DNDEBUG")
+SET(CMAKE_C_FLAGS_RELEASE "-O3 -Wall -Wshadow -DNDEBUG")
 SET(CMAKE_CXX_FLAGS_DISTRIBUTION "-std=c++11 -O3 -w -DNDEBUG")
 SET(CMAKE_C_FLAGS_DISTRIBUTION "-O3 -w -DNDEBUG")
 

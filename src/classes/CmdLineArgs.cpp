@@ -49,14 +49,14 @@ using namespace std;
 namespace tpms{
 std::string CmdLineArgs::getArg(std::string argName)
 {
-    map<string,string>::iterator foundArg = argsList.find(argName);
-    if(foundArg == argsList.end()) return "";
+    map<string,string>::iterator foundArg = argsList_.find(argName);
+    if(foundArg == argsList_.end()) return "";
     else return foundArg->second;
 }
 
 CmdLineArgs::CmdLineArgs(int nbArgs, char* mainArgs[], string reqArgs, ostream & errorLog) throw(string)
 {
-    binPath = string(mainArgs[0]);
+    binPath_ = string(mainArgs[0]);
     // boucle de prise en charge des arguments en c-style
     string argName,argValue;
     istringstream currArg;
@@ -67,7 +67,7 @@ CmdLineArgs::CmdLineArgs(int nbArgs, char* mainArgs[], string reqArgs, ostream &
 	getline(currArg,argValue,'=');
 	if(argValue.empty()) argValue = "true";
 	if(argName.at(0) == '-')
-	    argsList.insert(pair<string,string>(argName.substr(1,argName.size()-1), argValue));
+	    argsList_.insert(pair<string,string>(argName.substr(1,argName.size()-1), argValue));
 	else
 	    errorLog << "Arguments must start with a dash in:\n" << argName << endl;
     }
@@ -77,37 +77,37 @@ CmdLineArgs::CmdLineArgs(int nbArgs, char* mainArgs[], string reqArgs, ostream &
 
 void CmdLineArgs::print(ostream & out){
     out << "### Argument list control ###" << endl;
-    out << "## Binary = " << binPath << endl;
+    out << "## Binary = " << binPath_ << endl;
     
-    for(map<string,string>::iterator currArgPair = argsList.begin(); currArgPair != argsList.end(); currArgPair++){
+    for(map<string,string>::iterator currArgPair = argsList_.begin(); currArgPair != argsList_.end(); currArgPair++){
 	out << "## ";
-	if(reqArgs.find(currArgPair->first) != reqArgs.end()) out << '*';
+	if(reqArgs_.find(currArgPair->first) != reqArgs_.end()) out << '*';
 	out << currArgPair->first << '=' << currArgPair->second << endl;
     }
 }
 
-vector<string> CmdLineArgs::getMissingArgs(){
+vector<string> CmdLineArgs::getMissingArgs_(){
     //cette fonction vérifie simplement l'inclusion de reqArgs dans argsList.
     vector<string> missingArguments;
-    for(set<string>::iterator currRA = reqArgs.begin() ; currRA != reqArgs.end(); currRA++){
-	if(argsList.find(*currRA) == argsList.end()) {
+    for(set<string>::iterator currRA = reqArgs_.begin() ; currRA != reqArgs_.end(); currRA++){
+	if(argsList_.find(*currRA) == argsList_.end()) {
 	    missingArguments.push_back(*currRA);
 	}
     }
     return(missingArguments);
 }
 
-void CmdLineArgs::addReqArgs(std::string reqArgs){
+void CmdLineArgs::addReqArgs_(std::string reqArgs){
     string currReqArg;
     istringstream reqArgsList(reqArgs);
     while(getline(reqArgsList,currReqArg,','))
-	this->reqArgs.insert(currReqArg);
+	this->reqArgs_.insert(currReqArg);
 }
 
 void CmdLineArgs::requireArgs(string reqArgs)
 {
-    addReqArgs(reqArgs);
-    vector<string> missingArguments = getMissingArgs();
+    addReqArgs_(reqArgs);
+    vector<string> missingArguments = getMissingArgs_();
     if(missingArguments.size() != 0){
 	ostringstream missingArgumentsSs;
 	for(vector<string>::iterator it = missingArguments.begin(); it != missingArguments.end(); it++)

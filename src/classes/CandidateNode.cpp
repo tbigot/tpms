@@ -47,7 +47,7 @@ using namespace bpp;
 namespace tpms{
 CandidateNode::~CandidateNode(){
     // deleting sons
-    for(map<bpp::Node*,vector<CandidateNode*> >::iterator currSons = sons.begin(); currSons != sons.end(); currSons++){
+    for(map<bpp::Node*,vector<CandidateNode*> >::iterator currSons = sons_.begin(); currSons != sons_.end(); currSons++){
 	for(vector<CandidateNode*>::iterator currSon = currSons->second.begin(); currSon != currSons->second.end(); currSon++){
 	    delete(*currSon);
 	}
@@ -55,32 +55,32 @@ CandidateNode::~CandidateNode(){
 }
 
 CandidateNode::CandidateNode(CandidateNode* father, Node* treeNode, Node* patternNode):
-father(father), treeNode(treeNode), patternNode(patternNode), isRoot(false), addsons(0)
+father_(father), treeNode_(treeNode), patternNode_(patternNode), isRoot_(false), addsons_(0)
 {
 }
 
-Node * CandidateNode::getTreeNode(){ return(treeNode);}
+Node * CandidateNode::getTreeNode(){ return(treeNode_);}
 
 void CandidateNode::confirm(){
-    if(sons.size() == 2 || sons.size() == 0)
-	father->addSon(this,patternNode);
+    if(sons_.size() == 2 || sons_.size() == 0)
+	father_->addSon(this,patternNode_);
     else {
-	cout << "Erreur Nb Fils : " << sons.size() << " et addsons=" << addsons << ". " ;
-	if(patternNode->hasFather()) cout << "pas racine";
+	cout << "Erreur Nb Fils : " << sons_.size() << " et addsons=" << addsons_ << ". " ;
+	if(patternNode_->hasFather()) cout << "pas racine";
 	cout << endl;
     }
     
     // setting the distance to the matching node father
-    distanceToFather = tpms::TreeTools::getDistanceBetweenTwoNodes(father->getTreeNode(),treeNode);
+    distanceToFather_ = tpms::TreeTools::getDistanceBetweenTwoNodes(father_->getTreeNode(),treeNode_);
 }
 
-CandidateNode::CandidateNode(): isRoot(true), addsons(0)
+CandidateNode::CandidateNode(): isRoot_(true), addsons_(0)
 {
 }
 
-bool CandidateNode::isLeaf()
+bool CandidateNode::isLeaf_()
 {
-    return(sons.size() == 0);
+    return(sons_.size() == 0);
 }
 
 
@@ -88,20 +88,20 @@ bool CandidateNode::isLeaf()
 
 void CandidateNode::addSon(CandidateNode* son, Node* sonPatternNode)
 {
-    addsons++;
-    sons[sonPatternNode].push_back(son);
+    addsons_++;
+    sons_[sonPatternNode].push_back(son);
 }
 
 
 unsigned int CandidateNode::genTrees(std::vector< TreeTemplate< Node >* >& trees)
 {
     vector<Node *> roots;
-    if(isRoot){
+    if(isRoot_){
 	//NOTE: the candidate root has no phylogenetics meaning. It's only designed to put found trees together.
 		
-	vector<CandidateNode*> candSons = sons.begin()->second;
+	vector<CandidateNode*> candSons = sons_.begin()->second;
 	for(vector<CandidateNode*>::iterator currSon = candSons.begin(); currSon != candSons.end(); currSon++){
-	    vector<Node *> currRoots = (*currSon)->recGenTrees();
+	    vector<Node *> currRoots = (*currSon)->recGenTrees_();
 	    roots.insert(roots.end(),currRoots.begin(),currRoots.end());
 	}
 	
@@ -116,10 +116,10 @@ unsigned int CandidateNode::genTrees(std::vector< TreeTemplate< Node >* >& trees
 unsigned int CandidateNode::getWholeMatchingSubtrees(std::vector< TreeTemplate< Node >* >& trees)
 {
     vector<Node *> roots;
-    if(isRoot){
+    if(isRoot_){
 	//NOTE: the candidate root has no phylogenetics meaning. It's only designed to put found trees together.
 		
-	vector<CandidateNode*> candSons = sons.begin()->second;
+	vector<CandidateNode*> candSons = sons_.begin()->second;
 	for(vector<CandidateNode*>::iterator currSon = candSons.begin(); currSon != candSons.end(); currSon++){
 	    roots.push_back(bpp::TreeTemplateTools::cloneSubtree<Node>(*(*currSon)->getTreeNode()));
 	}
@@ -135,16 +135,16 @@ unsigned int CandidateNode::getWholeMatchingSubtrees(std::vector< TreeTemplate< 
 
 void CandidateNode::print(unsigned int lvl){
     for(unsigned int i = 0; i <= lvl; i++) cout << ' ';
-    if(!isRoot){
-    cout << this << ' ' << patternNode->getId();
-    if(patternNode->hasName()) cout <<" " << patternNode->getName() << " : ";
+    if(!isRoot_){
+    cout << this << ' ' << patternNode_->getId();
+    if(patternNode_->hasName()) cout <<" " << patternNode_->getName() << " : ";
     } else cout <<'\n'<< this << ' ';
-    for(map<Node *,vector<CandidateNode *> >::iterator it = sons.begin(); it != sons.end(); it++){
+    for(map<Node *,vector<CandidateNode *> >::iterator it = sons_.begin(); it != sons_.end(); it++){
 	cout << it->first << ", " ;
 	
     }
-    if(isLeaf()) cout << " <--------- " << endl; else { cout << endl;
-    for(map<Node *,vector<CandidateNode *> >::iterator it = sons.begin(); it != sons.end(); it++){
+    if(isLeaf_()) cout << " <--------- " << endl; else { cout << endl;
+    for(map<Node *,vector<CandidateNode *> >::iterator it = sons_.begin(); it != sons_.end(); it++){
 	for(unsigned int i = 0; i < lvl; i++) cout << '+';
 	cout << ">" << it->first << '-' << endl;
 	
@@ -155,32 +155,32 @@ void CandidateNode::print(unsigned int lvl){
     }
 }
 
-vector<Node *> CandidateNode::recGenTrees(){
+vector<Node *> CandidateNode::recGenTrees_(){
     vector<Node *> result;
     
     Node * currNode = new Node;
-    currNode->setId(treeNode->getId());
-    currNode->setDistanceToFather(distanceToFather);
-    if(patternNode->hasName()) currNode->setName(patternNode->getName());
+    currNode->setId(treeNode_->getId());
+    currNode->setDistanceToFather(distanceToFather_);
+    if(patternNode_->hasName()) currNode->setName(patternNode_->getName());
     
     result.push_back(currNode);
     
-    if(!isLeaf()){
+    if(!isLeaf_()){
 	
 	// generating subtrees
 	vector<Node *> leftSubtrees;
 	vector<Node *> rightSubtrees;
 	
-	vector<CandidateNode *> leftSons = sons.begin()->second;
-	vector<CandidateNode *> rightSons = sons.rbegin()->second;
+	vector<CandidateNode *> leftSons = sons_.begin()->second;
+	vector<CandidateNode *> rightSons = sons_.rbegin()->second;
 	
 	for(vector<CandidateNode *>::iterator cc = leftSons.begin(); cc != leftSons.end(); cc++){
-	    vector<Node*> currResult = (*cc)->recGenTrees();
+	    vector<Node*> currResult = (*cc)->recGenTrees_();
 	    leftSubtrees.insert(leftSubtrees.end(),currResult.begin(),currResult.end());
 	}
 	
 	for(vector<CandidateNode *>::iterator cc = rightSons.begin(); cc != rightSons.end(); cc++){
-	    vector<Node*> currResult = (*cc)->recGenTrees();
+	    vector<Node*> currResult = (*cc)->recGenTrees_();
 	    rightSubtrees.insert(rightSubtrees.end(),currResult.begin(),currResult.end());
 	}
 	

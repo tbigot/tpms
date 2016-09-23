@@ -52,32 +52,32 @@ namespace tpms{
 class NodeConstraints{
     
     private:
-	DataBase &refDB;
-	NodeNature nature;
-	std::set<tpms::Taxon*> allowedSpeciesOnSubtree;
-        tpms::Taxon* asosIsJustTaxon;
-	std::set<tpms::Taxon*> allowedSpeciesOnNode;
+	DataBase &db_;
+	NodeNature nature_;
+	std::set<tpms::Taxon*> allowedSpeciesOnSubtree_;
+        tpms::Taxon* asosIsJustTaxon_;
+	std::set<tpms::Taxon*> allowedSpeciesOnNode_;
 	
-	NodeType type;
-	unsigned int minBootstrap;
+	NodeType type_;
+	unsigned int minBootstrap_;
 	
-	std::string constraintsOnNodeString;
-	std::string subtreeConstraintsString;
+	std::string constraintsOnNodeString_;
+	std::string subtreeConstraintsString_;
         
-        bool ok;
+        bool ok_;
 	
 	/**
 	 * @brief True means the target node must be direct son of the node matching to his pattern father node.
 	 **/
-	bool direct;
+	bool direct_;
 	
-	tpms::Taxon* buildAllowedSpecies(std::set<tpms::Taxon*>& spset,std::string spstr, DataBase &pRefDB);
+	tpms::Taxon* buildAllowedSpecies_(std::set<tpms::Taxon*>& spset,std::string spstr, DataBase &pRefDB);
 	
-	void addTaxon(std::set<tpms::Taxon*>& spset,std::string);
-	void deleteTaxon(std::set<tpms::Taxon*>& spset,std::string);
+	void addTaxon_(std::set<tpms::Taxon*>& spset,std::string);
+	void deleteTaxon_(std::set<tpms::Taxon*>& spset,std::string);
 		
-	bool speciesRestrictionsAsSon;
-	bool speciesRestrictions;
+	bool speciesRestrictionsAsSon_;
+	bool speciesRestrictions_;
 	
     public:
         bool isOk();

@@ -48,21 +48,21 @@
 namespace tpms{
     class CandidateNode{
 	private:
-	    bpp::Node * treeNode;
-	    bpp::Node * patternNode;
-	    tpms::CandidateNode * father;
-	    double distanceToFather;
-	    std::map<bpp::Node *, std::vector<tpms::CandidateNode *> > sons;
-	    bool isRoot;
-	    unsigned int addsons;
-	    bool isLeaf();
+	    bpp::Node * treeNode_;
+	    bpp::Node * patternNode_;
+	    tpms::CandidateNode * father_;
+	    double distanceToFather_;
+	    std::map<bpp::Node *, std::vector<tpms::CandidateNode *> > sons_;
+	    bool isRoot_;
+	    unsigned int addsons_;
+	    bool isLeaf_();
 	    
 	    /**
 	    * @brief Recursively builds result trees from CandidateNode trees
 	    * 
 	    * @return the nodes of trees that can be built from this CandidateNode
 	    */
-	    std::vector<bpp::Node *> recGenTrees();
+	    std::vector<bpp::Node *> recGenTrees_();
 	    
 	public:
 	    CandidateNode(tpms::CandidateNode * father, bpp::Node * treeNode, bpp::Node * patternNode);

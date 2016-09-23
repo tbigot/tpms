@@ -55,40 +55,40 @@ using namespace tpms;
 
 namespace tpms{
 
-NodeConstraints::NodeConstraints(DataBase &pRefDB): refDB(pRefDB), ok(true) {
-    nature = ANY;
-    speciesRestrictionsAsSon = false;
-    speciesRestrictions = false;
-    type = NODE;
-    direct = false;
+NodeConstraints::NodeConstraints(DataBase &pRefDB): db_(pRefDB), ok_(true) {
+    nature_ = ANY;
+    speciesRestrictionsAsSon_ = false;
+    speciesRestrictions_ = false;
+    type_ = NODE;
+    direct_ = false;
 }
 
 void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString, NodeType type){    
     // the params are in the form :
     // D!/+SUBTREE-SPECIES/+LEAVE+SPECIES
     
-    this->type = type;
+    this->type_ = type;
     
     istringstream initSString(constraintsString);
     string paramsString;
     getline(initSString,paramsString,'/');
     
-    getline(initSString,subtreeConstraintsString,'/');
-    asosIsJustTaxon = buildAllowedSpecies(allowedSpeciesOnSubtree,subtreeConstraintsString,pRefDB);
+    getline(initSString,subtreeConstraintsString_,'/');
+    asosIsJustTaxon_ = buildAllowedSpecies_(allowedSpeciesOnSubtree_,subtreeConstraintsString_,pRefDB);
     
-    getline(initSString,constraintsOnNodeString,'/');
-    buildAllowedSpecies(allowedSpeciesOnNode,constraintsOnNodeString,pRefDB);
-    if(!allowedSpeciesOnSubtree.empty()) speciesRestrictionsAsSon = true;
+    getline(initSString,constraintsOnNodeString_,'/');
+    buildAllowedSpecies_(allowedSpeciesOnNode_,constraintsOnNodeString_,pRefDB);
+    if(!allowedSpeciesOnSubtree_.empty()) speciesRestrictionsAsSon_ = true;
   
 
 
     // dealing with nodeNature
-    if(paramsString.find('D') != string::npos) nature = DUPLICATION;
-    else if (paramsString.find('S') != string::npos) nature = SPECIATION;
-    else nature = ANY;
+    if(paramsString.find('D') != string::npos) nature_ = DUPLICATION;
+    else if (paramsString.find('S') != string::npos) nature_ = SPECIATION;
+    else nature_ = ANY;
     
     // dealing with branch type
-    if(paramsString.find('!') != string::npos) direct = true;
+    if(paramsString.find('!') != string::npos) direct_ = true;
     
     size_t colonPos = paramsString.find('$');
     if(colonPos != string::npos) {
@@ -96,10 +96,10 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
 	minBootstrapS =  paramsString.substr(colonPos+1);
 		
 	istringstream minBootstrapSs(minBootstrapS);
-	minBootstrapSs >> minBootstrap;
+	minBootstrapSs >> minBootstrap_;
 	
 	
-    } else minBootstrap = 0;
+    } else minBootstrap_ = 0;
     
 //     readConstraintsString();
 //     if(!initString.empty()){
@@ -117,7 +117,7 @@ void NodeConstraints::setConstraints(DataBase &pRefDB, string constraintsString,
 }
 
 
-Taxon* NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, DataBase &pRefDB){
+Taxon* NodeConstraints::buildAllowedSpecies_(set<Taxon*>& spset,string spstr, DataBase &pRefDB){
     Taxon* justTaxon = 00;
     if(spstr.empty()) return justTaxon;
     //cout << "Building species list with this string : " << spstr << endl;
@@ -136,7 +136,7 @@ Taxon* NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, Dat
             
             
         if(spstr.at(0)=='+' && spstr.find('+',1) == string::npos && spstr.find('-',1) == string::npos) {
-            justTaxon = refDB.nameToTaxon(spstr.substr(1));
+            justTaxon = db_.nameToTaxon(spstr.substr(1));
         }
         // fonction récursive qui analyse la liste des espèces à autoriser.
         // le premier caractère est un + ou un -, il détermine si le taxon est à ajouter ou soustraire
@@ -148,22 +148,22 @@ Taxon* NodeConstraints::buildAllowedSpecies(set<Taxon*>& spset,string spstr, Dat
 	while(cmpt < spstr.size() && spstr.at(cmpt) != '+' && spstr.at(cmpt) != '-') cmpt++;
 	// quoi qu'il en soit, on vient d'extraire un taxon, qu'on doit ajouter ou supprimer à la liste
 	if(toAdd)
-	    addTaxon(spset,spstr.substr(1,cmpt-1));
+	    addTaxon_(spset,spstr.substr(1,cmpt-1));
 	else
-            deleteTaxon(spset,spstr.substr(1,cmpt-1));
-	if(cmpt < spstr.size()) buildAllowedSpecies(spset,spstr.substr(cmpt),pRefDB);
+            deleteTaxon_(spset,spstr.substr(1,cmpt-1));
+	if(cmpt < spstr.size()) buildAllowedSpecies_(spset,spstr.substr(cmpt),pRefDB);
     }
     return justTaxon;
 }
 
-void NodeConstraints::addTaxon(set<Taxon*>& spset,string taxon)
+void NodeConstraints::addTaxon_(set<Taxon*>& spset,string taxon)
 {
     // très simple, on transforme ce taxon en une liste d'espèces
     // trying to find the taxon in the db
-    Taxon* foundTaxon = refDB.nameToTaxon(taxon);
+    Taxon* foundTaxon = db_.nameToTaxon(taxon);
     if (foundTaxon == 00){
 	cout << "The taxon “" << taxon << "” in your pattern does not seem to exist in the species tree of your collection." << endl;
-        ok = false;
+        ok_ = false;
 	return;
     }
     set<Taxon*> spList = foundTaxon->getDescendants();
@@ -179,12 +179,12 @@ void NodeConstraints::addTaxon(set<Taxon*>& spset,string taxon)
 }
 
 bool NodeConstraints::isOk(){
-    return(ok);
+    return(ok_);
 }
 
-void NodeConstraints::deleteTaxon(set<Taxon*>& spset,string taxon){
+void NodeConstraints::deleteTaxon_(set<Taxon*>& spset,string taxon){
     // trying to find the taxon in the db
-    Taxon* foundTaxon = refDB.nameToTaxon(taxon);
+    Taxon* foundTaxon = db_.nameToTaxon(taxon);
     if (foundTaxon == 00){
 	cout << "The taxon " << taxon << " in your pattern does not seem to appear in the species tree of your collection" << endl;
 	return;
@@ -199,23 +199,23 @@ void NodeConstraints::deleteTaxon(set<Taxon*>& spset,string taxon){
 
 bool NodeConstraints::allows(Family& family, bpp::Node* node)
 {
-    if(type == LEAF){
+    if(type_ == LEAF){
 	Taxon* nodeSpecies = family.getTaxonOfNode(node);
-	return(allowedSpeciesOnNode.find(nodeSpecies)!= allowedSpeciesOnNode.end());
+	return(allowedSpeciesOnNode_.find(nodeSpecies)!= allowedSpeciesOnNode_.end());
     } else {
 	// a node is accepted if the nature matches & sufficient bootstrap
 	double nodeBootstrap = 0;
 	if(node->hasBootstrapValue()) nodeBootstrap = node->getBootstrapValue();
-	return((nature==ANY || family.getNatureOf(node) == nature) && nodeBootstrap >= minBootstrap);
+	return((nature_==ANY || family.getNatureOf(node) == nature_) && nodeBootstrap >= minBootstrap_);
     }
 }
 
 bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
 {
-    if(speciesRestrictionsAsSon) // we allow only if the subtree contains only allowed species from father
+    if(speciesRestrictionsAsSon_) // we allow only if the subtree contains only allowed species from father
     {
-        if(asosIsJustTaxon != 00)
-            return(asosIsJustTaxon->contains(family.getTaxonOfNode(node)));
+        if(asosIsJustTaxon_ != 00)
+            return(asosIsJustTaxon_->contains(family.getTaxonOfNode(node)));
 	// 1st step: getting all the species on the gene tree subtree
 	set<Taxon*> & speciesList = family.getTaxaOnThisSubtree(node);
 	// seeing, for each species of the taxaList
@@ -223,39 +223,39 @@ bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
 // 	for(vector<Taxon*>::iterator currSp = speciesList.begin(); currSp != speciesList.end(); currSp++){
 // 	    allSpAreAllowed &= allowedSpeciesOnSubtree.find(*currSp) != allowedSpeciesOnSubtree.end();
 // 	}
-	return(includes(allowedSpeciesOnSubtree.begin(),allowedSpeciesOnSubtree.end(),speciesList.begin(),speciesList.end()));
+	return(includes(allowedSpeciesOnSubtree_.begin(),allowedSpeciesOnSubtree_.end(),speciesList.begin(),speciesList.end()));
     }
     return(true);
 }
 
 bool NodeConstraints::isDirect(){
-    return(direct);
+    return(direct_);
 }
 
 std::set< Taxon* >& NodeConstraints::getAllowedSpecies()
 {
-    return(allowedSpeciesOnNode);
+    return(allowedSpeciesOnNode_);
 }
 
 bool NodeConstraints::isLeaf()
 {
-    return(type == LEAF);
+    return(type_ == LEAF);
 }
 
 string NodeConstraints::getStr()
 {
     string result;
-    switch(nature){
+    switch(nature_){
 	case DUPLICATION: result= "<DUP>"; break;
 	case SPECIATION: result = "<SPE>"; break;
 	case ANY: result = "<ANY>"; break;
     }
-    if(direct){
+    if(direct_){
         result += " -DIRECT- ";
     }
     ostringstream minBootstrapSs;
-    minBootstrapSs << minBootstrap;
-    result += "{"+ subtreeConstraintsString +"} " + constraintsOnNodeString + " :" + minBootstrapSs.str();
+    minBootstrapSs << minBootstrap_;
+    result += "{"+ subtreeConstraintsString_ +"} " + constraintsOnNodeString_ + " :" + minBootstrapSs.str();
     return(result);
 }
 

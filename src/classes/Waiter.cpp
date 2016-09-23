@@ -45,112 +45,112 @@
 using namespace std;
 
 
-Waiter::Waiter(ostream * pOutput,int pTotal, char pIndic):output(pOutput), total(pTotal), indic(pIndic),type(percent),finished(false) {
-  displayStep = 1;
-  direction = 1;
-  done = 0;
+Waiter::Waiter(ostream * pOutput,int pTotal, char pIndic):output_(pOutput), total_(pTotal), indic_(pIndic),type_(percent),finished_(false) {
+  displayStep_ = 1;
+  direction_ = 1;
+  done_ = 0;
   char * cols_c;
   string cols_s;
   
   struct winsize w;
   ioctl(0, TIOCGWINSZ, &w);
 
-  cols = w.ws_col;
+  cols_ = w.ws_col;
   
-  if(cols > 200 || cols < 10) cols = 48;
-  else if(cols >= 15) cols -= 10;
-  writeFrame();
+  if(cols_ > 200 || cols_ < 10) cols_ = 48;
+  else if(cols_ >= 15) cols_ -= 10;
+  writeFrame_();
 }
 
-Waiter::Waiter(ostream * pOutput, char pIndic):output(pOutput), indic(pIndic),type(undefined),finished(false) {
-  displayStep = 1;
-  direction = 1;
-  done = 0;
+Waiter::Waiter(ostream * pOutput, char pIndic):output_(pOutput), indic_(pIndic),type_(undefined),finished_(false) {
+  displayStep_ = 1;
+  direction_ = 1;
+  done_ = 0;
 }
 
 Waiter::~Waiter(){
-  if(!finished) drawFinal();
+  if(!finished_) drawFinal();
   
 }
 
 void Waiter::step(unsigned int step){
-  setDone(done+step);
+  setDone(done_+step);
 }
 
 int Waiter::getDone() {
-  return(done);
+  return(done_);
 }
 
 void Waiter::setDone(int newDone){
-  done = newDone;
-  switch(type){
+  done_ = newDone;
+  switch(type_){
     case percent:
-      if((float)done/(float)total >= ((float)displayStep)/(double)cols) {
-	displayStep++;
-	drawProgressBar();
+      if((float)done_/(float)total_ >= ((float)displayStep_)/(double)cols_) {
+	displayStep_++;
+	drawProgressBar_();
       }
       break;
     case undefined:
-      if(done%1000 ==0){
-	if(displayStep == 20||displayStep ==0) direction = direction * -1;
-	displayStep = displayStep + (direction * 1);
-	drawProgressBar();
+      if(done_%1000 ==0){
+	if(displayStep_ == 20||displayStep_ ==0) direction_ = direction_ * -1;
+	displayStep_ = displayStep_ + (direction_ * 1);
+	drawProgressBar_();
       }
       break;
   }
 }	
 
-void Waiter::writeFrame(){
-  switch(type){
+void Waiter::writeFrame_(){
+  switch(type_){
     case percent:
-      *output << "|0%";
-      for(unsigned int i = 0; i < (cols - 5); i++)
-	*output << ' ';
-      *output << "100%|" << endl;
+      *output_ << "|0%";
+      for(unsigned int i = 0; i < (cols_ - 5); i++)
+	*output_ << ' ';
+      *output_ << "100%|" << endl;
       break;
     case undefined:
-      *output << "|  ";
+      *output_ << "|  ";
       for(unsigned int i = 0; i < (20 - 5); i++)
-	*output << ' ';
-      *output << "    |" << endl;
+	*output_ << ' ';
+      *output_ << "    |" << endl;
       break;
   }
 }
 
-void Waiter::drawProgressBar(){
-  switch(type){
+void Waiter::drawProgressBar_(){
+  switch(type_){
     case percent:
-      *output << "[";
-      for(unsigned int i = 0 ; i < displayStep; i++) {
-	*output << indic;
+      *output_ << "[";
+      for(unsigned int i = 0 ; i < displayStep_; i++) {
+	*output_ << indic_;
       }
-      *output << "] " << floor((float)done/(float)total*100.0) << " %\r" << flush;
+      *output_ << "] " << floor((float)done_/(float)total_*100.0) << " %\r" << flush;
       break;
     case undefined:
-      *output << "[";
+      *output_ << "[";
       for(unsigned int i = 0 ; i <= 20; i++) {
-	if(i == displayStep) *output << indic;
-	else *output << ' ';
+	if(i == displayStep_) *output_ << indic_;
+	else *output_ << ' ';
       }
-      *output << "] " << done << '\r' << flush;
+      *output_ << "] " << done_ << '\r' << flush;
       break;
   }
 }
 
 void Waiter::drawFinal(){
-  finished = true;
-  switch(type){
+  finished_ = true;
+  switch(type_){
     case percent:
-      *output << "\r[";
-      for(unsigned int i = 0; i<=cols; i++)
-	*output << indic;
-      *output << "]      " << endl;
+      *output_ << "\r[";
+      for(unsigned int i = 0; i<=cols_; i++)
+	*output_ << indic_;
+      *output_ << "]      " << endl;
       break;
     case undefined:
-      *output <<"[";
+      *output_ <<"[";
       for(unsigned int i = 0; i<=20; i++)
-	*output << indic;
-      *output << "] " << done << endl;
+	*output_ << indic_;
+      *output_ << "] " << done_ << endl;
       break;
   } 
 }
