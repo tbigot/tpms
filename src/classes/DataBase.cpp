@@ -292,7 +292,7 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 		laFamille = new Family(curPreambule,curNewick,this);
 		families.push_back(laFamille);
 		famillesChargees++;
-		patienteur.step();
+		patienteur.doStep();
 		
 	}
 	patienteur.drawFinal();

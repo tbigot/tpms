@@ -172,7 +172,7 @@ unsigned int Pattern::search(std::vector< Family* >& families, vector< pair< Fam
 		
 	
 	
-	patienteur.step();
+	patienteur.doStep();
     }
     return(found);
     

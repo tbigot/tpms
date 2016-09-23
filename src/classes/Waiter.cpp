@@ -49,7 +49,6 @@ Waiter::Waiter(ostream * pOutput,int pTotal, char pIndic):output_(pOutput), tota
   displayStep_ = 1;
   direction_ = 1;
   done_ = 0;
-  char * cols_c;
   string cols_s;
   
   struct winsize w;
@@ -73,7 +72,7 @@ Waiter::~Waiter(){
   
 }
 
-void Waiter::step(unsigned int step){
+void Waiter::doStep(unsigned int step){
   setDone(done_+step);
 }
 

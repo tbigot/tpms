@@ -1104,7 +1104,7 @@ namespace tpms{
             if(waiterUpdate == 50){
                 waiterUpdate = 0;
                 progressbarMutex->lock();
-                progressbar->step(50);
+                progressbar->doStep(50);
                 progressbarMutex->unlock();
             }
         }
@@ -1131,7 +1131,7 @@ namespace tpms{
             if(waiterUpdate == 50){
                 waiterUpdate = 0;
                 progressbarMutex->lock();
-                progressbar->step(50);
+                progressbar->doStep(50);
                 progressbarMutex->unlock();
             }
         }
