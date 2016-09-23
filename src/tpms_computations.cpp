@@ -65,7 +65,7 @@
 #include "classes/Waiter.hpp"
 
 
-#include <Bpp/Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/Tree/TreeTemplate.h>
 
 using namespace std;
 using namespace tpms;
@@ -111,7 +111,7 @@ void save_to_file(DataBase& collection, std::string path, annotationsTypes type)
     vector<Family*> & dbFamilies = collection.getFamilies();
     Waiter patienteur(&std::cout, dbFamilies.size(), '#');
     for(vector<Family*>::iterator currFamily = dbFamilies.begin(); currFamily != dbFamilies.end(); currFamily++){
-	patienteur.step();
+	patienteur.doStep();
 	
 	vector<float> scores;
 	if(type == UNICITY){

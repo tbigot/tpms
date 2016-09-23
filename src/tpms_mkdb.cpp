@@ -47,7 +47,7 @@
 #include "classes/CandidateNode.hpp"
 #include "classes/TreeTools.hpp"
 
-#include <Bpp/Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/Tree/TreeTemplate.h>
 #include <Bpp/Raa/RAA.h>
 
 

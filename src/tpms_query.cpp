@@ -48,7 +48,7 @@
 #include "classes/Waiter.hpp"
 
 
-#include <Bpp/Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/Tree/TreeTemplate.h>
 
 using namespace std;
 using namespace tpms;
@@ -56,7 +56,7 @@ using namespace bpp;
 
 int main(int argc, char *argv[]) {
    try{
-       string msg25 = "     version 0.95";
+       string msg25 = "     version 2 beta";
        cout << "      __                                 \n     /\\ \\__   " << msg25 << "\n     \\ \\ ,_\\  _____    ___ ___     ____\n      \\ \\ \\/ /\\ '__`\\/' __` __`\\  /',__\\\n       \\ \\ \\_\\ \\ \\L\\ \\\\ \\/\\ \\/\\ \\/\\__, `\\\n        \\ \\__\\\\ \\ ,__/ \\_\\ \\_\\ \\_\\/\\____/\n         \\/__/ \\ \\ \\/ \\/_/\\/_/\\/_/\\/___/\n                \\ \\_\\\n                 \\/_/    W E L C O M E\n" << endl;
     CmdLineArgs args(argc, argv, "collection,output-dir",cerr);
     args.print(cout);
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
 			Waiter waitB(&cout, familles.size(),'-');
 			
 			for(vector<pair<Family *,CandidateNode * > >::iterator curFam = familles.begin(); curFam != familles.end(); curFam++) {
-				waitB.step();
+				waitB.doStep();
 				
 				ooo << "; family_name " << curFam->first->getName() << endl;
 				ooo << "; number_of_species " << curFam->first->getSpecies().size() << endl;
