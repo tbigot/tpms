@@ -37,8 +37,8 @@
  */
 
 #include <string>
-#include <Bpp/Phyl/Tree.h>
-#include <Bpp/Phyl/TreeTools.h>
+#include <Bpp/Phyl/Tree/Tree.h>
+#include <Bpp/Phyl/Tree/TreeTools.h>
 
 #include "TreeTools.hpp"
 

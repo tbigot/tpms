@@ -54,7 +54,7 @@
 #include "Waiter.hpp"
 
 //inclusions bio++
-#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/Tree/Tree.h>
 
 
 

@@ -47,7 +47,7 @@
 #include <ios>
 #include <math.h>
 
-#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/Tree/Tree.h>
 #include <Bpp/Phyl/Io/Newick.h>
 #include <boost/iterator/iterator_concepts.hpp>
 

@@ -41,7 +41,7 @@
 #define TPMS_TAXON
 
 #include <string>
-#include <Bpp/Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/Tree/TreeTemplate.h>
 
 
 #include "DataBase.hpp"

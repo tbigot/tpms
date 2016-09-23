@@ -52,7 +52,7 @@
 #include "Taxon.hpp"
 
 //inclusions bio++
-#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/Tree/Tree.h>
 namespace tpms{
 
 class Pattern {

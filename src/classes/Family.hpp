@@ -46,8 +46,8 @@
 #include <set>
 
 //inclusions bio++
-#include <Bpp/Phyl/Tree.h>
-#include <Bpp/Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/Tree/Tree.h>
+#include <Bpp/Phyl/Tree/TreeTemplate.h>
 
 namespace tpms{
     

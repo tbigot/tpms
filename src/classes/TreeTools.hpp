@@ -41,7 +41,7 @@
 
 #include <string>
 
-#include <Bpp/Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/Tree/TreeTemplate.h>
 
 
 namespace tpms{

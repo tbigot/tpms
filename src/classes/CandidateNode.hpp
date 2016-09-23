@@ -42,7 +42,8 @@
 #include <set>
 #include <map>
 
-#include <Bpp/Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/Tree/Node.h>
+#include <Bpp/Phyl/Tree/TreeTemplate.h>
 
 namespace tpms{
     class CandidateNode{

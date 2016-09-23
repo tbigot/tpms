@@ -58,7 +58,7 @@
 #include "Pattern.hpp"
 
 
-#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/Tree/Tree.h>
 
 
 using namespace std;
