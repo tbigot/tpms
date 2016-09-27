@@ -70,7 +70,14 @@ namespace fs = boost::filesystem;
 
 namespace tpms{
 
-DataBase::DataBase(string path, bool expectSynonyms, unsigned int nbThreads): mappingDone_NodesToTaxa(false), mappingDone_LeavesToSpecies(false), mappingDone_NodesToUnicityScores(false), nbThreads(nbThreads), expectSynonyms(expectSynonyms) {
+DataBase::DataBase(string path, bool expectSynonyms, unsigned int nbThreads):
+mappingDone_LeavesToSpecies_(false),
+mappingDone_NodesToTaxa_(false),
+mappingDone_NodesToUnicityScores_(false),
+mappingDone_NodesToMaxDepth_(false),
+expectSynonyms_(expectSynonyms),
+nbThreads_(nbThreads)
+{
 	
 	// checking this file exists
 	fs::path dbFile(path);
@@ -78,19 +85,14 @@ DataBase::DataBase(string path, bool expectSynonyms, unsigned int nbThreads): ma
 	    cout << "The file "<< path << " does not exists, exiting."<< endl;
 	    exit(1);
 	}
-	
-	// using filesystem 3:
-	filename = dbFile.filename().string();
-	
-	// filesystem 2 is not available anymore in boost:
-	// filename = dbFile.filename();
-	
-    
+
+	filename_ = dbFile.filename().string();
+
     // ouverture du fichier
 	ifstream RAPfile(path.c_str(), ifstream::in);
 	
 	// chargement à partir du fichier
-	loadFromFile(RAPfile);
+	loadFromFile_(RAPfile);
 	
 	// on ferme le fichier proprement :
 	RAPfile.close();
@@ -98,13 +100,13 @@ DataBase::DataBase(string path, bool expectSynonyms, unsigned int nbThreads): ma
 	//DEBUG OUT
 	cout << "\nLoad sucessful!\n" << endl;
 	
-	std::cout << "Species tree loaded: " << speciesTree->getNumberOfLeaves() << " species." << std::endl;
+	std::cout << "Species tree loaded: " << speciesTree_->getNumberOfLeaves() << " species." << std::endl;
 	
-	cout << "Loaded " << families.size() << " families / " << nbFamilies << " expected." << endl;
-	if(families.size() != nbFamilies) {
+	cout << "Loaded " << families_.size() << " families / " << nbFamilies_ << " expected." << endl;
+	if(families_.size() != nbFamilies_) {
 		cout << "WARNING : The file " << path << " is supposed to contain more trees." << endl;
 	}
-	if(reconciled) cout << "Trees are reconciled."; else cout << "Trees are not reconciled.";
+	if(reconciled_) cout << "Trees are reconciled."; else cout << "Trees are not reconciled.";
 	cout << '\n' << endl;
 		
 	/*
@@ -125,44 +127,44 @@ DataBase::DataBase(string path, bool expectSynonyms, unsigned int nbThreads): ma
 	
 }
 
-bpp::TreeTemplate<bpp::Node> * DataBase::getSpeciesTree() { return(speciesTree); }
+bpp::TreeTemplate<bpp::Node> * DataBase::getSpeciesTree() { return(speciesTree_); }
 
 std::string DataBase::getStatus(std::string preText){
     ostringstream out;
     out << preText << "Database Status" << endl;
-    out << preText << "  name\t" << filename<<endl;
-    out << preText << "  reconciled\t" << (reconciled?"yes":"no")<< endl;
-    out << preText << "  unicity scores computed\t" << (mappingDone_NodesToUnicityScores?"yes":"no")<< endl;
+    out << preText << "  name\t" << filename_<<endl;
+    out << preText << "  reconciled\t" << (reconciled_?"yes":"no")<< endl;
+    out << preText << "  unicity scores computed\t" << (mappingDone_NodesToUnicityScores_?"yes":"no")<< endl;
     return(out.str());
 }
 
 void DataBase::doFamiliesMapping_NodesToMaxDepth() {
     // multithreading version
-    if(!mappingDone_NodesToMaxDepth){
+    if(!mappingDone_NodesToMaxDepth_){
         cout << "Mapping nodes to max depth:" << endl;
-        Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToMaxDepth,nbThreads);
+        Family::threadedWork_launchJobs(families_,&Family::doMapping_NodesToMaxDepth,nbThreads_);
     }
-    mappingDone_NodesToMaxDepth=true;
+    mappingDone_NodesToMaxDepth_=true;
 }
 
 
 void DataBase::doFamiliesMapping_LeavesToSpecies() {
     // multithreading version
-    if(!mappingDone_LeavesToSpecies){
+    if(!mappingDone_LeavesToSpecies_){
 	cout << "\n\nMapping leaves to species:" << endl;
-	Family::threadedWork_launchJobs(families,&Family::doMapping_LeavesToSpecies,nbThreads);
+	Family::threadedWork_launchJobs(families_,&Family::doMapping_LeavesToSpecies,nbThreads_);
     }
-    mappingDone_LeavesToSpecies=true;
+    mappingDone_LeavesToSpecies_=true;
 }
 
 
 void DataBase::doFamiliesMapping_NodesToTaxa() {
     // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
     doFamiliesMapping_LeavesToSpecies();
-    if(!mappingDone_NodesToTaxa){
+    if(!mappingDone_NodesToTaxa_){
 	cout << "\n\nMapping nodes to Taxa:" << endl;
-	Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToTaxa,nbThreads);
-	mappingDone_NodesToTaxa = true;
+	Family::threadedWork_launchJobs(families_,&Family::doMapping_NodesToTaxa,nbThreads_);
+	mappingDone_NodesToTaxa_ = true;
     }
 
 }
@@ -170,10 +172,10 @@ void DataBase::doFamiliesMapping_NodesToTaxa() {
 void DataBase::doFamiliesRerooting_Taxonomy() {
     // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
     doFamiliesMapping_LeavesToSpecies();
-    if(!mappingDone_NodesToTaxa){
+    if(!mappingDone_NodesToTaxa_){
 	cout << "Re-rooting family trees using the taxonomic criteria:" << endl;
-	Family::threadedWork_launchJobs(families,&Family::doRerooting_Taxonomy,nbThreads);
-	mappingDone_NodesToTaxa = true;
+	Family::threadedWork_launchJobs(families_,&Family::doRerooting_Taxonomy,nbThreads_);
+	mappingDone_NodesToTaxa_ = true;
     }
 
 }
@@ -181,10 +183,10 @@ void DataBase::doFamiliesRerooting_Taxonomy() {
 void DataBase::doFamiliesRerooting_UnicityTaxonomy() {
     // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
     doFamiliesMapping_LeavesToSpecies();
-    if(!mappingDone_NodesToTaxa){
+    if(!mappingDone_NodesToTaxa_){
         cout << "Re-rooting families trees using a combo method Unicity+Taxonomy:" << endl;
-        Family::threadedWork_launchJobs(families,&Family::doRerooting_UnicityTaxonomy,nbThreads);
-        mappingDone_NodesToTaxa = true;
+        Family::threadedWork_launchJobs(families_,&Family::doRerooting_UnicityTaxonomy,nbThreads_);
+        mappingDone_NodesToTaxa_ = true;
     }
 
 }
@@ -193,46 +195,46 @@ void DataBase::doFamiliesRerooting_Daubin() {
     // to use the mapping “node on taxon”, we must ensure the mapping “species on leave” has been performed
     doFamiliesMapping_LeavesToSpecies();
     cout << "Re-rooting families trees using Daubin’s criteria:" << endl;
-    Family::threadedWork_launchJobs(families,&Family::doRerooting_Daubin,nbThreads);
+    Family::threadedWork_launchJobs(families_,&Family::doRerooting_Daubin,nbThreads_);
 
 }
 
 void DataBase::doFamiliesRerooting_Unicity() {
     doFamiliesMapping_LeavesToSpecies();
     cout << "Re-rooting families trees with the unicity criteria:" << endl;
-    Family::threadedWork_launchJobs(families,&Family::doRerooting_Unicity,nbThreads);
-    mappingDone_NodesToUnicityScores = true;
+    Family::threadedWork_launchJobs(families_,&Family::doRerooting_Unicity,nbThreads_);
+    mappingDone_NodesToUnicityScores_ = true;
 }
 
 
 void DataBase::doFamiliesRerooting_LessTransfers(ostream * output) {
     doFamiliesMapping_LeavesToSpecies();
     cout << "Re-rooting families trying to minimize the number of transfers:" << endl;
-    Family::threadedWork_launchJobs(families,&Family::doRerooting_LessTransfers,nbThreads,output);
+    Family::threadedWork_launchJobs(families_,&Family::doRerooting_LessTransfers,nbThreads_,output);
 }
 
 
 void DataBase::doFamiliesMapping_NodesToUnicityScores() {
     doFamiliesMapping_LeavesToSpecies();
     cout << "UnicityScores computing:" << endl;
-    Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToUnicityScores,nbThreads);
-    mappingDone_NodesToUnicityScores = true;
+    Family::threadedWork_launchJobs(families_,&Family::doMapping_NodesToUnicityScores,nbThreads_);
+    mappingDone_NodesToUnicityScores_ = true;
 }
 
 
 void DataBase::doFamiliesMapping_NodesToTaxonomicShift(){
     doFamiliesMapping_LeavesToSpecies();
     cout << "Nodes to taxonomic shift (grandfather affectation change):" << endl;
-    Family::threadedWork_launchJobs(families,&Family::doMapping_NodesToTaxonomicShift,nbThreads);
+    Family::threadedWork_launchJobs(families_,&Family::doMapping_NodesToTaxonomicShift,nbThreads_);
 }
 
 void DataBase::doFamiliesComputation_detectTransfers(ostream * output){
     doFamiliesMapping_LeavesToSpecies();
     cout << "Transfers Detection:" << endl;
-    Family::threadedWork_launchJobs(families,&Family::compute_detectTransfers,nbThreads,output);
+    Family::threadedWork_launchJobs(families_,&Family::compute_detectTransfers,nbThreads_,output);
 }
 
-void DataBase::loadFromFile(ifstream & RAPfile) {
+void DataBase::loadFromFile_(ifstream & RAPfile) {
 	// on extrait les lignes
 	
 	cout << "Loading preamble..." << flush;
@@ -245,21 +247,21 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	int currEspace = currLigne.find(" ");
 	stringstream ssNbFam;
 	ssNbFam << currLigne.substr(0,currEspace);
-	ssNbFam >> nbFamilies;
+	ssNbFam >> nbFamilies_;
 	
 	// Réconciliés ?
 	int espacePrecedent = currEspace;
 	currEspace = currLigne.find(" ",espacePrecedent+1);
 	string sReconciled = currLigne.substr(espacePrecedent+1,currEspace-espacePrecedent-1);
 	
-	if(sReconciled=="unreconciled") reconciled = false; else reconciled = true;
+	if(sReconciled=="unreconciled") reconciled_ = false; else reconciled_ = true;
 	
 	cout << "    [DONE]" << endl;
 	// la seconde ligne contient l'arbre exhaustif des espèces
 	cout << "Loading species tree..." << flush;
 	
 	getline(RAPfile, currLigne);
-	loadSpeciesTree(currLigne);
+	loadSpeciesTree_(currLigne);
 	
 	cout << "    [DONE]" << endl;
 
@@ -272,8 +274,8 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	bool familleSuivante;
 	bool crochetFermant;
 	Family * laFamille;
-	Waiter patienteur(&cout, nbFamilies, '#');
-	while(famillesChargees < nbFamilies) {
+	Waiter patienteur(&cout, nbFamilies_, '#');
+	while(famillesChargees < nbFamilies_) {
 		// la première ligne est le nom de la famille, on l'ajoute
 		// dynamic allocation: will be destroyed during family creation
 		curPreambule = new stringstream;
@@ -290,7 +292,7 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 			}
 		}
 		laFamille = new Family(curPreambule,curNewick,this);
-		families.push_back(laFamille);
+		families_.push_back(laFamille);
 		famillesChargees++;
 		patienteur.doStep();
 		
@@ -300,12 +302,12 @@ void DataBase::loadFromFile(ifstream & RAPfile) {
 	// initializing families
 	
         cout << "\n --  Building families from the read data:" << endl ;
-	Family::threadedWork_launchJobs(families,&Family::initialize, nbThreads);
+	Family::threadedWork_launchJobs(families_,&Family::initialize, nbThreads_);
 
 	
 }
 
-void DataBase::loadSpeciesTree(string newickLine)
+void DataBase::loadSpeciesTree_(string newickLine)
 {
 	// nettoyage des synonymes ET indexation des espèces de la base
 	stringstream sNewickPropre;
@@ -331,39 +333,39 @@ void DataBase::loadSpeciesTree(string newickLine)
 	}
 	
 	string snp = sNewickPropre.str();
-	speciesTree = tpms::TreeTools::newickToTree(snp,expectSynonyms);
+	speciesTree_ = tpms::TreeTools::newickToTree(snp,expectSynonyms_);
 	
-    cout << "NODES = " << speciesTree->getNodes().size() << " ; LEAVES = " << speciesTree->getLeaves().size() << endl;
+    cout << "NODES = " << speciesTree_->getNodes().size() << " ; LEAVES = " << speciesTree_->getLeaves().size() << endl;
 	
 	//Debug : toutes les espèces :
 	//cout << "\n\n\n### Voici la liste de toutes les espèces de l'abre des espèces :" << endl;	
 	
-	vector<Node *> listeNoeuds = speciesTree->getNodes();
+	vector<Node *> listeNoeuds = speciesTree_->getNodes();
 		
 	for(vector<Node *>::iterator it = listeNoeuds.begin(); it != listeNoeuds.end(); it++) {
 	    string taxonToCreateName;
 	    if ((*it)->hasName()) taxonToCreateName = (*it)->getName();
         boost::to_upper(taxonToCreateName);
 	    Taxon* currTaxon = new tpms::Taxon(taxonToCreateName,(*it),*this);
-	    nodeToTaxon.insert(  pair<unsigned int, Taxon*> ( (*it)->getId(),currTaxon )  );
+	    nodeToTaxon_.insert(  pair<unsigned int, Taxon*> ( (*it)->getId(),currTaxon )  );
 	    if(!taxonToCreateName.empty()) {
-		taxa.insert(pair<string,Taxon*>(taxonToCreateName,currTaxon));
+		taxa_.insert(pair<string,Taxon*>(taxonToCreateName,currTaxon));
 	    }
 	}
 	
-	for(map<unsigned int,Taxon*>::iterator ct = nodeToTaxon.begin(); ct != nodeToTaxon.end(); ct++){
+	for(map<unsigned int,Taxon*>::iterator ct = nodeToTaxon_.begin(); ct != nodeToTaxon_.end(); ct++){
 	    ct->second->genRelations();
 	}
 }
 
-vector<Family *> & DataBase::getFamilies() {return(families);}
+vector<Family *> & DataBase::getFamilies() {return(families_);}
 
 unsigned int DataBase::getNbFamilies() {
-	return(families.size());
+	return(families_.size());
 }
 
 string DataBase::getParentTaxon(string pTaxon, unsigned int level) {
-	Node * pNode = speciesTree->getNode(pTaxon);
+	Node * pNode = speciesTree_->getNode(pTaxon);
 	for(unsigned int i =0 ; i < level; i++) pNode = pNode->getFather();
 	return(pNode->getName());
 }
@@ -391,21 +393,21 @@ std::set<std::string> DataBase::getAllNodes(Node * localRoot, bool nodesWanted){
 }
 
 set<string> * DataBase::getSpecies(){
-    return(&species);
+    return(&species_);
 }
 
 Taxon* DataBase::nameToTaxon(string taxonName)
 {
     boost::to_upper(taxonName);
-    map<string,Taxon*>::iterator foundTaxon = taxa.find(taxonName);
-    if(foundTaxon != taxa.end()) return(foundTaxon->second);
+    map<string,Taxon*>::iterator foundTaxon = taxa_.find(taxonName);
+    if(foundTaxon != taxa_.end()) return(foundTaxon->second);
     cout << "Unable to find the taxon named " << taxonName << " in the database" << endl;
     return(00);
 }
 
 Taxon* DataBase::nodeIdToTaxon(unsigned int nodeId){
-    map<unsigned int,Taxon*>::iterator foundTaxon = nodeToTaxon.find(nodeId);
-    if(foundTaxon != nodeToTaxon.end()) return(foundTaxon->second);
+    map<unsigned int,Taxon*>::iterator foundTaxon = nodeToTaxon_.find(nodeId);
+    if(foundTaxon != nodeToTaxon_.end()) return(foundTaxon->second);
     cout << "Unable to find node "  << nodeId << endl;
     return(00);
 }

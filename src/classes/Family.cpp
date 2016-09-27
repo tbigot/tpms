@@ -66,8 +66,14 @@ using namespace tpms;
 
 
 namespace tpms{
-    Family::Family(stringstream* sIntro, string* sNewick, DataBase* dbp): db_(dbp), preamble_(sIntro), newick_(sNewick), containsUndefinedSequences_(false), doneMapping_NodeToTaxa_(false) {
-        
+    Family::Family(stringstream* sIntro, string* sNewick, DataBase* dbp):
+    db_(dbp),
+    preamble_(sIntro),
+    newick_(sNewick),
+    containsUndefinedSequences_(false),
+    doneMapping_NodeToTaxa_(false)
+	{
+	  
     }
     
     

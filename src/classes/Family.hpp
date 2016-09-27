@@ -67,23 +67,33 @@ namespace tpms{
 class Family {
     
 struct transfer {
-	tpms::Taxon* donnor;
-        std::vector<std::string> donnorLeaves;
-	std::vector<tpms::Taxon*> acceptors;
-        std::vector<std::vector<std::string> > acceptorsLeaves;
-	unsigned int perturbationIndex;
-        unsigned int bootstrap;
-        tpms::Taxon* formerAncestorTaxon;
-    };
-    
+  tpms::Taxon* donnor;
+  std::vector<std::string> donnorLeaves;
+  std::vector<tpms::Taxon*> acceptors;
+  std::vector<std::vector<std::string> > acceptorsLeaves;
+  unsigned int perturbationIndex;
+  unsigned int bootstrap;
+  tpms::Taxon* formerAncestorTaxon;
+};
+
 private:
     
     unsigned int highestID_;
     
-    bool doneMapping_NodeToTaxa_;
-    
     std::string name_;
     DataBase * db_;
+	
+	// before initialization: these objects are deleted after initialization
+	std::stringstream *preamble_;
+    std::string *newick_;
+	
+	
+	bool containsUndefinedSequences_;
+
+    bool doneMapping_NodeToTaxa_;
+
+
+	
     bpp::TreeTemplate<bpp::Node> * tree_;
     std::map<std::string,tpms::Taxon*> mne2tax_;
     std::set<tpms::Taxon*> taxa_;
@@ -100,12 +110,6 @@ private:
     unsigned int getTaxonomicSum_(std::vector<Taxon*> &taxa);
     
     
-    bool containsUndefinedSequences_;
-    
-    // before initialization: these objects are deleted after initialization
-    std::stringstream *preamble_;
-    std::string *newick_;
-   
     
     std::vector<tpms::NodeNature> mapping_NodesToNatures_;
     std::vector<float> mapping_NodesToUnicityScores_;

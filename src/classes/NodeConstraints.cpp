@@ -218,11 +218,6 @@ bool NodeConstraints::allowsAsSon(Family& family, bpp::Node* node)
             return(asosIsJustTaxon_->contains(family.getTaxonOfNode(node)));
 	// 1st step: getting all the species on the gene tree subtree
 	set<Taxon*> & speciesList = family.getTaxaOnThisSubtree(node);
-	// seeing, for each species of the taxaList
-	bool allSpAreAllowed = true;
-// 	for(vector<Taxon*>::iterator currSp = speciesList.begin(); currSp != speciesList.end(); currSp++){
-// 	    allSpAreAllowed &= allowedSpeciesOnSubtree.find(*currSp) != allowedSpeciesOnSubtree.end();
-// 	}
 	return(includes(allowedSpeciesOnSubtree_.begin(),allowedSpeciesOnSubtree_.end(),speciesList.begin(),speciesList.end()));
     }
     return(true);

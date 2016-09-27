@@ -345,7 +345,7 @@ void Pattern::toString(ostream &outputStream){
     toString_(tree_.getRootNode(),0,outputStream);
 }
 
-void Pattern::toString_(Node * noeud, int cpt, ostream &outputStream){
+void Pattern::toString_(Node * noeud, unsigned int cpt, ostream &outputStream){
     for(unsigned int i=0; i<cpt; i++) cout << " ";
 	outputStream << noeud->getId();
 	outputStream << constraintsOf_(noeud)->getStr();

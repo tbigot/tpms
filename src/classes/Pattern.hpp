@@ -59,11 +59,7 @@ class Pattern {
     
 private:
     
-    /**
-     * @brief Are all the node constraints Ok?
-     **/
-    bool ok_;
-    
+
     /**
      * @brief The database associated to this pattern.
      **/
@@ -75,6 +71,12 @@ private:
      **/
     bpp::TreeTemplate<bpp::Node> &tree_;
     
+	/**
+     * @brief Are all the node constraints Ok?
+     **/
+    bool ok_;
+    
+	
     /**
      * @brief All species that can be in this pattern.
      **/
@@ -114,7 +116,7 @@ private:
     int enumerateTaxon(bpp::Node * localRoot, std::set<std::string> * tsMembers, bool tsComplementary, bpp::Node * impasse, unsigned int * totsize);
     
     std::vector<NodeConstraints *> constraints_;
-    void toString_(bpp::Node * noeud, int spc, std::ostream &outputStream);
+    void toString_(bpp::Node * noeud, unsigned int spc, std::ostream &outputStream);
     
     NodeConstraints* constraintsOf_(bpp::Node* node);
     bool isTreeBinary_();
