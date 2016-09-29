@@ -82,7 +82,7 @@ nbThreads_(nbThreads)
 	// checking this file exists
 	fs::path dbFile(path);
 	if(!fs::exists(dbFile)) {
-	    cout << "The file "<< path << " does not exists, exiting."<< endl;
+	    cout << "The file "<< path << " does not exist, exiting."<< endl;
 	    exit(1);
 	}
 
