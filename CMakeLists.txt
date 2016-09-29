@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT(tpms CXX)
 
-SET(CMAKE_CXX_FLAGS "-std=c++11")
-
-SET(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -g -Wall -Wshadow")
+SET(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Wshadow")
 SET(CMAKE_C_FLAGS_DEBUG "-g -Wall -Wshadow")
-SET(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -O3 -Wall -Wshadow -DNDEBUG")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -Wshadow -DNDEBUG")
 SET(CMAKE_C_FLAGS_RELEASE "-O3 -Wall -Wshadow -DNDEBUG")
-SET(CMAKE_CXX_FLAGS_DISTRIBUTION "-std=c++11 -O3 -w -DNDEBUG")
+SET(CMAKE_CXX_FLAGS_DISTRIBUTION "-O3 -w -DNDEBUG")
 SET(CMAKE_C_FLAGS_DISTRIBUTION "-O3 -w -DNDEBUG")
 
 #here is a useful function:
@@ -43,13 +41,6 @@ link_directories(${BPP_LIBRARIES})
 message(${BPP_LIBRARIES})
 
 
-#boost
-# search for Boost version 1.40
-# Components :
- #filesystem, iostreams, programoptions, python, regex, serialization, signals
-#system, thread, wave
-
-#SET(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43.0")
 SET(Boost_USE_STATIC_LIBS ${BUILD_STATIC})
 find_package(Boost COMPONENTS filesystem system thread REQUIRED)
 
@@ -62,12 +53,15 @@ file(
 
 add_executable(tpms_query src/tpms_query.cpp ${classes})
 target_link_libraries(tpms_query ${BPP_LIBRARIES} ${Boost_LIBRARIES})
+set_property(TARGET tpms_query PROPERTY CXX_STANDARD 11)
 
 add_executable(tpms_mkdb src/tpms_mkdb.cpp ${classes})
 target_link_libraries(tpms_mkdb ${BPP_LIBRARIES} ${Boost_LIBRARIES} -lz)
+set_property(TARGET tpms_mkdb PROPERTY CXX_STANDARD 11)
 
 add_executable(tpms_computations src/tpms_computations.cpp ${classes})
 target_link_libraries(tpms_computations ${BPP_LIBRARIES} ${Boost_LIBRARIES})
+set_property(TARGET tpms_computations PROPERTY CXX_STANDARD 11)
 
 install(TARGETS tpms_query tpms_mkdb tpms_computations DESTINATION bin)
 
